@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>My Gallery</title>
+
+    <link rel="stylesheet" href="style.css">
+
+    <style>
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+body{
+    font-family: 'Poppins', sans-serif;
+
+    background:
+        radial-gradient(circle at 15% 20%, rgba(124,58,237,0.35), transparent 30%),
+        radial-gradient(circle at 85% 25%, rgba(37,99,235,0.35), transparent 30%),
+        radial-gradient(circle at 50% 80%, rgba(6,182,212,0.25), transparent 35%),
+        linear-gradient(
+            135deg,
+            #050816 0%,
+            #0b1120 30%,
+            #111827 70%,
+            #0f172a 100%
+        );
+
+    color:white;
+    overflow-x:hidden;
+    min-height:100vh;
+    padding:60px 20px;
+}
+
+/* BACKGROUND LIGHTS */
+
+.shape{
+    position:fixed;
+    border-radius:50%;
+    filter:blur(140px);
+    z-index:-1;
+    opacity:0.45;
+}
+
+.shape1{
+    width:450px;
+    height:450px;
+    background:#7c3aed;
+    top:-150px;
+    left:-120px;
+}
+
+.shape2{
+    width:400px;
+    height:400px;
+    background:#2563eb;
+    bottom:-150px;
+    right:-120px;
+}
+
+.shape3{
+    width:350px;
+    height:350px;
+    background:#06b6d4;
+    top:40%;
+    left:55%;
+}
+
+.gallery-container{
+    max-width:1200px;
+    margin:auto;
+}
+
+.gallery-title{
+
+    text-align:center;
+
+    font-size:58px;
+
+    margin-bottom:70px;
+
+    font-weight:800;
+
+    letter-spacing:2px;
+
+    background:linear-gradient(
+        90deg,
+        #ffffff,
+        #60a5fa
+    );
+
+    -webkit-background-clip:text;
+    -webkit-text-fill-color:transparent;
+}
+
+/******************************
+    EVENT CARDS
+******************************/
+
+#galleryWrapper{
+    display:flex;
+    flex-direction:column;
+    gap:50px;
+}
+
+.gallery-event{
+
+    position:relative;
+
+    background:
+    linear-gradient(
+        145deg,
+        rgba(255,255,255,0.08),
+        rgba(255,255,255,0.04)
+    );
+
+    backdrop-filter:blur(20px);
+
+    border:1px solid rgba(255,255,255,0.12);
+
+    border-radius:32px;
+
+    padding:50px;
+
+    overflow:hidden;
+
+    box-shadow:
+        0 25px 60px rgba(0,0,0,0.45);
+
+    transition:0.4s ease;
+}
+
+.gallery-event::before{
+
+    content:"";
+
+    position:absolute;
+
+    top:0;
+    left:0;
+
+    width:100%;
+    height:6px;
+
+    background:
+    linear-gradient(
+        90deg,
+        #7c3aed,
+        #2563eb,
+        #06b6d4
+    );
+}
+
+.gallery-event:hover{
+
+    transform:translateY(-8px);
+
+    border-color:rgba(96,165,250,0.35);
+
+    box-shadow:
+        0 35px 80px rgba(0,0,0,0.55);
+}
+
+.gallery-event h2{
+
+    font-size:42px;
+
+    font-weight:800;
+
+    margin-bottom:18px;
+
+    color:white;
+}
+
+.date{
+
+    display:inline-flex;
+
+    align-items:center;
+
+    gap:8px;
+
+    background:rgba(255,255,255,0.08);
+
+    padding:10px 22px;
+
+    border-radius:50px;
+
+    font-size:15px;
+
+    color:#dbeafe;
+
+    border:1px solid rgba(255,255,255,0.12);
+
+    margin-bottom:25px;
+}
+
+.gallery-event p{
+
+    color:#cbd5e1;
+
+    line-height:2;
+
+    margin-bottom:35px;
+
+    font-size:17px;
+
+    max-width:1100px;
+}
+
+.gallery-divider{
+
+    width:100%;
+
+    height:1px;
+
+    background:
+    linear-gradient(
+        90deg,
+        transparent,
+        rgba(255,255,255,0.18),
+        transparent
+    );
+
+    margin-bottom:30px;
+}
+
+.photos-title{
+
+    font-size:20px;
+
+    font-weight:700;
+
+    color:#93c5fd;
+
+    margin-bottom:25px;
+}
+
+/******************************
+    IMAGE GRID
+******************************/
+
+.gallery-images{
+
+    display:grid;
+
+    grid-template-columns:
+    repeat(auto-fill,minmax(280px,1fr));
+
+    gap:28px;
+}
+
+.gallery-images img{
+
+    width:100%;
+
+    height:320px;
+
+    object-fit:cover;
+
+    border-radius:22px;
+
+    transition:0.45s ease;
+
+    cursor:pointer;
+
+    border:2px solid transparent;
+
+    box-shadow:
+        0 15px 35px rgba(0,0,0,0.4);
+}
+
+.gallery-images img:hover{
+
+    transform:
+        translateY(-8px)
+        scale(1.03);
+
+    border-color:#60a5fa;
+
+    box-shadow:
+        0 25px 60px rgba(37,99,235,0.45);
+}
+
+
+
+
+
+
+/* SCROLLBAR */
+
+::-webkit-scrollbar{
+    width:10px;
+}
+
+::-webkit-scrollbar-track{
+    background:#0f172a;
+}
+
+::-webkit-scrollbar-thumb{
+    background:#334155;
+    border-radius:20px;
+}
+
+::-webkit-scrollbar-thumb:hover{
+    background:#475569;
+}
+
+/* MOBILE */
+
+@media(max-width:768px){
+
+    .gallery-title{
+        font-size:40px;
+    }
+
+    .gallery-event{
+        padding:22px;
+    }
+
+    .gallery-event h2{
+        font-size:26px;
+    }
+
+    .gallery-images img{
+        height:220px;
+    }
+}
+/* IMAGE MODAL */
+
+.image-modal{
+
+    position:fixed;
+
+    top:0;
+    left:0;
+
+    width:100%;
+    height:100%;
+
+    background:rgba(0,0,0,0.92);
+
+    display:none;
+
+    justify-content:center;
+    align-items:center;
+
+    z-index:9999;
+
+    padding:30px;
+}
+
+.image-modal img{
+
+    max-width:90%;
+    max-height:90%;
+
+    border-radius:18px;
+
+    animation:zoomIn 0.3s ease;
+}
+
+@keyframes zoomIn{
+
+    from{
+        transform:scale(0.7);
+        opacity:0;
+    }
+
+    to{
+        transform:scale(1);
+        opacity:1;
+    }
+}
+
+.close-btn{
+
+    position:absolute;
+
+    top:25px;
+    right:40px;
+
+    font-size:45px;
+
+    color:white;
+
+    cursor:pointer;
+
+    transition:0.3s;
+}
+
+.close-btn:hover{
+
+    transform:scale(1.2);
+    color:#60a5fa;
+}
+.gallery-images{
+
+    display:grid;
+
+    grid-template-columns:
+    repeat(auto-fit,minmax(220px,1fr));
+
+    gap:22px;
+
+    justify-content:center;
+}
+
+</style>
+</head>
+
+
+
+
+
+
+
+
+
+
+
+
+<body>
+
+<!-- BACKGROUND SHAPES -->
+
+<div class="shape shape1"></div>
+<div class="shape shape2"></div>
+<div class="shape shape3"></div>
+
+<div class="gallery-container">
+
+    <h1 class="gallery-title">
+        My Galleria
+    </h1>
+
+    <div id="galleryWrapper"></div>
+
+</div>
+
+<script type="module">
+
+import { initializeApp }
+from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+
+import {
+    getFirestore,
+    collection,
+    getDocs
+}
+from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+
+const firebaseConfig = {
+
+    apiKey: "AIzaSyC3VAj6pHUPZOrOVoWti64EZgVt0wDEqYE",
+
+    authDomain: "parthajit-portfolio.firebaseapp.com",
+
+    projectId: "parthajit-portfolio",
+
+    storageBucket: "parthajit-portfolio.firebasestorage.app",
+
+    messagingSenderId: "368597265378",
+
+    appId: "1:368597265378:web:8b1352aac8da9dd2ada7bb"
+};
+
+const app = initializeApp(firebaseConfig);
+
+const db = getFirestore(app);
+
+const galleryWrapper =
+document.getElementById("galleryWrapper");
+
+
+async function loadGallery(){
+
+    galleryWrapper.innerHTML = "";
+
+    const snapshot =
+    await getDocs(collection(db,"gallery"));
+
+    snapshot.forEach((docSnap)=>{
+
+        const data = docSnap.data();
+
+        const div = document.createElement("div");
+
+        div.className = "gallery-event";
+
+        div.innerHTML = `
+
+    <h2>${data.title}</h2>
+
+    <div class="date">
+        📅 ${data.date}
+    </div>
+
+    <p>${data.description}</p>
+
+    <div class="gallery-divider"></div>
+
+    <div class="photos-title">
+        Event Photos
+    </div>
+
+    <div class="gallery-images">
+
+        ${(data.images || [])
+            .map(img => `
+                <img src="${img}" alt="">
+            `)
+            .join("")}
+
+    </div>
+
+`;
+
+        galleryWrapper.appendChild(div);
+
+    });
+}
+
+loadGallery();
+// IMAGE CLICK ZOOM
+
+const modal =
+document.getElementById("imageModal");
+
+const modalImage =
+document.getElementById("modalImage");
+
+const closeBtn =
+document.querySelector(".close-btn");
+
+
+document.addEventListener("click",(e)=>{
+
+    if(e.target.tagName === "IMG" &&
+       e.target.parentElement.classList.contains("gallery-images")){
+
+        modal.style.display = "flex";
+
+        modalImage.src = e.target.src;
+    }
+});
+
+
+closeBtn.addEventListener("click",()=>{
+
+    modal.style.display = "none";
+});
+
+
+modal.addEventListener("click",(e)=>{
+
+    if(e.target === modal){
+
+        modal.style.display = "none";
+    }
+});
+</script>
+<!-- IMAGE ZOOM MODAL -->
+
+<div id="imageModal" class="image-modal">
+
+    <span class="close-btn">&times;</span>
+
+    <img id="modalImage">
+
+</div>
+</body>
+</html>
