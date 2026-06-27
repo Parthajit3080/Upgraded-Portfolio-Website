@@ -149,15 +149,71 @@
 <!-- PROJECTS (Dynamic) -->
 <section id="projects" class="projects-section">
     <div class="container">
+
         <div class="projects-header">
             <h2>My <span class="highlight">Projects</span></h2>
             <button id="toggleViewBtn" class="see-all-btn">See All</button>
         </div>
 
+        <!-- Project Description -->
+        <div class="projects-note">
+            <span>✨</span>
+            Every project tells a story — click a card to explore the challenge,
+            technologies used, key features, development process, and live demo.
+        </div>
+
         <div class="project-grid" id="projectsContainer"></div>
+
     </div>
 </section>
+    .projects-note {
+    max-width: 850px;
+    margin: 1rem auto 2.5rem;
+    padding: 14px 24px;
 
+    text-align: center;
+    font-size: 0.95rem;
+    line-height: 1.7;
+
+    color: #475569;
+    background: linear-gradient(
+        90deg,
+        #f8fafc,
+        #ffffff,
+        #f8fafc
+    );
+
+    border: 1px solid #e2e8f0;
+    border-radius: 50px;
+
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+
+    transition: all 0.3s ease;
+}
+
+.projects-note:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+}
+
+.projects-note span {
+    margin-right: 8px;
+    font-size: 1.1rem;
+}
+
+@media (max-width: 768px) {
+    .projects-note {
+        padding: 12px 18px;
+        border-radius: 20px;
+        font-size: 0.9rem;
+    }
+}
+
+
+
+
+
+    
 <!-- CERTIFICATES (Dynamic) -->
 <section id="certificates" class="certificates-section">
     <div class="container">
