@@ -146,101 +146,16 @@
     </div>
 </section>
 <!-- PROJECTS (Dynamic) -->
-
 <section id="projects" class="projects-section">
     <div class="container">
-
-```
-    <div class="projects-header">
-        <h2>My <span class="highlight">Projects</span></h2>
-        <button id="toggleViewBtn" class="see-all-btn">See All</button>
-    </div>
-
-    <!-- Enhanced Note -->
-    <div class="projects-note">
-        <span class="note-icon">✨</span>
-        <div class="note-content">
-            <h4>Explore My Work</h4>
-            <p>
-                Every project tells a story — click a card to explore the
-                challenge, technologies used, key features, development
-                process, and live demo.
-            </p>
+        <div class="projects-header">
+            <h2>My <span class="highlight">Projects</span></h2>
+            <button id="toggleViewBtn" class="see-all-btn">See All</button>
         </div>
+
+        <div class="project-grid" id="projectsContainer"></div>
     </div>
-
-    <div class="project-grid" id="projectsContainer"></div>
-
-</div>
-```
-
 </section>
-
-<style>
-/* PROJECT NOTE */
-.projects-note {
-    display: flex;
-    align-items: center;
-    gap: 18px;
-
-    margin: 1.5rem auto 3rem;
-    padding: 18px 24px;
-    max-width: 850px;
-
-    background: linear-gradient(
-        135deg,
-        #f8fbff,
-        #eef6ff
-    );
-
-    border: 1px solid #dbeafe;
-    border-left: 5px solid #2563eb;
-
-    border-radius: 16px;
-
-    box-shadow:
-        0 8px 20px rgba(0,0,0,0.08);
-
-    transition: all 0.3s ease;
-}
-
-.projects-note:hover {
-    transform: translateY(-3px);
-    box-shadow:
-        0 12px 28px rgba(0,0,0,0.12);
-}
-
-.note-icon {
-    font-size: 2rem;
-    flex-shrink: 0;
-}
-
-.note-content h4 {
-    margin: 0 0 6px;
-    color: #111827;
-    font-size: 1rem;
-    font-weight: 700;
-}
-
-.note-content p {
-    margin: 0;
-    color: #4b5563;
-    line-height: 1.6;
-}
-
-/* Mobile */
-@media (max-width: 768px) {
-    .projects-note {
-        flex-direction: column;
-        text-align: center;
-        padding: 16px;
-    }
-
-    .note-icon {
-        font-size: 2.3rem;
-    }
-}
-</style>
 
 
 
