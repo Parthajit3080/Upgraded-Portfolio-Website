@@ -133,34 +133,31 @@ document.addEventListener("DOMContentLoaded", () => {
                 index >= 3 ? 'style="display:none"' : "";
 
             container.innerHTML += `
+    <div class="project-item">
 
-                <div class="project-item hidden-project"
-                     ${hiddenStyle}
-                     onclick="window.location.href='project.html?id=${doc.id}'">
+        <h3>${data.title}</h3>
+        <p>${data.shortDesc || ""}</p>
 
-                    <h3>${data.title}</h3>
+        ${
+            fileName
+            ? `
+            <div class="file-preview"
+                 onclick="event.stopPropagation();
+                 openFileModal('assets/projects/${fileName}')">
 
-                    <p>${data.shortDesc || ""}</p>
+                ${getFilePreviewHTML(fileName, 'assets/projects/')}
+            </div>
+            `
+            : ""
+        }
 
-                    ${
-                        fileName
-                        ? `
-                        <div class="file-preview"
-                             onclick="event.stopPropagation();
-                             openFileModal('assets/projects/${fileName}')">
+        <button class="details-btn"
+            onclick="window.location.href='project.html?id=${doc.id}'">
+            View Details →
+        </button>
 
-                            ${getFilePreviewHTML(
-                                fileName,
-                                'assets/projects/'
-                            )}
-
-                        </div>
-                        `
-                        : ""
-                    }
-
-                </div>
-            `;
+    </div>
+`;
 
             index++;
         });
