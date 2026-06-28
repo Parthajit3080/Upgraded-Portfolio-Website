@@ -224,6 +224,18 @@ header nav ul li a:hover::after {
     color: rgba(255, 255, 255, 0.9);
 }
 
+#typing-text::after{
+    content: "|";
+    animation: blink 0.8s infinite;
+}
+
+@keyframes blink{
+    50%{
+        opacity: 0;
+    }
+}
+
+
 .hero p {
     font-size: 1.1em;
     margin-bottom: 40px;
@@ -2222,3 +2234,96 @@ body.light-mode {
 .email-display{
     margin-left: -50px;
 }
+
+
+.hero .tagline {
+    font-size: 2.3rem;
+    font-family: "Times New Roman", Times, serif;
+
+    font-weight: 600;
+    margin-bottom: 30px;
+    min-height: 2.5rem;
+
+    background: linear-gradient(
+        90deg,
+        #ffffff,
+        #ffffff,
+        #ffffff
+    );
+
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+
+    letter-spacing: 0.5px;
+    display: flex;
+    align-items: center;
+
+    text-shadow:
+        0 0 15px rgba(192,132,252,0.25),
+        0 0 30px rgba(96,165,250,0.15);
+}
+
+
+
+
+
+
+.hero-text h2{
+    font-size: 4rem;
+    font-weight: 800;
+    color: rgb(0, 0, 0);
+    font-family: "Lucida Handwriting", "Apple Chancery", cursive;
+
+    
+    text-shadow:
+        0 0 15px rgba(192,132,252,.4),
+        0 0 40px rgba(96,165,250,.25);
+}
+
+
+
+.hero {
+    position: relative;
+    overflow: hidden;
+    background: linear-gradient(
+        -45deg,
+        #f8fafc,
+        #e0f2fe,
+        #f0f9ff,
+        #ecfeff
+    );
+    background-size: 400% 400%;
+    animation: gradientMove 12s ease infinite;
+}
+
+@keyframes gradientMove {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+
+.hero::after{
+    content:'';
+    position:absolute;
+    width:500px;
+    height:500px;
+    background:radial-gradient(
+      circle,
+      rgba(22, 63, 134, 0.2),
+      transparent 70%
+    );
+    filter:blur(80px);
+    animation:aurora 12s ease-in-out infinite alternate;
+}
+
+@keyframes aurora{
+    from{
+        transform:translate(-100px,-50px);
+    }
+    to{
+        transform:translate(150px,100px);
+    }
+}
+
