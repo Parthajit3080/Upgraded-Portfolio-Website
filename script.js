@@ -612,3 +612,50 @@ document.addEventListener("DOMContentLoaded", () => {
 
     init();
 });
+
+
+const texts = [
+    "M.Tech Scholar, IIT Kharagpur",
+    "Advancing AI Research Frontiers",
+    "Deep Learning Architectures"
+];
+
+let textIndex = 0;
+let charIndex = 0;
+let isDeleting = false;
+
+const typingElement = document.getElementById("typing-text");
+
+function typeEffect() {
+
+    const currentText = texts[textIndex];
+
+    if (!isDeleting) {
+        typingElement.textContent =
+            currentText.substring(0, charIndex + 1);
+
+        charIndex++;
+
+        if (charIndex === currentText.length) {
+            isDeleting = true;
+            setTimeout(typeEffect, 1800);
+            return;
+        }
+
+    } else {
+
+        typingElement.textContent =
+            currentText.substring(0, charIndex - 1);
+
+        charIndex--;
+
+        if (charIndex === 0) {
+            isDeleting = false;
+            textIndex = (textIndex + 1) % texts.length;
+        }
+    }
+
+    setTimeout(typeEffect, isDeleting ? 40 : 20);
+}
+
+typeEffect();
