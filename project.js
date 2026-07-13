@@ -17,6 +17,41 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
+function setupProjectThemeToggle() {
+    const toggle = document.getElementById("projectThemeToggle");
+
+    function applyProjectTheme(theme) {
+        const isDark = theme === "dark";
+
+        document.body.classList.toggle("light-mode", !isDark);
+        document.body.classList.toggle("dark-mode", isDark);
+
+        if (!toggle) return;
+
+        toggle.innerHTML = isDark
+            ? '<i class="fas fa-sun"></i>'
+            : '<i class="fas fa-moon"></i>';
+
+        toggle.setAttribute(
+            "aria-label",
+            isDark ? "Switch to light mode" : "Switch to dark mode"
+        );
+    }
+
+    applyProjectTheme("light");
+
+    if (toggle) {
+        toggle.addEventListener("click", () => {
+            const nextTheme =
+                document.body.classList.contains("dark-mode")
+                    ? "light"
+                    : "dark";
+
+            applyProjectTheme(nextTheme);
+        });
+    }
+}
+
 function getProjectId() {
     const params = new URLSearchParams(window.location.search);
     return params.get("id");
