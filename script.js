@@ -33,7 +33,165 @@ document.addEventListener("DOMContentLoaded", () => {
        🔹 THEME TOGGLE
     ========================== */
 
-    document.body.classList.add("light-mode");
+    const themeToggle =
+        document.getElementById("themeToggle");
+
+    function applyTheme(theme) {
+
+        const isDark = theme === "dark";
+
+        document.body.classList.toggle("light-mode", !isDark);
+        document.body.classList.toggle("dark-mode", isDark);
+
+        if (!themeToggle) return;
+
+        themeToggle.innerHTML = isDark
+            ? '<i class="fas fa-sun"></i>'
+            : '<i class="fas fa-moon"></i>';
+
+        themeToggle.setAttribute(
+            "aria-label",
+            isDark ? "Switch to light mode" : "Switch to dark mode"
+        );
+    }
+
+    applyTheme("light");
+
+    if (themeToggle) {
+
+        themeToggle.addEventListener("click", () => {
+
+            const nextTheme =
+                document.body.classList.contains("dark-mode")
+                    ? "light"
+                    : "dark";
+
+            applyTheme(nextTheme);
+        });
+    }
+
+    /* =========================
+       🔹 ACTIVE NAV HIGHLIGHT
+    ========================== */
+
+    const sectionLinks =
+        Array.from(document.querySelectorAll("header nav a[href^='#']"));
+
+    const sectionMap =
+        sectionLinks
+            .map(link => {
+                const id = link.getAttribute("href").slice(1);
+                const section = document.getElementById(id);
+                return { link, section };
+            })
+            .filter(item => item.section);
+
+    function setActiveNav(id) {
+        sectionMap.forEach(({ link, section }) => {
+            link.classList.toggle("nav-active", section.id === id);
+        });
+    }
+
+    function updateActiveNavFromScroll() {
+        if (!sectionMap.length) return;
+
+        const headerHeight =
+            document.querySelector("header")?.offsetHeight || 0;
+
+        const marker =
+            window.scrollY + headerHeight + (window.innerHeight * 0.32);
+
+        let currentId = sectionMap[0].section.id;
+
+        sectionMap.forEach(({ section }) => {
+            if (section.offsetTop <= marker) {
+                currentId = section.id;
+            }
+        });
+
+        setActiveNav(currentId);
+    }
+
+    if (sectionMap.length) {
+        updateActiveNavFromScroll();
+        window.addEventListener("scroll", updateActiveNavFromScroll, { passive: true });
+        window.addEventListener("resize", updateActiveNavFromScroll);
+    }
+
+    /* =========================
+       🔹 3D CARD MOTION
+    ========================== */
+
+    function attachTiltEffect() {
+        const cards =
+            document.querySelectorAll(
+                ".project-item, .achievement-card, .research-card, .certificate-item, .edu-row"
+            );
+
+        cards.forEach(card => {
+            if (card.dataset.tiltReady === "true") return;
+
+            card.dataset.tiltReady = "true";
+
+            card.addEventListener("mousemove", (event) => {
+                const rect = card.getBoundingClientRect();
+                const x = event.clientX - rect.left;
+                const y = event.clientY - rect.top;
+                const rotateY = ((x / rect.width) - 0.5) * 10;
+                const rotateX = ((0.5 - (y / rect.height)) * 10);
+
+                card.style.setProperty("--tilt-x", `${rotateX}deg`);
+                card.style.setProperty("--tilt-y", `${rotateY}deg`);
+                card.style.setProperty("--shine-x", `${(x / rect.width) * 100}%`);
+                card.style.setProperty("--shine-y", `${(y / rect.height) * 100}%`);
+            });
+
+            card.addEventListener("mouseleave", () => {
+                card.style.setProperty("--tilt-x", "0deg");
+                card.style.setProperty("--tilt-y", "0deg");
+                card.style.setProperty("--shine-x", "50%");
+                card.style.setProperty("--shine-y", "50%");
+            });
+        });
+    }
+
+    attachTiltEffect();
+
+    /* =========================
+       🔹 SCROLL REVEAL MOTION
+    ========================== */
+
+    const revealObserver =
+        new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add("reveal-visible");
+                    revealObserver.unobserve(entry.target);
+                }
+            });
+        }, {
+            root: null,
+            rootMargin: "0px 0px -12% 0px",
+            threshold: 0.12
+        });
+
+    function attachScrollReveal() {
+        const revealTargets =
+            document.querySelectorAll(
+                "section .container > h2, .skill-pill, .project-item, .certificate-item, .achievement-card, .edu-row, .research-card, .contact-info, .contact-form-wrapper"
+            );
+
+        revealTargets.forEach((target, index) => {
+            if (target.dataset.revealReady === "true") return;
+
+            target.dataset.revealReady = "true";
+            target.classList.add("scroll-reveal");
+            target.style.setProperty("--reveal-delay", `${Math.min(index % 8, 7) * 55}ms`);
+            revealObserver.observe(target);
+        });
+    }
+
+    attachScrollReveal();
 
     /* =========================
        🔹 MODAL VIEWER
@@ -130,10 +288,10 @@ document.addEventListener("DOMContentLoaded", () => {
             const fileName = data.fileName || null;
 
             const hiddenStyle =
-                index >= 3 ? 'style="display:none"' : "";
+                index >= 3 ? 'style="display:none"' : 'style="display:flex"';
 
             container.innerHTML += `
-    <div class="project-item">
+    <div class="project-item" ${hiddenStyle}>
 
         <h3>${data.title}</h3>
         <p>${data.shortDesc || ""}</p>
@@ -170,8 +328,16 @@ document.addEventListener("DOMContentLoaded", () => {
 
             if (i < 3) {
                 item.style.display = "flex";
+            } else {
+                item.style.display = "none";
             }
         });
+
+        if (toggleBtn) {
+            toggleBtn.textContent = "See All";
+            toggleBtn.style.display =
+                items.length > 3 ? "inline-block" : "none";
+        }
     }
 
     /* =========================
@@ -608,6 +774,8 @@ document.addEventListener("DOMContentLoaded", () => {
         await loadSkills();
         await loadAchievements();
         await loadResearch();
+        attachTiltEffect();
+        attachScrollReveal();
     }
 
     init();
