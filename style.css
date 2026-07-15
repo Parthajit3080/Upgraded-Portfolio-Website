@@ -3941,3 +3941,10 @@ body.dark-mode header nav ul li a.nav-active {
     }
 }
 
+
+.header-actions {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
