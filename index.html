@@ -16,34 +16,39 @@
 
 <header id="home">
     <div class="container">
+
         <h1 class="logo">Parthajit Das</h1>
+
         <nav>
             <ul>
                 <li><a href="#about">About</a></li>
-                <li><a href="#skills">Skills</a></li>
-
-                <!-- NEW -->
-                <li><a href="#achievements">Achievements</a></li>
                 <li><a href="#education">Education</a></li>
-
+                <li><a href="#achievements">Achievements</a></li>
                 <li><a href="#projects">Projects</a></li>
                 <li><a href="#certificates">Certificates</a></li>
+                <li><a href="#skills">Skills</a></li>
                 <li><a href="#research">Research</a></li>
-
-                <!-- NEW PAGE -->
-                <li><a href="galleria.html">Galleria</a></li>
-
                 <li><a href="#contact">Contact</a></li>
             </ul>
         </nav>
-        <button
-            id="themeToggle"
-            class="theme-toggle"
-            type="button"
-            aria-label="Switch to dark mode">
-            <i class="fas fa-moon"></i>
-        </button>
-        
+
+        <div class="header-actions">
+
+            <a href="galleria.html" class="gallery-btn">
+                <i class="fas fa-images"></i>
+                Galleria
+            </a>
+
+            <button
+                id="themeToggle"
+                class="theme-toggle"
+                type="button"
+                aria-label="Switch to dark mode">
+                <i class="fas fa-moon"></i>
+            </button>
+
+        </div>
+
     </div>
 </header>
 
@@ -71,6 +76,8 @@
                 <a href="#contact" class="btn">Get in Touch</a>
 
                 <a href="assets/Resume.pdf" target="_blank" class="btn"> View Resume</a>
+
+                <a href="galleria.html" class="btn gallery-hero-btn"><i class="fas fa-images"></i> Explore Galleria</a>
                 
             </div>
         </div>
@@ -78,22 +85,6 @@
     </div>
 </section>
 
-<!-- SKILLS -->
-<section id="skills" class="skills-section">
-    <div class="container">
-        <h2>Professional <span class="highlight">Skillset & Tools</span></h2>
-        <div id="skillsContainer" class="skills-grid"></div>
-    </div>
-</section>
-
-<!-- ACHIEVEMENTS -->
-<section id="achievements" class="achievements-section">
-    <div class="container">
-        <h2>My <span class="highlight">Achievements</span></h2>
-
-       <div class="achievements-grid" id="achievementsContainer"></div>
-    </div>
-</section>
 
 <!-- EDUCATION -->
 <section id="education" class="education-section">
@@ -148,16 +139,10 @@
         </div>
     </div>
 </div>
+</div>
 
 
 
-
-
-        
-
-    </div>
-</section>
-    
 <!-- PROJECTS (Dynamic) -->
 <section id="projects" class="projects-section">
     <div class="container">
@@ -171,9 +156,6 @@
 </section>
 
     
-
-
-
 
 
     
@@ -200,6 +182,34 @@
 
 
 
+<!-- SKILLS -->
+<section id="skills" class="skills-section">
+    <div class="container">
+        <h2>Professional <span class="highlight">Skillset & Tools</span></h2>
+        <div id="skillsContainer" class="skills-grid"></div>
+    </div>
+</section>
+
+
+
+
+
+
+<!-- ACHIEVEMENTS -->
+<section id="achievements" class="achievements-section">
+    <div class="container">
+        <h2>My <span class="highlight">Achievements</span></h2>
+
+       <div class="achievements-grid" id="achievementsContainer"></div>
+    </div>
+</section>
+    </div>
+</section>
+
+
+
+
+
 <!-- Research -->
 <section id="research" class="research-section">
     <div class="container">
@@ -212,6 +222,7 @@
 
 
 
+<!-- Contact -->
 <section id="contact" class="contact-section">
     <div class="container">
 
