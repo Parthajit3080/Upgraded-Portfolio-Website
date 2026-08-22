@@ -57,6 +57,67 @@ function getProjectId() {
     return params.get("id");
 }
 
+function escapeHtml(value) {
+    return String(value)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+}
+
+function renderProjectDescription(description) {
+    const lines = String(description || "").replace(/\r\n/g, "\n").split("\n");
+    const blocks = [];
+    let paragraph = [];
+    let list = [];
+    let listType = null;
+
+    const flushParagraph = () => {
+        if (paragraph.length) {
+            blocks.push(`<p>${paragraph.map(escapeHtml).join("<br>")}</p>`);
+            paragraph = [];
+        }
+    };
+    const flushList = () => {
+        if (list.length) {
+            const tag = listType === "ordered" ? "ol" : "ul";
+            const items = list.map((item, index) => {
+                const content = escapeHtml(item);
+                return listType === "ordered"
+                    ? `<li><span class="project-list-number">${index + 1}.</span><span>${content}</span></li>`
+                    : `<li>${content}</li>`;
+            }).join("");
+            blocks.push(`<${tag}>${items}</${tag}>`);
+            list = [];
+            listType = null;
+        }
+    };
+
+    lines.forEach(line => {
+        const bullet = line.match(/^\s*[-*•]\s+(.+)$/);
+        const numbered = line.match(/^\s*\d+[.)]\s+(.+)$/);
+
+        if (bullet || numbered) {
+            const nextType = numbered ? "ordered" : "unordered";
+            if (listType && listType !== nextType) flushList();
+            flushParagraph();
+            listType = nextType;
+            list.push((bullet || numbered)[1]);
+        } else if (!line.trim()) {
+            flushParagraph();
+            flushList();
+        } else {
+            flushList();
+            paragraph.push(line.trim());
+        }
+    });
+
+    flushParagraph();
+    flushList();
+    return blocks.join("");
+}
+
 async function loadProject() {
 
     const id = getProjectId();
@@ -83,7 +144,7 @@ async function loadProject() {
         ${data.description ? `
             <div class="project-section">
                 <h3>Description</h3>
-                <p>${data.description}</p>
+                <div class="project-description">${renderProjectDescription(data.description)}</div>
             </div>
         ` : ""}
 
