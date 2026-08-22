@@ -12,7 +12,7 @@
     <!-- Your CSS -->
     <link rel="stylesheet" href="style.css">
 </head>
-<body>
+<body class="dark-mode">
 
 <header id="home">
     <div class="container">
@@ -23,10 +23,10 @@
             <ul>
                 <li><a href="#about">About</a></li>
                 <li><a href="#education">Education</a></li>
-                <li><a href="#achievements">Achievements</a></li>
                 <li><a href="#projects">Projects</a></li>
                 <li><a href="#certificates">Certificates</a></li>
                 <li><a href="#skills">Skills</a></li>
+                <li><a href="#achievements">Achievements</a></li>
                 <li><a href="#research">Research</a></li>
                 <li><a href="#contact">Contact</a></li>
             </ul>
@@ -35,8 +35,8 @@
         <div class="header-actions">
 
             <a href="galleria.html" class="gallery-btn">
-                <i class="fas fa-images"></i>
-                Galleria
+                <span class="gallery-mark" aria-hidden="true"><i class="fas fa-layer-group"></i></span>
+                <span>Galleria</span>
             </a>
 
             <button
@@ -58,9 +58,16 @@
     
     <div class="container">
         
-        <img src="img2.jpeg" alt="Profile" class="profile-pic">
+        <div class="profile-node">
+            <span class="node-ring ring-one"></span>
+            <span class="node-ring ring-two"></span>
+            <img src="img2.jpeg" alt="Profile" class="profile-pic">
+            <span class="node-dot dot-one"></span>
+            <span class="node-dot dot-two"></span>
+        </div>
         
         <div class="hero-text">
+            <p class="tech-eyebrow"><span class="tech-status-dot"></span> M.TECH CSE · IIT KHARAGPUR · SYSTEM ONLINE</p>
             <h2>Bonjour World, I'm Parthajit</h2>
 
            <p class="tagline">
@@ -71,13 +78,24 @@
                 Where research meets engineering, mathematics learn to compute, and ideas evolve into technologies that shape tomorrow
             </p>
 
+            <div class="hero-metrics" aria-label="Professional focus areas">
+                <span><i class="fas fa-microchip"></i> Statistical ML</span>
+                <span><i class="fas fa-brain"></i> Deep learning</span>
+                <span><i class="fas fa-code-branch"></i> Research to product</span>
+            </div>
+
+            <div class="hero-console" aria-label="Technology focus summary">
+                <span><i class="fas fa-terminal"></i> MODEL_PIPELINE: ACTIVE</span>
+                <span><i class="fas fa-satellite-dish"></i> RESEARCH_SIGNAL: LIVE</span>
+            </div>
+
             <!-- BUTTONS -->
             <div class="hero-buttons">
                 <a href="#contact" class="btn">Get in Touch</a>
 
                 <a href="assets/Resume.pdf" target="_blank" class="btn"> View Resume</a>
 
-                <a href="galleria.html" class="btn gallery-hero-btn"><i class="fas fa-images"></i> Explore Galleria</a>
+                <a href="galleria.html" class="btn gallery-hero-btn"><i class="fas fa-layer-group"></i> Explore Galleria</a>
                 
             </div>
         </div>
@@ -100,10 +118,8 @@
         <div class="edu-college">Indian Institute of Technology, Kharagpur</div>
         <div class="edu-degree">🎓 M.Tech in CSE</div>
         <div class="edu-desc">
-            Focusing on advanced research in <strong>Artificial Intelligence, Machine Learning, and Deep Learning</strong>. 
-            The curriculum emphasizes systems-level research, exploring the intersection of generative models and scalable computing. 
-            As a GATE-qualified candidate, I aim to push the boundaries of neural network architectures and their real-world applications 
-            in intelligent systems and recommendation frameworks.
+            Pursuing my M.Tech in CSE at IIT Kharagpur, I’m diving deeper into AI and intelligent systems — from statistical ML and algorithms to the mathematics and logic behind them. I’m exploring how mathematics, logic, and computation come together to turn ideas into real-world projects and build systems that go beyond the classroom.
+
         </div>
     </div>
 </div>
@@ -140,6 +156,7 @@
     </div>
 </div>
 </div>
+</section>
 
 
 
@@ -198,11 +215,12 @@
 <!-- ACHIEVEMENTS -->
 <section id="achievements" class="achievements-section">
     <div class="container">
-        <h2>My <span class="highlight">Achievements</span></h2>
+        <div class="achievements-header">
+            <h2>My <span class="highlight">Achievements</span></h2>
+            <button id="achievementsToggleBtn" class="see-all-btn" type="button">See All</button>
+        </div>
 
        <div class="achievements-grid" id="achievementsContainer"></div>
-    </div>
-</section>
     </div>
 </section>
 
@@ -333,7 +351,7 @@ Don't be shy—my inbox is significantly less scary than a compiler error. Wheth
 
 <script type="module" src="script.js"></script>
 
-<div class="neural-bg">
+<div class="neural-bg" aria-hidden="true">
     <span></span>
     <span></span>
     <span></span>
