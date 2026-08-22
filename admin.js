@@ -8,6 +8,7 @@ import {
     doc,
     getDoc,
     updateDoc,
+    writeBatch,
     query,
     orderBy
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
@@ -40,11 +41,72 @@ let editingCertificateId = null;
 let editingAchievementId = null;
 let editingResearchId = null;
 
+function sortByDisplayOrder(documents) {
+    return [...documents].sort((a, b) => {
+        const orderA = a.data().order ?? Number.MAX_SAFE_INTEGER;
+        const orderB = b.data().order ?? Number.MAX_SAFE_INTEGER;
+        return orderA - orderB || a.id.localeCompare(b.id);
+    });
+}
+
+async function nextDisplayOrder(collectionName) {
+    const snapshot = await getDocs(collection(db, collectionName));
+    return snapshot.size;
+}
+
+window.moveContentItem = async function(collectionName, id, direction) {
+    const snapshot = await getDocs(collection(db, collectionName));
+    const documents = sortByDisplayOrder(snapshot.docs);
+    const currentIndex = documents.findIndex(item => item.id === id);
+    const destinationIndex = currentIndex + direction;
+
+    if (currentIndex < 0 || destinationIndex < 0 || destinationIndex >= documents.length) return;
+
+    [documents[currentIndex], documents[destinationIndex]] =
+        [documents[destinationIndex], documents[currentIndex]];
+
+    const batch = writeBatch(db);
+    documents.forEach((item, index) => {
+        batch.update(item.ref, { order: index });
+    });
+    await batch.commit();
+
+    const loaders = {
+        projects: loadProjects,
+        certificates: loadCertificates,
+        achievements: loadAchievements,
+        research: loadResearch
+    };
+    loaders[collectionName]?.();
+};
+
+function reorderButtons(collectionName, id) {
+    return `
+        <button class="order-btn" title="Move up" onclick="moveContentItem('${collectionName}', '${id}', -1)">↑</button>
+        <button class="order-btn" title="Move down" onclick="moveContentItem('${collectionName}', '${id}', 1)">↓</button>
+    `;
+}
+
 
 document.addEventListener("DOMContentLoaded", () => {
 
     const loginSection = document.getElementById("loginSection");
     const adminPanel = document.getElementById("adminPanel");
+
+    function showAdminSection(sectionName) {
+        document.querySelectorAll("[data-admin-section]").forEach(section => {
+            section.classList.toggle("is-active", section.dataset.adminSection === sectionName);
+        });
+        document.querySelectorAll("[data-admin-target]").forEach(button => {
+            button.classList.toggle("is-active", button.dataset.adminTarget === sectionName);
+        });
+    }
+
+    document.querySelectorAll("[data-admin-target]").forEach(button => {
+        button.addEventListener("click", () => showAdminSection(button.dataset.adminTarget));
+    });
+
+    showAdminSection("projects");
 
     // 🔐 LOGIN
     document.getElementById("loginBtn").addEventListener("click", async () => {
@@ -172,6 +234,7 @@ document.getElementById("addProjectBtn").addEventListener("click", async () => {
             paper: paper || null,
             screenshots,
             fileName: fileName || null,
+            order: await nextDisplayOrder("projects"),
             createdAt: new Date()
         });
 
@@ -231,6 +294,7 @@ document.getElementById("addCertBtn").addEventListener("click", async () => {
         title,
         issuer,
         fileName,
+        order: await nextDisplayOrder("certificates"),
         createdAt: new Date()
     });
 
@@ -308,6 +372,7 @@ document.getElementById("addAchievementBtn").addEventListener("click", async () 
             subtitle: subtitle || null,
             description: description || null,
             year: year || null,
+            order: await nextDisplayOrder("achievements"),
             createdAt: new Date()
         });
 
@@ -371,6 +436,7 @@ document.getElementById("addResearchBtn").addEventListener("click", async () => 
         // ➕ ADD MODE
         await addDoc(collection(db, "research"), {
             ...researchData,
+            order: await nextDisplayOrder("research"),
             createdAt: new Date()
         });
 
@@ -409,7 +475,7 @@ async function loadMessages() {
 
     const querySnapshot = await getDocs(collection(db, "messages"));
 
-    querySnapshot.forEach((docSnap) => {
+    sortByDisplayOrder(querySnapshot.docs).forEach((docSnap) => {
         const data = docSnap.data();
         const id = docSnap.id;
 
@@ -443,7 +509,7 @@ async function loadProjects() {
 
     container.innerHTML = "";
 
-    querySnapshot.forEach((docSnap) => {
+    sortByDisplayOrder(querySnapshot.docs).forEach((docSnap) => {
         const data = docSnap.data();
         const id = docSnap.id;
 
@@ -459,6 +525,7 @@ async function loadProjects() {
                 </div>
 
                 <div class="project-admin-actions">
+                    ${reorderButtons("projects", id)}
                     <button class="edit-btn" onclick="editProject('${id}')">Edit</button>
                     <button class="delete-btn" onclick="deleteProject('${id}')">Delete</button>
                 </div>
@@ -476,7 +543,7 @@ async function loadCertificates() {
 
     container.innerHTML = "";
 
-    querySnapshot.forEach((docSnap) => {
+    sortByDisplayOrder(querySnapshot.docs).forEach((docSnap) => {
         const data = docSnap.data();
         const id = docSnap.id;
 
@@ -492,6 +559,7 @@ async function loadCertificates() {
                 </div>
 
                 <div class="certificate-admin-actions">
+                    ${reorderButtons("certificates", id)}
                     <button class="edit-btn" onclick="editCertificate('${id}')">Edit</button>
                     <button class="delete-btn" onclick="deleteCertificate('${id}')">Delete</button>
                 </div>
@@ -510,7 +578,7 @@ async function loadSkills() {
 
     const querySnapshot = await getDocs(collection(db, "skills"));
 
-    querySnapshot.forEach((docSnap) => {
+    sortByDisplayOrder(querySnapshot.docs).forEach((docSnap) => {
         const data = docSnap.data();
         const id = docSnap.id;
 
@@ -533,7 +601,7 @@ async function loadAchievements() {
 
     const querySnapshot = await getDocs(collection(db, "achievements"));
 
-    querySnapshot.forEach((docSnap) => {
+    sortByDisplayOrder(querySnapshot.docs).forEach((docSnap) => {
         const data = docSnap.data();
         const id = docSnap.id;
 
@@ -560,6 +628,7 @@ async function loadAchievements() {
         onclick="editAchievement('${id}')">
         Edit
     </button>
+    <span class="reorder-actions">${reorderButtons("achievements", id)}</span>
 
 </div>
 `;
@@ -576,7 +645,7 @@ async function loadResearch() {
 
     const querySnapshot = await getDocs(collection(db, "research"));
 
-    querySnapshot.forEach((docSnap) => {
+    sortByDisplayOrder(querySnapshot.docs).forEach((docSnap) => {
         const data = docSnap.data();
         const id = docSnap.id;
 
@@ -617,6 +686,7 @@ async function loadResearch() {
         onclick="editResearch('${id}')">
         Edit
     </button>
+    <span class="reorder-actions">${reorderButtons("research", id)}</span>
 
 </div>
 `;
@@ -719,12 +789,12 @@ window.editResearch = async function(id) {
     const docSnap = await getDoc(doc(db, "research", id));
     const data = docSnap.data();
 
-   const icon = document.getElementById("researchIcon").value.trim();
-const title = document.getElementById("researchTitle").value.trim();
-const subtitle = document.getElementById("researchSubtitle").value.trim();
-const description = document.getElementById("researchDesc").value.trim();
-const paper = document.getElementById("researchPaper").value.trim();
-const github = document.getElementById("researchGithub").value.trim();
+    document.getElementById("researchIcon").value = data.icon || "";
+    document.getElementById("researchTitle").value = data.title || "";
+    document.getElementById("researchSubtitle").value = data.subtitle || "";
+    document.getElementById("researchDesc").value = data.description || "";
+    document.getElementById("researchPaper").value = data.paper || "";
+    document.getElementById("researchGithub").value = data.github || "";
 
     editingResearchId = id;
     document.getElementById("addResearchBtn").textContent = "Update Research";
@@ -839,6 +909,9 @@ if (galleryForm) {
                 document.getElementById("galleryOrder").value
             ) || 999;
 
+        const coverImage =
+            document.getElementById("galleryCoverImage").value.trim();
+
         const description =
             document.getElementById("galleryDescription").value.trim();
 
@@ -854,6 +927,7 @@ if (galleryForm) {
             date,
             description,
             images,
+            coverImage: coverImage || images[0] || "",
             order,
             updatedAt: new Date()
         };
@@ -942,6 +1016,9 @@ window.editGallery = async function(id) {
     
     document.getElementById("galleryOrder").value =
         data.order || "";
+
+    document.getElementById("galleryCoverImage").value =
+        data.coverImage || (data.images || [])[0] || "";
 
     document.getElementById("galleryDescription").value =
         data.description || "";
