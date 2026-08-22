@@ -512,6 +512,180 @@ body.dark-mode .gallery-theme-toggle{
     color:#facc15;
 }
 
+/* Year folders */
+.gallery-year-section{
+    margin:0;
+    padding:0;
+    background:transparent;
+    border:0;
+    box-shadow:none;
+}
+
+.gallery-year-heading{
+    margin:0 0 14px;
+    font-size:clamp(2rem, 4vw, 3rem);
+    color:#312e81;
+    text-align:left;
+}
+
+.event-folder-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fill, minmax(250px, 1fr));
+    gap:22px;
+}
+
+#galleryWrapper{
+    gap:32px;
+}
+
+.event-folder{
+    position:relative;
+    min-height:210px;
+    overflow:hidden;
+    padding:0;
+    border:1px solid rgba(124,58,237,0.24);
+    border-radius:18px;
+    background:#e2e8f0;
+    color:white;
+    cursor:pointer;
+    box-shadow:0 16px 32px rgba(30,41,59,0.16);
+    transition:transform .25s ease, box-shadow .25s ease;
+}
+
+.event-folder:hover{
+    transform:translateY(-6px);
+    box-shadow:0 24px 44px rgba(76,29,149,0.24);
+}
+
+.folder-cover{
+    display:block;
+    width:100%;
+    height:210px;
+    object-fit:cover;
+    transition:transform .4s ease;
+}
+
+.event-folder:hover .folder-cover{ transform:scale(1.06); }
+
+.folder-placeholder{
+    display:grid;
+    place-items:center;
+    width:100%;
+    height:210px;
+    background:linear-gradient(135deg,#7c3aed,#2563eb);
+    font-weight:700;
+}
+
+.folder-overlay{
+    position:absolute;
+    inset:auto 0 0;
+    display:flex;
+    flex-direction:column;
+    align-items:flex-start;
+    gap:2px;
+    padding:38px 18px 16px;
+    text-align:left;
+    background:linear-gradient(transparent,rgba(15,23,42,.9));
+    width:100%;
+}
+
+.folder-title{ font-size:1.1rem; font-weight:800; }
+.folder-count{ font-size:.82rem; color:rgba(255,255,255,.8); }
+
+.back-to-years{
+    margin:0 0 20px;
+    padding:9px 15px;
+    border:1px solid rgba(124,58,237,.3);
+    border-radius:999px;
+    background:rgba(255,255,255,.8);
+    color:#4c1d95;
+    font-weight:700;
+    cursor:pointer;
+}
+
+.gallery-empty{ text-align:center; color:#475569; }
+
+body.dark-mode .gallery-year-section{
+    background:transparent;
+    border:0;
+    box-shadow:none;
+}
+body.dark-mode .gallery-year-heading{ color:#e0e7ff; }
+body.dark-mode .event-folder{ border-color:rgba(192,132,252,.35); }
+body.dark-mode .back-to-years{ background:rgba(15,23,42,.8); color:#e0e7ff; }
+
+/* Match the main site's refined technical palette. */
+body.dark-mode{
+    background:
+        radial-gradient(circle at 10% 10%,rgba(71,85,105,.22),transparent 26%),
+        radial-gradient(circle at 88% 14%,rgba(37,99,235,.15),transparent 24%),
+        linear-gradient(135deg,#0b1220,#111827 52%,#172033);
+}
+
+body.dark-mode .gallery-title{
+    background:linear-gradient(90deg,#f8fafc,#bfdbfe,#cbd5e1);
+    -webkit-background-clip:text;
+    -webkit-text-fill-color:transparent;
+}
+
+.gallery-title::after{
+    content:"";
+    display:block;
+    width:92px;
+    height:3px;
+    margin:18px auto 0;
+    border-radius:99px;
+    background:linear-gradient(90deg,#64748b,#2563eb,#94a3b8);
+}
+
+body.dark-mode .event-folder{
+    border-color:rgba(96,165,250,.22);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.06),0 16px 34px rgba(0,0,0,.34);
+}
+
+body.dark-mode .event-folder:hover{ box-shadow:0 24px 44px rgba(37,99,235,.22); }
+body.dark-mode .folder-placeholder{ background:linear-gradient(135deg,#1e3a5f,#334155); }
+body.dark-mode .back-to-years{ border-color:rgba(96,165,250,.24); color:#dbeafe; }
+
+/* Galleria has an editorial amber/rose identity distinct from the portfolio. */
+body.light-mode{
+    background:
+        radial-gradient(circle at 12% 10%,rgba(251,146,60,.16),transparent 26%),
+        radial-gradient(circle at 88% 14%,rgba(244,63,94,.12),transparent 24%),
+        linear-gradient(135deg,#fffaf5,#fff7ed 50%,#fff1f2);
+}
+
+body.dark-mode{
+    background:
+        radial-gradient(circle at 10% 10%,rgba(180,83,9,.18),transparent 26%),
+        radial-gradient(circle at 88% 14%,rgba(159,18,57,.13),transparent 24%),
+        linear-gradient(135deg,#1c1917,#211b19 52%,#292524);
+}
+
+.gallery-title{
+    background: linear-gradient(90deg, #db2777, #9333ea, #06b6d4);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+.gallery-title::after{ background: linear-gradient(90deg, #f472b6, #c084fc, #22d3ee); }
+.gallery-year-heading{ color: #831843; }
+.event-folder{ border-color: rgba(219, 39, 119, 0.28); }
+.event-folder:hover{ box-shadow: 0 24px 44px rgba(219, 39, 119, 0.25); }
+.folder-placeholder{ background: linear-gradient(135deg, #db2777, #9333ea); }
+.back-to-years{ border-color: rgba(219, 39, 119, 0.32); color: #831843; }
+
+body.dark-mode .gallery-title{
+    background: linear-gradient(90deg, #fbcfe8, #e9d5ff, #cffaff);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+body.dark-mode .gallery-year-heading{ color:#fed7aa; }
+body.dark-mode .event-folder{ border-color:rgba(251,146,60,.24); }
+body.dark-mode .event-folder:hover{ box-shadow:0 24px 44px rgba(251,146,60,.16); }
+body.dark-mode .folder-placeholder{ background:linear-gradient(135deg,#9a3412,#881337); }
+body.dark-mode .back-to-years{ border-color:rgba(251,146,60,.28); color:#fed7aa; }
+
 </style>
 </head>
 
@@ -629,51 +803,89 @@ if(galleryThemeToggle){
 
 
 async function loadGallery(){
+    const snapshot = await getDocs(collection(db,"gallery"));
+    const events = snapshot.docs
+        .map(docSnap => ({ id: docSnap.id, ...docSnap.data() }))
+        .sort((a, b) => (a.order ?? 999) - (b.order ?? 999));
 
-    galleryWrapper.innerHTML = "";
+    const eventsByYear = events.reduce((years, event) => {
+        const year = /^\d{4}/.test(event.date || "")
+            ? event.date.slice(0, 4)
+            : "Unsorted";
+        (years[year] ||= []).push(event);
+        return years;
+    }, {});
 
-    const snapshot =
-    await getDocs(collection(db,"gallery"));
+    galleryWrapper.innerHTML = Object.keys(eventsByYear)
+        .sort((a, b) => b.localeCompare(a, undefined, { numeric: true }))
+        .map(year => `
+            <section class="gallery-year-section">
+                <h2 class="gallery-year-heading">${year}</h2>
+                <div class="event-folder-grid">
+                    ${eventsByYear[year].map(event => {
+                        const cover = event.coverImage || event.images?.[0] || "";
+                        return `
+                            <button class="event-folder" type="button" data-event-id="${event.id}">
+                                ${cover
+                                    ? `<img class="folder-cover" src="${cover}" alt="${event.title} preview">`
+                                    : `<span class="folder-placeholder">No preview image</span>`}
+                                <span class="folder-overlay">
+                                    <span class="folder-title">${event.title}</span>
+                                    <span class="folder-count">${(event.images || []).length} photos</span>
+                                </span>
+                            </button>`;
+                    }).join("")}
+                </div>
+            </section>`)
+        .join("") || `<p class="gallery-empty">No events have been added yet.</p>`;
 
-    snapshot.forEach((docSnap)=>{
+    galleryWrapper.onclick = event => {
+        const folder = event.target.closest(".event-folder");
+        if (!folder) return;
+        const selected = events.find(item => item.id === folder.dataset.eventId);
+        if (selected) showEvent(selected, events);
+    };
+}
 
-        const data = docSnap.data();
+function showEvent(event, allEvents) {
+    galleryWrapper.innerHTML = `
+        <button class="back-to-years" type="button">← All years</button>
+        <article class="gallery-event">
+            <h2>${event.title}</h2>
+            <div class="date">📅 ${event.date || ""}</div>
+            ${event.description ? `<p>${event.description}</p>` : ""}
+            <div class="gallery-divider"></div>
+            <div class="photos-title">Event Photos</div>
+            <div class="gallery-images">
+                ${(event.images || []).map(img => `<img src="${img}" alt="${event.title}">`).join("")}
+            </div>
+        </article>`;
 
-        const div = document.createElement("div");
-
-        div.className = "gallery-event";
-
-        div.innerHTML = `
-
-    <h2>${data.title}</h2>
-
-    <div class="date">
-        📅 ${data.date}
-    </div>
-
-    <p>${data.description}</p>
-
-    <div class="gallery-divider"></div>
-
-    <div class="photos-title">
-        Event Photos
-    </div>
-
-    <div class="gallery-images">
-
-        ${(data.images || [])
-            .map(img => `
-                <img src="${img}" alt="">
-            `)
-            .join("")}
-
-    </div>
-
-`;
-
-        galleryWrapper.appendChild(div);
-
+    galleryWrapper.querySelector(".back-to-years").addEventListener("click", () => {
+        renderYearFolders(allEvents);
     });
+}
+
+function renderYearFolders(events) {
+    const years = events.reduce((result, event) => {
+        const year = /^\d{4}/.test(event.date || "") ? event.date.slice(0, 4) : "Unsorted";
+        (result[year] ||= []).push(event);
+        return result;
+    }, {});
+    galleryWrapper.innerHTML = Object.keys(years).sort((a, b) => b.localeCompare(a, undefined, { numeric: true })).map(year => `
+        <section class="gallery-year-section"><h2 class="gallery-year-heading">${year}</h2>
+            <div class="event-folder-grid">${years[year].map(event => {
+                const cover = event.coverImage || event.images?.[0] || "";
+                return `<button class="event-folder" type="button" data-event-id="${event.id}">
+                    ${cover ? `<img class="folder-cover" src="${cover}" alt="${event.title} preview">` : `<span class="folder-placeholder">No preview image</span>`}
+                    <span class="folder-overlay"><span class="folder-title">${event.title}</span><span class="folder-count">${(event.images || []).length} photos</span></span>
+                </button>`;
+            }).join("")}</div></section>`).join("");
+    galleryWrapper.onclick = clickEvent => {
+        const folder = clickEvent.target.closest(".event-folder");
+        const selected = events.find(item => item.id === folder?.dataset.eventId);
+        if (selected) showEvent(selected, events);
+    };
 }
 
 loadGallery();
