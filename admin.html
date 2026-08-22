@@ -538,6 +538,26 @@ h1, h2, h3 {
     opacity: 0.85;
 }
 
+.order-btn {
+    min-width: 28px;
+    padding: 5px 8px;
+    border: 1px solid rgba(192,132,252,0.6);
+    border-radius: 6px;
+    background: transparent;
+    color: #e9d5ff;
+    cursor: pointer;
+}
+
+.order-btn:hover {
+    background: rgba(168,85,247,0.25);
+}
+
+.reorder-actions {
+    display: inline-flex;
+    gap: 6px;
+    margin-left: 8px;
+}
+
 /* INPUT ROW ALIGNMENT FIX */
 #achievementTitle,
 #achievementDesc,
@@ -1157,6 +1177,71 @@ select::-ms-expand {
 
     margin-bottom:14px;
 }
+
+/* Section navigation */
+.admin-dashboard {
+    display:grid;
+    grid-template-columns:220px minmax(0, 1fr);
+    gap:26px;
+    align-items:start;
+    margin-top:26px;
+}
+
+.admin-sidebar {
+    position:sticky;
+    top:22px;
+    padding:14px;
+    border:1px solid rgba(192,132,252,.28);
+    border-radius:14px;
+    background:rgba(20,20,33,.86);
+    box-shadow:0 12px 30px rgba(0,0,0,.22);
+}
+
+.admin-sidebar-title {
+    margin:4px 8px 12px;
+    color:#c084fc;
+    font-size:12px;
+    font-weight:700;
+    letter-spacing:.1em;
+    text-transform:uppercase;
+}
+
+.admin-nav {
+    display:grid;
+    gap:6px;
+}
+
+.admin-nav button {
+    width:100%;
+    padding:10px 12px;
+    border:0;
+    border-radius:8px;
+    background:transparent;
+    color:#d1d5db;
+    text-align:left;
+    font:inherit;
+    cursor:pointer;
+}
+
+.admin-nav button:hover,
+.admin-nav button.is-active {
+    background:linear-gradient(135deg,rgba(124,58,237,.42),rgba(37,99,235,.3));
+    color:#fff;
+}
+
+.admin-section { display:none; }
+.admin-section.is-active { display:block; }
+.admin-content { min-width:0; }
+
+@media (max-width:850px) {
+    .admin-dashboard { grid-template-columns:1fr; }
+    .admin-sidebar { position:static; }
+    .admin-nav { grid-template-columns:repeat(2, minmax(0,1fr)); }
+}
+
+@media (max-width:520px) {
+    .admin-nav { grid-template-columns:1fr; }
+}
 </style>
 </head>
 
@@ -1186,11 +1271,27 @@ select::-ms-expand {
             <h1>Welcome Parthajit</h1>
             <button id="logoutBtn">Logout</button>
 
+            <div class="admin-dashboard">
+                <aside class="admin-sidebar" aria-label="Admin sections">
+                    <p class="admin-sidebar-title">Manage portfolio</p>
+                    <nav class="admin-nav">
+                        <button type="button" data-admin-target="projects">Projects</button>
+                        <button type="button" data-admin-target="certificates">Certificates</button>
+                        <button type="button" data-admin-target="skills">Skills</button>
+                        <button type="button" data-admin-target="achievements">Achievements</button>
+                        <button type="button" data-admin-target="gallery">Gallery Events</button>
+                        <button type="button" data-admin-target="research">Research</button>
+                        <button type="button" data-admin-target="messages">Messages</button>
+                    </nav>
+                </aside>
+
+                <main class="admin-content">
+
             <!-- ========================= -->
             <!-- 📦 PROJECTS -->
             <!-- ========================= -->
 
-            <div class="admin-card project-section">
+            <div class="admin-card project-section admin-section" data-admin-section="projects">
 
                 <h3 class="section-primary">Projects</h3>
 
@@ -1199,7 +1300,7 @@ select::-ms-expand {
                     <input type="text" id="projectTitle" placeholder="Project Title">
                     <input type="text" id="shortDesc" placeholder="Short Description (for preview)">
                     
-                    <textarea id="projectFullDesc" placeholder="Full Description"></textarea>
+                    <textarea id="projectFullDesc" placeholder="Full Description&#10;&#10;Use blank lines for paragraphs. Use - for bullet points, or 1. for numbered points."></textarea>
 
                     <input type="text" id="projectTechStack" placeholder="Tech Stack (comma separated)">
                     <input type="text" id="projectDataset" placeholder="Dataset (optional)">
@@ -1214,7 +1315,7 @@ select::-ms-expand {
                 </div>
 
                 <!-- EXISTING PROJECTS -->
-                <h3 class="section-secondary">Existing Projects</h3>
+                <h3 class="section-secondary">Existing Projects <small>Use ↑ and ↓ to set display order</small></h3>
                 <div id="adminProjectsContainer"></div>
 
             </div>
@@ -1224,7 +1325,7 @@ select::-ms-expand {
             <!-- 📜 CERTIFICATES -->
             <!-- ========================= -->
 
-           <div class="admin-card certificate-section">
+           <div class="admin-card certificate-section admin-section" data-admin-section="certificates">
 
             <h3 class="section-primary">Certificates</h3>
 
@@ -1237,7 +1338,7 @@ select::-ms-expand {
             </div>
 
             <!-- EXISTING CERTIFICATES -->
-            <h3 class="section-secondary">Existing Certificates</h3>
+            <h3 class="section-secondary">Existing Certificates <small>Use ↑ and ↓ to set display order</small></h3>
             <div id="adminCertificatesContainer"></div>
 
         </div>
@@ -1247,7 +1348,7 @@ select::-ms-expand {
             <!-- 🧠 SKILLS -->
             <!-- ========================= -->
 
-           <div class="admin-card skill-section">
+           <div class="admin-card skill-section admin-section" data-admin-section="skills">
 
                 <h3 class="section-primary">Skills</h3>
 
@@ -1269,7 +1370,7 @@ select::-ms-expand {
             <!-- 🏆 ACHIEVEMENTS -->
             <!-- ========================= -->
 
-            <div class="admin-card">
+            <div class="admin-card admin-section" data-admin-section="achievements">
 
                 <h3 class="section-primary">Add Achievement</h3>
 
@@ -1302,7 +1403,7 @@ select::-ms-expand {
 
                 <button id="addAchievementBtn" class="admin-btn">Add Achievement</button>
 
-                <h3 class="section-secondary">Existing Achievements</h3>
+                <h3 class="section-secondary">Existing Achievements <small>Use ↑ and ↓ to set display order</small></h3>
                 <div id="adminAchievementsContainer"></div>
 
             </div>
@@ -1312,7 +1413,7 @@ select::-ms-expand {
 <!-- 🖼️ GALLERY -->
 <!-- ========================= -->
 
-<div class="admin-card gallery-section">
+<div class="admin-card gallery-section admin-section" data-admin-section="gallery">
 
     <h3 class="section-primary">Gallery Events</h3>
 
@@ -1333,6 +1434,11 @@ select::-ms-expand {
             type="number"
             id="galleryOrder"
             placeholder="Display Order (10,20,30...)">
+
+        <input
+            type="text"
+            id="galleryCoverImage"
+            placeholder="Folder cover image path (used as the event preview)">
 
         <textarea
             id="galleryDescription"
@@ -1375,7 +1481,7 @@ select::-ms-expand {
             <!-- 🔬 RESEARCH -->
             <!-- ========================= -->
 
-            <div class="admin-card">
+            <div class="admin-card admin-section" data-admin-section="research">
 
                 <h3 class="section-primary">Add Research</h3>
 
@@ -1409,7 +1515,7 @@ select::-ms-expand {
 
                 <button id="addResearchBtn" class="admin-btn">Add Research</button>
 
-                <h3 class="section-secondary">Existing Research</h3>
+                <h3 class="section-secondary">Existing Research <small>Use ↑ and ↓ to set display order</small></h3>
                 <div id="adminResearchContainer"></div>
 
             </div>
@@ -1419,8 +1525,15 @@ select::-ms-expand {
             <!-- 📩 MESSAGES -->
             <!-- ========================= -->
 
-            <h3 class="section-primary">Messages</h3>
-            <div id="messagesContainer"></div>
+            <section class="admin-section" data-admin-section="messages">
+                <div class="admin-card">
+                    <h3 class="section-primary">Messages</h3>
+                    <div id="messagesContainer"></div>
+                </div>
+            </section>
+
+                </main>
+            </div>
 
         </div>
 
