@@ -55,7 +55,7 @@ document.addEventListener("DOMContentLoaded", () => {
         );
     }
 
-    applyTheme("light");
+    applyTheme("dark");
 
     if (themeToggle) {
 
@@ -276,12 +276,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
         const querySnapshot =
             await getDocs(collection(db, "projects"));
+        const documents = Array.from(querySnapshot.docs)
+            .sort((a, b) => (a.data().order ?? Number.MAX_SAFE_INTEGER) - (b.data().order ?? Number.MAX_SAFE_INTEGER));
 
         container.innerHTML = "";
 
         let index = 0;
 
-        querySnapshot.forEach((doc) => {
+        documents.forEach((doc) => {
 
             const data = doc.data();
 
@@ -395,10 +397,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
         const querySnapshot =
             await getDocs(collection(db, "certificates"));
+        const documents = Array.from(querySnapshot.docs)
+            .sort((a, b) => (a.data().order ?? Number.MAX_SAFE_INTEGER) - (b.data().order ?? Number.MAX_SAFE_INTEGER));
 
         container.innerHTML = "";
 
-        querySnapshot.forEach((doc) => {
+        documents.forEach((doc) => {
 
             const data = doc.data();
 
@@ -522,6 +526,8 @@ document.addEventListener("DOMContentLoaded", () => {
        🏆 ACHIEVEMENTS
     ========================== */
 
+    let showAllAchievements = false;
+
     async function loadAchievements() {
 
         const container =
@@ -531,16 +537,18 @@ document.addEventListener("DOMContentLoaded", () => {
 
         const snapshot =
             await getDocs(collection(db, "achievements"));
+        const documents = Array.from(snapshot.docs)
+            .sort((a, b) => (a.data().order ?? Number.MAX_SAFE_INTEGER) - (b.data().order ?? Number.MAX_SAFE_INTEGER));
 
         container.innerHTML = "";
 
-        snapshot.forEach(doc => {
+        documents.forEach((doc, index) => {
 
             const data = doc.data();
 
             container.innerHTML += `
 
-                <div class="achievement-card">
+                <div class="achievement-card" style="display:${index < 6 ? "flex" : "none"}">
 
                     <div class="ach-icon">
                         ${data.icon || "🏆"}
@@ -559,6 +567,25 @@ document.addEventListener("DOMContentLoaded", () => {
                 </div>
             `;
         });
+
+        const toggleBtn = document.getElementById("achievementsToggleBtn");
+        if (toggleBtn) {
+            showAllAchievements = false;
+            toggleBtn.textContent = "See All";
+            toggleBtn.style.display = documents.length > 6 ? "inline-block" : "none";
+        }
+    }
+
+    const achievementsToggleBtn = document.getElementById("achievementsToggleBtn");
+    if (achievementsToggleBtn) {
+        achievementsToggleBtn.addEventListener("click", () => {
+            const items = document.querySelectorAll(".achievement-card");
+            showAllAchievements = !showAllAchievements;
+            items.forEach((item, index) => {
+                item.style.display = showAllAchievements || index < 6 ? "flex" : "none";
+            });
+            achievementsToggleBtn.textContent = showAllAchievements ? "Show Less" : "See All";
+        });
     }
 
     /* =========================
@@ -574,10 +601,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
         const snapshot =
             await getDocs(collection(db, "research"));
+        const documents = Array.from(snapshot.docs)
+            .sort((a, b) => (a.data().order ?? Number.MAX_SAFE_INTEGER) - (b.data().order ?? Number.MAX_SAFE_INTEGER));
 
         container.innerHTML = "";
 
-        snapshot.forEach(doc => {
+        documents.forEach(doc => {
 
             const data = doc.data();
 
