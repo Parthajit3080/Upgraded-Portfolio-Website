@@ -3,17 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Project Details</title>
-    <link rel="stylesheet"
-          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <title>Project notes — Parthajit Das</title>
+    <meta name="description" content="Project details and research by Parthajit Das.">
+    <meta name="theme-color" content="#f5f3ee">
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
     <link rel="stylesheet" href="style.css">
 </head>
 <body class="project-page light-mode">
 
+<a class="skip-link" href="#projectDetails">Skip to project</a>
+
 <div class="page-controls">
     <a href="index.html#projects" class="page-home-btn">
-        <i class="fas fa-arrow-left"></i>
-        Home
+        ← Selected work
     </a>
 
     <button
@@ -21,48 +23,11 @@
         class="page-theme-toggle"
         type="button"
         aria-label="Switch to dark mode">
-        <i class="fas fa-moon"></i>
+        ☾
     </button>
 </div>
 
-<main id="projectDetails"></main>
-
-<script>
-    (function () {
-        const toggle = document.getElementById("projectThemeToggle");
-
-        function applyProjectTheme(theme) {
-            const isDark = theme === "dark";
-
-            document.body.classList.toggle("light-mode", !isDark);
-            document.body.classList.toggle("dark-mode", isDark);
-
-            if (!toggle) return;
-
-            toggle.innerHTML = isDark
-                ? '<i class="fas fa-sun"></i>'
-                : '<i class="fas fa-moon"></i>';
-
-            toggle.setAttribute(
-                "aria-label",
-                isDark ? "Switch to light mode" : "Switch to dark mode"
-            );
-        }
-
-        applyProjectTheme("light");
-
-        if (toggle) {
-            toggle.addEventListener("click", () => {
-                const nextTheme =
-                    document.body.classList.contains("dark-mode")
-                        ? "light"
-                        : "dark";
-
-                applyProjectTheme(nextTheme);
-            });
-        }
-    })();
-</script>
+<main id="projectDetails" aria-live="polite"><p class="content-state" role="status">Loading project notes…</p></main>
 
 <script type="module" src="project.js"></script>
 

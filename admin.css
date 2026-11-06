@@ -1,0 +1,86 @@
+.admin-page { min-height: 100vh; }
+.admin-container { width: min(1240px, calc(100% - 48px)); margin: 0 auto; padding: 38px 0 72px; }
+#adminLoginTitle, #adminPanel > h1 { margin: 0 0 22px; font-family: var(--serif); font-size: clamp(2.8rem, 6vw, 4.8rem); font-weight: 400; letter-spacing: -.055em; line-height: 1.05; }
+.admin-page h3 { font-family: var(--serif); font-weight: 400; }
+#loginSection { width: min(440px, 100%); display: grid; gap: 14px; padding: 25px; border: 1px solid var(--line); background: var(--surface); }
+#loginSection input { min-height: 48px; }
+#loginBtn, #logoutBtn, .admin-btn, .edit-btn, .delete-btn, .message-delete, .order-btn, .gallery-edit-btn, .gallery-delete-btn {
+    min-height: 40px; padding: 8px 13px; border: 1px solid var(--line); border-radius: 2px; background: var(--surface); color: var(--ink); font-size: .8rem; font-weight: 700; cursor: pointer;
+}
+#loginBtn, .admin-btn { border-color: var(--accent); background: var(--accent); color: white; }
+#loginBtn:hover, .admin-btn:hover { background: var(--accent-dark); }
+#adminStatus { min-height: 1.5em; color: var(--accent); font-size: .85rem; }
+#adminPanel > h1 { display: inline-block; margin-right: 20px; font-size: clamp(2.6rem, 5vw, 4rem); }
+#logoutBtn { vertical-align: 10px; }
+.admin-dashboard { display: grid; grid-template-columns: 210px minmax(0, 1fr); align-items: start; gap: 24px; margin-top: 20px; }
+.admin-sidebar { position: sticky; top: 95px; padding: 18px; border: 1px solid var(--line); background: var(--surface); }
+.admin-sidebar-title { margin: 0 0 14px; color: var(--muted); font-size: .7rem; font-weight: 750; letter-spacing: .12em; text-transform: uppercase; }
+.admin-nav { display: grid; gap: 4px; }
+.admin-nav button { padding: 10px; border: 0; background: transparent; color: var(--muted); font-size: .83rem; text-align: left; cursor: pointer; }
+.admin-nav button:hover, .admin-nav button.is-active { background: var(--surface-strong); color: var(--accent); }
+.admin-content { min-width: 0; }
+.admin-section { display: none; }
+.admin-section.is-active { display: block; }
+.admin-card { min-width: 0; padding: clamp(20px, 4vw, 34px); border: 1px solid var(--line); background: var(--surface); }
+.admin-card > .section-primary { margin: 0 0 22px; font-size: 2rem; }
+.admin-card .section-secondary { margin: 35px 0 15px; padding-top: 21px; border-top: 1px solid var(--line); font-size: 1.4rem; }
+.admin-card small { color: var(--muted); font-family: var(--sans); font-size: .68rem; font-weight: 500; }
+.project-form, .cert-form, .skill-form, .admin-grid, .gallery-form { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.project-form textarea, .admin-grid textarea, .gallery-form textarea { grid-column: 1 / -1; }
+.project-preview-hint { grid-column: 1 / -1; margin-top: -8px; }
+.project-form #projectFullDesc, #galleryDescription, #galleryImages { min-height: 125px; }
+.admin-btn { justify-self: start; }
+.project-admin-card, .certificate-admin-card, .gallery-admin-card { display: flex; justify-content: space-between; align-items: center; gap: 16px; padding: 15px 0; border-top: 1px solid var(--line); }
+.project-admin-title, .certificate-admin-title, .message-name { font-weight: 750; }
+.project-admin-file, .certificate-admin-issuer, .message-email, .gallery-meta, .gallery-image-count { margin-top: 3px; color: var(--muted); font-size: .78rem; }
+.project-admin-actions, .certificate-admin-actions, .gallery-admin-actions { display: flex; flex-wrap: wrap; gap: 6px; }
+.edit-btn, .gallery-edit-btn { color: var(--green); }
+.delete-btn, .message-delete, .gallery-delete-btn { color: var(--accent); }
+.skill-admin-card { display: inline-flex; align-items: center; gap: 9px; margin: 5px; padding: 8px 10px; border: 1px solid var(--line); }
+.skill-admin-card button { border: 0; background: transparent; color: var(--accent); cursor: pointer; }
+.emoji-picker { display: flex; flex-wrap: wrap; grid-column: 1 / -1; gap: 5px; }
+.emoji-picker span { display: grid; width: 36px; height: 36px; place-items: center; border: 1px solid var(--line); cursor: pointer; }
+.emoji-picker span.active { border-color: var(--accent); background: var(--surface-strong); }
+.message-card { position: relative; min-width: 0; padding: 16px; border: 1px solid var(--line); background: var(--paper); }
+#messagesContainer { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.message-card .message-delete { position: absolute; top: 10px; right: 10px; min-height: 32px; padding: 5px 9px; }
+.message-name { padding-right: 72px; }
+.message-email { padding-right: 72px; }
+.message-date { display: block; margin-top: 6px; color: var(--green); font-size: .75rem; font-weight: 700; }
+.message-text { margin: 10px 0 0; color: var(--muted); font-size: .96rem; line-height: 1.65; white-space: pre-wrap; overflow-wrap: anywhere; }
+#adminAchievementsContainer { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.achievement-admin-card { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 14px; margin: 0; padding: 11px 12px; border: 1px solid var(--line); background: var(--paper); }
+.achievement-admin-copy { min-width: 0; }
+.achievement-admin-card .message-name { padding: 0; font-size: .91rem; }
+.achievement-admin-card .message-email { padding: 0; font-size: .74rem; }
+.achievement-admin-description { display: -webkit-box; margin: 5px 0 0; overflow: hidden; color: var(--muted); font-size: .78rem; line-height: 1.45; -webkit-box-orient: vertical; -webkit-line-clamp: 2; }
+.achievement-admin-actions { display: flex; align-items: center; justify-content: flex-end; gap: 5px; }
+.achievement-admin-actions .edit-btn, .achievement-admin-actions .message-delete, .achievement-admin-actions .order-btn { min-height: 32px; padding: 5px 8px; }
+.achievement-admin-actions .reorder-actions { margin: 0; }
+#galleryList { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.gallery-admin-card { display: block; min-width: 0; margin-top: 10px; padding: 13px; border: 1px solid var(--line); background: var(--paper); }
+.gallery-admin-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; }
+.gallery-admin-card h3 { margin: 0; font-size: 1.12rem; line-height: 1.2; }
+.gallery-admin-card .gallery-meta { margin: 3px 0 0; font-size: .73rem; }
+.gallery-desc { display: -webkit-box; margin: 8px 0 0; overflow: hidden; color: var(--muted); font-size: .8rem; line-height: 1.5; -webkit-box-orient: vertical; -webkit-line-clamp: 2; }
+.gallery-image-count { margin: 8px 0 0; font-size: .73rem; }
+.gallery-admin-actions { display: flex; flex: 0 0 auto; align-items: center; gap: 5px; }
+.gallery-admin-actions button { min-height: 32px; padding: 5px 8px; }
+.reorder-actions { display: inline-flex; gap: 6px; margin-left: 8px; }
+[hidden] { display: none !important; }
+@media (max-width: 760px) {
+    .admin-container { width: calc(100% - 32px); padding-top: 24px; }
+    .admin-dashboard { grid-template-columns: 1fr; }
+    .admin-sidebar { position: static; }
+    .admin-nav { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    #messagesContainer, #galleryList { grid-template-columns: 1fr; }
+}
+@media (max-width: 520px) {
+    .project-form, .cert-form, .skill-form, .admin-grid, .gallery-form { grid-template-columns: 1fr; }
+    .project-form textarea, .admin-grid textarea, .gallery-form textarea, .emoji-picker { grid-column: auto; }
+    .project-admin-card, .certificate-admin-card { align-items: flex-start; flex-direction: column; }
+    #adminAchievementsContainer { grid-template-columns: 1fr; }
+    .achievement-admin-card { grid-template-columns: 1fr; }
+    .achievement-admin-actions { justify-content: flex-start; }
+    .gallery-admin-header { flex-direction: column; }
+}

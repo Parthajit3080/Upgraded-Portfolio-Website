@@ -1,858 +1,382 @@
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-
-import {
-    getFirestore,
-    collection,
-    addDoc,
-    getDocs
-} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-
-/* =========================
-   🔹 FIREBASE INIT
-========================= */
-
-const firebaseConfig = {
-    apiKey: "AIzaSyC3VAj6pHUPZOrOVoWti64EZgVt0wDEqYE",
-    authDomain: "parthajit-portfolio.firebaseapp.com",
-    projectId: "parthajit-portfolio",
-    storageBucket: "parthajit-portfolio.firebasestorage.app",
-    messagingSenderId: "368597265378",
-    appId: "1:368597265378:web:8b1352aac8da9dd2ada7bb"
-};
-
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-
-/* =========================
-   🔹 DOM READY
-========================= */
-
-document.addEventListener("DOMContentLoaded", () => {
-
-    /* =========================
-       🔹 THEME TOGGLE
-    ========================== */
-
-    const themeToggle =
-        document.getElementById("themeToggle");
-
-    function applyTheme(theme) {
-
-        const isDark = theme === "dark";
-
-        document.body.classList.toggle("light-mode", !isDark);
-        document.body.classList.toggle("dark-mode", isDark);
-
-        if (!themeToggle) return;
-
-        themeToggle.innerHTML = isDark
-            ? '<i class="fas fa-sun"></i>'
-            : '<i class="fas fa-moon"></i>';
-
-        themeToggle.setAttribute(
-            "aria-label",
-            isDark ? "Switch to light mode" : "Switch to dark mode"
-        );
-    }
-
-    applyTheme("dark");
-
-    if (themeToggle) {
-
-        themeToggle.addEventListener("click", () => {
-
-            const nextTheme =
-                document.body.classList.contains("dark-mode")
-                    ? "light"
-                    : "dark";
-
-            applyTheme(nextTheme);
-        });
-    }
-
-    /* =========================
-       🔹 ACTIVE NAV HIGHLIGHT
-    ========================== */
-
-    const sectionLinks =
-        Array.from(document.querySelectorAll("header nav a[href^='#']"));
-
-    const sectionMap =
-        sectionLinks
-            .map(link => {
-                const id = link.getAttribute("href").slice(1);
-                const section = document.getElementById(id);
-                return { link, section };
-            })
-            .filter(item => item.section);
-
-    function setActiveNav(id) {
-        sectionMap.forEach(({ link, section }) => {
-            link.classList.toggle("nav-active", section.id === id);
-        });
-    }
-
-    function updateActiveNavFromScroll() {
-        if (!sectionMap.length) return;
-
-        const headerHeight =
-            document.querySelector("header")?.offsetHeight || 0;
-
-        const marker =
-            window.scrollY + headerHeight + (window.innerHeight * 0.32);
-
-        let currentId = sectionMap[0].section.id;
-
-        sectionMap.forEach(({ section }) => {
-            if (section.offsetTop <= marker) {
-                currentId = section.id;
-            }
-        });
-
-        setActiveNav(currentId);
-    }
-
-    if (sectionMap.length) {
-        updateActiveNavFromScroll();
-        window.addEventListener("scroll", updateActiveNavFromScroll, { passive: true });
-        window.addEventListener("resize", updateActiveNavFromScroll);
-    }
-
-    /* =========================
-       🔹 3D CARD MOTION
-    ========================== */
-
-    function attachTiltEffect() {
-        const cards =
-            document.querySelectorAll(
-                ".project-item, .achievement-card, .research-card, .certificate-item, .edu-row"
-            );
-
-        cards.forEach(card => {
-            if (card.dataset.tiltReady === "true") return;
-
-            card.dataset.tiltReady = "true";
-
-            card.addEventListener("mousemove", (event) => {
-                const rect = card.getBoundingClientRect();
-                const x = event.clientX - rect.left;
-                const y = event.clientY - rect.top;
-                const rotateY = ((x / rect.width) - 0.5) * 10;
-                const rotateX = ((0.5 - (y / rect.height)) * 10);
-
-                card.style.setProperty("--tilt-x", `${rotateX}deg`);
-                card.style.setProperty("--tilt-y", `${rotateY}deg`);
-                card.style.setProperty("--shine-x", `${(x / rect.width) * 100}%`);
-                card.style.setProperty("--shine-y", `${(y / rect.height) * 100}%`);
-            });
-
-            card.addEventListener("mouseleave", () => {
-                card.style.setProperty("--tilt-x", "0deg");
-                card.style.setProperty("--tilt-y", "0deg");
-                card.style.setProperty("--shine-x", "50%");
-                card.style.setProperty("--shine-y", "50%");
-            });
-        });
-    }
-
-    attachTiltEffect();
-
-    /* =========================
-       🔹 SCROLL REVEAL MOTION
-    ========================== */
-
-    const revealObserver =
-        new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.classList.add("reveal-visible");
-                    revealObserver.unobserve(entry.target);
-                }
-            });
-        }, {
-            root: null,
-            rootMargin: "0px 0px -12% 0px",
-            threshold: 0.12
-        });
-
-    function attachScrollReveal() {
-        const revealTargets =
-            document.querySelectorAll(
-                "section .container > h2, .skill-pill, .project-item, .certificate-item, .achievement-card, .edu-row, .research-card, .contact-info, .contact-form-wrapper"
-            );
-
-        revealTargets.forEach((target, index) => {
-            if (target.dataset.revealReady === "true") return;
-
-            target.dataset.revealReady = "true";
-            target.classList.add("scroll-reveal");
-            target.style.setProperty("--reveal-delay", `${Math.min(index % 8, 7) * 55}ms`);
-            revealObserver.observe(target);
-        });
-    }
-
-    attachScrollReveal();
-
-    /* =========================
-       🔹 MODAL VIEWER
-    ========================== */
-
-    const modal = document.getElementById("fileModal");
-
-    function closeModal() {
-
-        const modalBody =
-            document.getElementById("modalBody");
-
-        if (!modal || !modalBody) return;
-
-        modal.style.display = "none";
-        modalBody.innerHTML = "";
-    }
-
-    if (modal) {
-
-        modal.addEventListener("click", (e) => {
-
-            if (e.target.id === "fileModal") {
-                closeModal();
-            }
-        });
-    }
-
-    const closeBtn = document.getElementById("closeModal");
-
-    if (closeBtn) {
-        closeBtn.addEventListener("click", closeModal);
-    }
-
-    window.openFileModal = function(filePath) {
-
-        const modalBody =
-            document.getElementById("modalBody");
-
-        if (!modal || !modalBody) return;
-
-        modal.style.display = "flex";
-        modalBody.innerHTML = "";
-
-        const extension =
-            filePath.split(".").pop().toLowerCase();
-
-        if (extension === "pdf") {
-
-            const iframe = document.createElement("iframe");
-
-            iframe.src = filePath;
-            iframe.style.width = "100%";
-            iframe.style.height = "100%";
-            iframe.style.border = "none";
-
-            modalBody.appendChild(iframe);
-
-        } else {
-
-            const img = document.createElement("img");
-
-            img.src = filePath;
-            img.style.maxWidth = "100%";
-            img.style.maxHeight = "100%";
-            img.style.objectFit = "contain";
-
-            modalBody.appendChild(img);
-        }
-    };
-
-    /* =========================
-       🔹 PROJECTS
-    ========================== */
-
-    async function loadProjects() {
-
-        const container =
-            document.getElementById("projectsContainer");
-
-        if (!container) return;
-
-        const querySnapshot =
-            await getDocs(collection(db, "projects"));
-        const documents = Array.from(querySnapshot.docs)
-            .sort((a, b) => (a.data().order ?? Number.MAX_SAFE_INTEGER) - (b.data().order ?? Number.MAX_SAFE_INTEGER));
-
-        container.innerHTML = "";
-
-        let index = 0;
-
-        documents.forEach((doc) => {
-
-            const data = doc.data();
-
-            const fileName = data.fileName || null;
-
-            const hiddenStyle =
-                index >= 3 ? 'style="display:none"' : 'style="display:flex"';
-
-            container.innerHTML += `
-    <div class="project-item" ${hiddenStyle}>
-
-        <h3>${data.title}</h3>
-        <p>${data.shortDesc || ""}</p>
-
-        ${
-            fileName
-            ? `
-            <div class="file-preview"
-                 onclick="event.stopPropagation();
-                 openFileModal('assets/projects/${fileName}')">
-
-                ${getFilePreviewHTML(fileName, 'assets/projects/')}
-            </div>
-            `
-            : ""
-        }
-
-        <button class="details-btn"
-            onclick="window.location.href='project.html?id=${doc.id}'">
-            View Details →
-        </button>
-
-    </div>
-`;
-
-            index++;
-        });
-
-        // show first 3 initially
-        const items =
-            document.querySelectorAll(".project-item");
-
-        items.forEach((item, i) => {
-
-            if (i < 3) {
-                item.style.display = "flex";
-            } else {
-                item.style.display = "none";
-            }
-        });
-
-        if (toggleBtn) {
-            toggleBtn.textContent = "See All";
-            toggleBtn.style.display =
-                items.length > 3 ? "inline-block" : "none";
-        }
-    }
-
-    /* =========================
-       🔹 PROJECT TOGGLE
-    ========================== */
-
-    const toggleBtn =
-        document.getElementById("toggleViewBtn");
-
-    if (toggleBtn) {
-
-        let showAll = false;
-
-        toggleBtn.addEventListener("click", () => {
-
-            const items =
-                document.querySelectorAll(".project-item");
-
-            showAll = !showAll;
-
-            if (showAll) {
-
-                items.forEach(item => {
-                    item.style.display = "flex";
-                });
-
-                toggleBtn.textContent = "Show Less";
-
-            } else {
-
-                items.forEach((item, index) => {
-
-                    if (index < 3) {
-                        item.style.display = "flex";
-                    } else {
-                        item.style.display = "none";
-                    }
-                });
-
-                toggleBtn.textContent = "See All";
-            }
-        });
-    }
-
-    /* =========================
-       🔹 CERTIFICATES
-    ========================== */
-
-    async function loadCertificates() {
-
-        const container =
-            document.getElementById("certificatesContainer");
-
-        if (!container) return;
-
-        const querySnapshot =
-            await getDocs(collection(db, "certificates"));
-        const documents = Array.from(querySnapshot.docs)
-            .sort((a, b) => (a.data().order ?? Number.MAX_SAFE_INTEGER) - (b.data().order ?? Number.MAX_SAFE_INTEGER));
-
-        container.innerHTML = "";
-
-        documents.forEach((doc) => {
-
-            const data = doc.data();
-
-            const fileName = data.fileName || null;
-
-            container.innerHTML += `
-
-                <div class="certificate-item">
-
-                    <h3>${data.title}</h3>
-
-                    <p>Issued by ${data.issuer}</p>
-
-                    ${
-                        fileName
-                        ? `
-                        <div class="file-preview"
-                             onclick="openFileModal(
-                             'assets/certificates/${fileName}')">
-
-                            ${getFilePreviewHTML(
-                                fileName,
-                                'assets/certificates/'
-                            )}
-
-                        </div>
-                        `
-                        : `<p style="color:gray;">
-                             No file uploaded
-                           </p>`
-                    }
-
-                </div>
-            `;
-        });
-
-        startCertCarousel();
-    }
-
-    function startCertCarousel() {
-
-        const track =
-            document.getElementById("certificatesContainer");
-
-        const items =
-            document.querySelectorAll(".certificate-item");
-
-        const prevBtn =
-            document.getElementById("certPrev");
-
-        const nextBtn =
-            document.getElementById("certNext");
-
-        if (!items.length || !prevBtn || !nextBtn)
-            return;
-
-        let index = 0;
-
-        const visibleCount = 3;
-
-        const itemWidth =
-            items[0].offsetWidth + 30;
-
-        function updatePosition() {
-
-            track.style.transform =
-                `translateX(-${index * itemWidth}px)`;
-        }
-
-        nextBtn.addEventListener("click", () => {
-
-            if (index < items.length - visibleCount)
-                index++;
-
-            updatePosition();
-        });
-
-        prevBtn.addEventListener("click", () => {
-
-            if (index > 0)
-                index--;
-
-            updatePosition();
-        });
-    }
-
-    /* =========================
-       🔹 SKILLS
-    ========================== */
-
-    async function loadSkills() {
-
-        const container =
-            document.getElementById("skillsContainer");
-
-        if (!container) return;
-
-        const querySnapshot =
-            await getDocs(collection(db, "skills"));
-
-        container.innerHTML = "";
-
-        querySnapshot.forEach((doc) => {
-
-            const data = doc.data();
-
-            container.innerHTML += `
-
-                <div class="skill-pill">
-
-                    <span>${data.icon || "⚡"}</span>
-
-                    <span>${data.name}</span>
-
-                </div>
-            `;
-        });
-    }
-
-    /* =========================
-       🏆 ACHIEVEMENTS
-    ========================== */
-
-    let showAllAchievements = false;
-
-    async function loadAchievements() {
-
-        const container =
-            document.getElementById("achievementsContainer");
-
-        if (!container) return;
-
-        const snapshot =
-            await getDocs(collection(db, "achievements"));
-        const documents = Array.from(snapshot.docs)
-            .sort((a, b) => (a.data().order ?? Number.MAX_SAFE_INTEGER) - (b.data().order ?? Number.MAX_SAFE_INTEGER));
-
-        container.innerHTML = "";
-
-        documents.forEach((doc, index) => {
-
-            const data = doc.data();
-
-            container.innerHTML += `
-
-                <div class="achievement-card" style="display:${index < 6 ? "flex" : "none"}">
-
-                    <div class="ach-icon">
-                        ${data.icon || "🏆"}
-                    </div>
-
-                    <h3>${data.title}</h3>
-
-                    <p class="ach-main">
-                        ${data.subtitle || ""}
-                    </p>
-
-                    <p class="ach-sub">
-                        ${data.description || ""}
-                    </p>
-
-                </div>
-            `;
-        });
-
-        const toggleBtn = document.getElementById("achievementsToggleBtn");
-        if (toggleBtn) {
-            showAllAchievements = false;
-            toggleBtn.textContent = "See All";
-            toggleBtn.style.display = documents.length > 6 ? "inline-block" : "none";
-        }
-    }
-
-    const achievementsToggleBtn = document.getElementById("achievementsToggleBtn");
-    if (achievementsToggleBtn) {
-        achievementsToggleBtn.addEventListener("click", () => {
-            const items = document.querySelectorAll(".achievement-card");
-            showAllAchievements = !showAllAchievements;
-            items.forEach((item, index) => {
-                item.style.display = showAllAchievements || index < 6 ? "flex" : "none";
-            });
-            achievementsToggleBtn.textContent = showAllAchievements ? "Show Less" : "See All";
-        });
-    }
-
-    /* =========================
-       🔬 RESEARCH
-    ========================== */
-
-    async function loadResearch() {
-
-        const container =
-            document.getElementById("researchContainer");
-
-        if (!container) return;
-
-        const snapshot =
-            await getDocs(collection(db, "research"));
-        const documents = Array.from(snapshot.docs)
-            .sort((a, b) => (a.data().order ?? Number.MAX_SAFE_INTEGER) - (b.data().order ?? Number.MAX_SAFE_INTEGER));
-
-        container.innerHTML = "";
-
-        documents.forEach(doc => {
-
-            const data = doc.data();
-
-            container.innerHTML += `
-
-                <div class="research-card">
-
-                    <div class="research-icon">
-                        ${data.icon || "📄"}
-                    </div>
-
-                    <h3>${data.title}</h3>
-
-                    <p class="research-main">
-                        ${data.subtitle || ""}
-                    </p>
-
-                    <p class="research-sub">
-                        ${data.description || ""}
-                    </p>
-
-                    <div class="research-links">
-
-                        ${
-                            data.paper
-                            ? `
-                            <a href="${data.paper}"
-                               class="btn-small"
-                               target="_blank">
-
-                               View Paper
-
-                            </a>
-                            `
-                            : ""
-                        }
-
-                        ${
-                            data.github
-                            ? `
-                            <a href="${data.github}"
-                               class="btn-small"
-                               target="_blank">
-
-                               GitHub
-
-                            </a>
-                            `
-                            : ""
-                        }
-
-                    </div>
-
-                </div>
-            `;
-        });
-    }
-
-    /* =========================
-       🔹 CONTACT FORM
-    ========================== */
-
-    const contactForm =
-        document.getElementById("contactForm");
-
-    if (contactForm) {
-
-        contactForm.addEventListener(
-            "submit",
-            async (e) => {
-
-                e.preventDefault();
-
-                const name =
-                    contactForm.querySelector(
-                        'input[name="name"]'
-                    ).value;
-
-                const email =
-                    contactForm.querySelector(
-                        'input[name="email"]'
-                    ).value;
-
-                const message =
-                    contactForm.querySelector(
-                        'textarea[name="message"]'
-                    ).value;
-
-                try {
-
-                    await addDoc(
-                        collection(db, "messages"),
-                        {
-                            name,
-                            email,
-                            message,
-                            createdAt: new Date()
-                        }
-                    );
-
-                    alert("Message sent successfully!");
-
-                    contactForm.reset();
-
-                } catch (error) {
-
-                    console.error(error);
-
-                    alert("Error sending message.");
-                }
-            }
-        );
-    }
-
-    /* =========================
-       🔹 FILE PREVIEW
-    ========================== */
-
-    function getFilePreviewHTML(fileName, basePath) {
-
-        if (!fileName) return "";
-
-        const extension =
-            fileName.split(".").pop().toLowerCase();
-
-        if (extension === "pdf") {
-
-            return `
-
-                <div class="preview-wrapper">
-
-                    <iframe
-                        src="${basePath + fileName}"
-                        width="100%"
-                        height="200px">
-                    </iframe>
-
-                </div>
-            `;
-
-        } else {
-
-            return `
-
-                <div class="preview-wrapper">
-
-                    <img
-                        src="${basePath + fileName}"
-                        width="100%"
-                        height="200px"
-                        style="
-                            object-fit:cover;
-                            border-radius:10px;
-                        ">
-
-                </div>
-            `;
-        }
-    }
-
-    /* =========================
-       🔹 CERTIFICATE TOGGLE
-    ========================== */
-
-    const certBtn =
-        document.getElementById("certToggleBtn");
-
-    const certContainer =
-        document.getElementById("certificatesContainer");
-
-    if (certBtn && certContainer) {
-
-        let isGrid = false;
-
-        certBtn.addEventListener("click", () => {
-
-            isGrid = !isGrid;
-
-            certContainer.classList.toggle("cert-grid");
-
-            certBtn.textContent =
-                isGrid ? "Show Less" : "See All";
-        });
-    }
-
-    /* =========================
-       🔹 INIT
-    ========================== */
-
-    async function init() {
-
-        await loadProjects();
-        await loadCertificates();
-        await loadSkills();
-        await loadAchievements();
-        await loadResearch();
-        attachTiltEffect();
-        attachScrollReveal();
-    }
-
-    init();
-});
-
-
-const texts = [
-    "M.Tech Scholar, IIT Kharagpur",
-    "Advancing AI Research Frontiers",
-    "Deep Learning Architectures"
-];
-
-let textIndex = 0;
-let charIndex = 0;
-let isDeleting = false;
-
-const typingElement = document.getElementById("typing-text");
-
-function typeEffect() {
-
-    const currentText = texts[textIndex];
-
-    if (!isDeleting) {
-        typingElement.textContent =
-            currentText.substring(0, charIndex + 1);
-
-        charIndex++;
-
-        if (charIndex === currentText.length) {
-            isDeleting = true;
-            setTimeout(typeEffect, 1800);
-            return;
-        }
-
-    } else {
-
-        typingElement.textContent =
-            currentText.substring(0, charIndex - 1);
-
-        charIndex--;
-
-        if (charIndex === 0) {
-            isDeleting = false;
-            textIndex = (textIndex + 1) % texts.length;
-        }
-    }
-
-    setTimeout(typeEffect, isDeleting ? 40 : 20);
+import { collection, getDocs, addDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+import { db } from "./js/firebase.js";
+import { escapeHtml, safeAssetFilename, safeExternalUrl } from "./js/safe-content.js";
+import { setupThemeToggle } from "./js/theme.js";
+import { setupReveal } from "./js/reveal.js";
+
+const $ = (selector, root = document) => root.querySelector(selector);
+const byOrder = (left, right) =>
+    (left.data.order ?? Number.MAX_SAFE_INTEGER) - (right.data.order ?? Number.MAX_SAFE_INTEGER);
+
+function setState(container, message, kind = "empty") {
+    container.innerHTML = `<p class="content-state" role="status" data-state="${kind}">${escapeHtml(message)}</p>`;
 }
 
-typeEffect();
+async function renderCollection(name, selector, renderItem, emptyMessage) {
+    const container = $(selector);
+    if (!container) return [];
+
+    try {
+        const snapshot = await getDocs(collection(db, name));
+        const records = snapshot.docs
+            .map(snapshotDoc => ({ id: snapshotDoc.id, data: snapshotDoc.data() }))
+            .sort(byOrder);
+
+        if (!records.length) {
+            setState(container, emptyMessage);
+            return records;
+        }
+
+        container.innerHTML = records.map(renderItem).join("");
+        setupReveal(container);
+        return records;
+    } catch (error) {
+        console.error(`Unable to load ${name}.`, error);
+        setState(container, "This content is temporarily unavailable. Please try again later.", "error");
+        return null;
+    }
+}
+
+function assetPreview(folder, value, title) {
+    const filename = safeAssetFilename(value);
+    if (!filename) return "";
+    const path = `${folder}/${filename}`;
+    const escapedPath = escapeHtml(path);
+    const extension = filename.split(".").pop().toLowerCase();
+    const image = ["jpg", "jpeg", "png", "webp", "gif"].includes(extension);
+    const content = image
+        ? `<img src="${escapedPath}" alt="Preview of ${escapeHtml(title)}" loading="lazy">`
+        : `<span class="preview-file">Preview ${escapeHtml(filename)} ↗</span>`;
+
+    return `<button class="project-preview file-preview" type="button" data-preview-path="${escapedPath}" aria-label="Preview ${escapeHtml(title)}">${content}</button>`;
+}
+
+function projectPreview(value, title, screenshots = []) {
+    const filename = safeAssetFilename(value);
+    if (!filename) return "";
+
+    const extension = filename.split(".").pop().toLowerCase();
+    const videoTypes = { mp4: "video/mp4", webm: "video/webm", ogg: "video/ogg", ogv: "video/ogg" };
+    const mimeType = videoTypes[extension];
+    if (!mimeType) return assetPreview("assets/projects", filename, title);
+
+    const fallbackImage = (Array.isArray(screenshots) ? screenshots : [])
+        .map(safeAssetFilename)
+        .find(imageName => ["jpg", "jpeg", "png", "webp", "gif"].includes(imageName.split(".").pop().toLowerCase()));
+    const videoPath = escapeHtml(`assets/projects/${filename}`);
+    const posterPath = fallbackImage ? escapeHtml(`assets/projects/${fallbackImage}`) : "";
+    return `
+        <div class="project-preview project-preview-video">
+            <video class="project-preview-media project-video" muted loop playsinline preload="none"${posterPath ? ` poster="${posterPath}"` : ""} data-fallback-src="${posterPath}" data-preview-title="${escapeHtml(title)}" aria-label="Video preview of ${escapeHtml(title)}">
+                <source src="${videoPath}" type="${mimeType}">
+            </video>
+            <span class="preview-video-badge" aria-hidden="true">VIDEO</span>
+        </div>`;
+}
+
+function setupProjectVideoPreviews() {
+    const videos = Array.from(document.querySelectorAll("#projectsContainer .project-video"));
+    if (!videos.length) return;
+    const visibleVideos = new Set();
+    let observer = null;
+
+    const fallbackVideo = video => {
+        const frame = video.closest(".project-preview");
+        if (!frame) return;
+        visibleVideos.delete(video);
+        observer?.unobserve(video);
+        const fallbackPath = video.dataset.fallbackSrc;
+        if (fallbackPath) {
+            const image = document.createElement("img");
+            image.src = fallbackPath;
+            image.alt = `${video.dataset.previewTitle || "Project"} preview image`;
+            image.loading = "lazy";
+            image.addEventListener("error", () => {
+                const message = document.createElement("span");
+                message.className = "preview-file";
+                message.textContent = "Project preview unavailable";
+                frame.replaceChildren(message);
+            }, { once: true });
+            frame.replaceChildren(image);
+            frame.classList.remove("project-preview-video");
+            return;
+        }
+
+        const message = document.createElement("span");
+        message.className = "preview-file";
+        message.textContent = "Video preview unavailable";
+        frame.replaceChildren(message);
+        frame.classList.remove("project-preview-video");
+    };
+
+    videos.forEach(video => video.addEventListener("error", () => fallbackVideo(video), { once: true }));
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+        videos.forEach(video => { video.controls = true; });
+        return;
+    }
+
+    const playVideo = video => {
+        if (document.hidden || !video.paused) return;
+        video.playbackRate = 1.5;
+        const playback = video.play();
+        playback?.catch(() => { video.controls = true; });
+    };
+
+    if (!("IntersectionObserver" in window)) {
+        videos.forEach(video => {
+            const bounds = video.getBoundingClientRect();
+            if (bounds.bottom > 0 && bounds.top < window.innerHeight) playVideo(video);
+        });
+        return;
+    }
+
+    observer = new IntersectionObserver(entries => {
+        entries.forEach(entry => {
+            const video = entry.target;
+            if (entry.isIntersecting && entry.intersectionRatio >= 0.55) {
+                visibleVideos.add(video);
+                playVideo(video);
+            } else {
+                visibleVideos.delete(video);
+                video.pause();
+            }
+        });
+    }, { threshold: [0, 0.55] });
+
+    videos.forEach(video => observer.observe(video));
+    document.addEventListener("visibilitychange", () => {
+        if (document.hidden) videos.forEach(video => video.pause());
+        else visibleVideos.forEach(playVideo);
+    });
+}
+
+async function loadProjects() {
+    const records = await renderCollection("projects", "#projectsContainer", ({ id, data }) => `
+        <article class="project-item">
+            ${projectPreview(data.fileName, data.title || "project", data.screenshots)}
+            <p class="section-kicker">Selected work</p>
+            <h3>${escapeHtml(data.title || "Untitled project")}</h3>
+            <p>${escapeHtml(data.shortDesc || "")}</p>
+            <a class="details-btn" href="project.html?id=${encodeURIComponent(id)}">Read project notes <span aria-hidden="true">↗</span></a>
+        </article>
+    `, "Project details will appear here when available.");
+
+    const track = $("#projectsContainer");
+    const carousel = $("#projectsCarousel");
+    const previous = $("#projectPrev");
+    const next = $("#projectNext");
+    const toggle = $("#toggleViewBtn");
+    const canBrowse = Boolean(records && records.length > 1);
+    setupProjectVideoPreviews();
+    if (toggle) toggle.hidden = !canBrowse;
+    if (previous) previous.hidden = !canBrowse;
+    if (next) next.hidden = !canBrowse;
+    if (!track || !canBrowse) return;
+
+    const updateArrows = () => {
+        const expanded = track.classList.contains("is-expanded");
+        if (previous) previous.disabled = expanded || track.scrollLeft <= 1;
+        if (next) next.disabled = expanded || track.scrollLeft + track.clientWidth >= track.scrollWidth - 1;
+    };
+    const scrollBehavior = () => window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth";
+    previous?.addEventListener("click", () => track.scrollBy({ left: -track.clientWidth, behavior: scrollBehavior() }));
+    next?.addEventListener("click", () => track.scrollBy({ left: track.clientWidth, behavior: scrollBehavior() }));
+    track.addEventListener("scroll", updateArrows, { passive: true });
+    window.addEventListener("resize", updateArrows);
+    updateArrows();
+
+    toggle.textContent = "See all projects";
+    toggle.setAttribute("aria-expanded", "false");
+    toggle.onclick = () => {
+        const expanded = track.classList.toggle("is-expanded");
+        carousel?.classList.toggle("is-expanded", expanded);
+        toggle.textContent = expanded ? "View carousel" : "See all projects";
+        toggle.setAttribute("aria-expanded", String(expanded));
+        if (!expanded) track.scrollTo({ left: 0, behavior: scrollBehavior() });
+        requestAnimationFrame(updateArrows);
+    };
+}
+
+async function loadCertificates() {
+    const records = await renderCollection("certificates", "#certificatesContainer", ({ data }) => `
+        <article class="certificate-item">
+            <h3>${escapeHtml(data.title || "Certificate")}</h3>
+            <p>${escapeHtml(data.issuer || "")}</p>
+            ${assetPreview("assets/certificates", data.fileName, data.title || "certificate")}
+        </article>
+    `, "No certificates have been added yet.");
+
+    const container = $("#certificatesContainer");
+    const toggle = $("#certToggleBtn");
+    if (toggle && container) {
+        toggle.onclick = () => {
+            const grid = container.classList.toggle("cert-grid");
+            toggle.textContent = grid ? "View as a row" : "View as a grid";
+        };
+        toggle.hidden = !records?.length;
+    }
+    $("#certPrev")?.addEventListener("click", () => container?.scrollBy({ left: -300, behavior: "smooth" }));
+    $("#certNext")?.addEventListener("click", () => container?.scrollBy({ left: 300, behavior: "smooth" }));
+}
+
+async function loadSkills() {
+    await renderCollection("skills", "#skillsContainer", ({ data }) => `
+        <div class="skill-pill"><span aria-hidden="true">${escapeHtml(data.icon || "•")}</span><span>${escapeHtml(data.name || "")}</span></div>
+    `, "No skills have been added yet.");
+}
+
+async function loadAchievements() {
+    const records = await renderCollection("achievements", "#achievementsContainer", ({ data }) => `
+        <article class="achievement-card">
+            <div class="ach-icon" aria-hidden="true">${escapeHtml(data.icon || "•")}</div>
+            <h3>${escapeHtml(data.title || "")}</h3>
+            ${data.subtitle ? `<p class="ach-main">${escapeHtml(data.subtitle)}</p>` : ""}
+            ${data.description ? `<p class="ach-sub">${escapeHtml(data.description)}</p>` : ""}
+        </article>
+    `, "No achievements have been added yet.");
+
+    const toggle = $("#achievementsToggleBtn");
+    if (toggle && records?.length) {
+        const cards = Array.from(document.querySelectorAll("#achievementsContainer .achievement-card"));
+        let expanded = false;
+        toggle.hidden = cards.length <= 6;
+        cards.forEach((card, index) => { card.hidden = index >= 6; });
+        toggle.textContent = "See all achievements";
+        toggle.onclick = () => {
+            expanded = !expanded;
+            cards.forEach((card, index) => { card.hidden = !expanded && index >= 6; });
+            toggle.textContent = expanded ? "Show fewer achievements" : "See all achievements";
+        };
+    } else if (toggle) toggle.hidden = true;
+}
+
+async function loadResearch() {
+    await renderCollection("research", "#researchContainer", ({ data }) => {
+        const paper = safeExternalUrl(data.paper);
+        const github = safeExternalUrl(data.github);
+        return `
+            <article class="research-card">
+                <div class="research-icon" aria-hidden="true">${escapeHtml(data.icon || "•")}</div>
+                <h3>${escapeHtml(data.title || "")}</h3>
+                ${data.subtitle ? `<p class="research-main">${escapeHtml(data.subtitle)}</p>` : ""}
+                ${data.description ? `<p class="research-sub">${escapeHtml(data.description)}</p>` : ""}
+                <div class="research-links">
+                    ${paper ? `<a class="btn-small" href="${escapeHtml(paper)}" target="_blank" rel="noopener noreferrer">Read paper ↗</a>` : ""}
+                    ${github ? `<a class="btn-small" href="${escapeHtml(github)}" target="_blank" rel="noopener noreferrer">Source ↗</a>` : ""}
+                </div>
+            </article>`;
+    }, "Research notes will appear here when available.");
+}
+
+function setupFileModal() {
+    const modal = $("#fileModal");
+    const body = $("#modalBody");
+    const close = $("#closeModal");
+    let previousFocus = null;
+    if (!modal || !body || !close) return;
+
+    const closeModal = () => {
+        modal.setAttribute("aria-hidden", "true");
+        modal.style.display = "none";
+        body.replaceChildren();
+        previousFocus?.focus();
+    };
+
+    document.addEventListener("click", event => {
+        const trigger = event.target.closest("[data-preview-path]");
+        if (!trigger) return;
+        const filename = safeAssetFilename(trigger.dataset.previewPath);
+        if (!filename) return;
+
+        previousFocus = trigger;
+        const path = trigger.dataset.previewPath.startsWith("assets/certificates/")
+            ? `assets/certificates/${filename}`
+            : `assets/projects/${filename}`;
+        const extension = filename.split(".").pop().toLowerCase();
+        if (extension === "pdf") {
+            const frame = document.createElement("iframe");
+            frame.src = path;
+            frame.title = `Preview of ${filename}`;
+            body.append(frame);
+        } else {
+            const image = document.createElement("img");
+            image.src = path;
+            image.alt = `Preview of ${filename}`;
+            body.append(image);
+        }
+        modal.style.display = "flex";
+        modal.setAttribute("aria-hidden", "false");
+        close.focus();
+    });
+    close.addEventListener("click", closeModal);
+    modal.addEventListener("click", event => { if (event.target === modal) closeModal(); });
+    document.addEventListener("keydown", event => { if (event.key === "Escape" && modal.getAttribute("aria-hidden") === "false") closeModal(); });
+}
+
+function setupContactForm() {
+    const form = $("#contactForm");
+    const status = $("#contactStatus");
+    const button = form?.querySelector("[type=submit]");
+    if (!form || !status || !button) return;
+
+    form.addEventListener("submit", async event => {
+        event.preventDefault();
+        if (!form.reportValidity()) return;
+        const values = new FormData(form);
+        const name = String(values.get("name") || "").trim();
+        const email = String(values.get("email") || "").trim();
+        const message = String(values.get("message") || "").trim();
+        if (!name || !email || !message) return;
+
+        status.textContent = "Sending your note…";
+        status.dataset.state = "pending";
+        button.disabled = true;
+        try {
+            await addDoc(collection(db, "messages"), { name, email, message, createdAt: new Date() });
+            status.textContent = "Your message was sent. Thank you for reaching out.";
+            status.dataset.state = "success";
+            form.reset();
+        } catch (error) {
+            console.error("Unable to send contact message.", error);
+            status.textContent = "The message could not be sent. Please email me directly instead.";
+            status.dataset.state = "error";
+        } finally {
+            button.disabled = false;
+        }
+    });
+}
+
+function setupActiveNavigation() {
+    const links = Array.from(document.querySelectorAll('header nav a[href^="#"]'));
+    const observed = links
+        .map(link => ({ link, section: document.getElementById(link.hash.slice(1)) }))
+        .filter(item => item.section);
+    if (!observed.length || !("IntersectionObserver" in window)) return;
+
+    const observer = new IntersectionObserver(entries => {
+        const current = entries.filter(entry => entry.isIntersecting)
+            .sort((left, right) => right.intersectionRatio - left.intersectionRatio)[0];
+        if (!current) return;
+        observed.forEach(({ link, section }) => {
+            const active = section === current.target;
+            link.classList.toggle("nav-active", active);
+            if (active) link.setAttribute("aria-current", "location");
+            else link.removeAttribute("aria-current");
+        });
+    }, { rootMargin: "-20% 0px -65% 0px", threshold: [0, .2, .5] });
+
+    observed.forEach(({ section }) => observer.observe(section));
+}
+
+document.addEventListener("DOMContentLoaded", async () => {
+    setupThemeToggle($("#themeToggle"));
+    setupFileModal();
+    setupContactForm();
+    setupActiveNavigation();
+    setupReveal();
+    const year = $("#currentYear");
+    if (year) year.textContent = String(new Date().getFullYear());
+
+    const loaders = [loadProjects, loadCertificates, loadSkills, loadAchievements, loadResearch];
+    await Promise.allSettled(loaders.map(load => load()));
+});

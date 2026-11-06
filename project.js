@@ -1,190 +1,174 @@
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import {
-    getFirestore,
-    doc,
-    getDoc
-} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+import { db } from "./js/firebase.js";
+import { escapeHtml, safeExternalUrl, safeAssetFilename, safeDocumentId } from "./js/safe-content.js";
+import { setupThemeToggle } from "./js/theme.js";
+import { setupReveal } from "./js/reveal.js";
 
-const firebaseConfig = {
-    apiKey: "AIzaSyC3VAj6pHUPZOrOVoWti64EZgVt0wDEqYE",
-    authDomain: "parthajit-portfolio.firebaseapp.com",
-    projectId: "parthajit-portfolio",
-    storageBucket: "parthajit-portfolio.firebasestorage.app",
-    messagingSenderId: "368597265378",
-    appId: "1:368597265378:web:8b1352aac8da9dd2ada7bb"
-};
+const container = document.getElementById("projectDetails");
+setupThemeToggle(document.getElementById("projectThemeToggle"));
+const resultImageExtensions = new Set(["jpg", "jpeg", "png", "webp", "gif"]);
+const resultVideoTypes = { mp4: "video/mp4", webm: "video/webm", ogg: "video/ogg", ogv: "video/ogg" };
 
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-
-function setupProjectThemeToggle() {
-    const toggle = document.getElementById("projectThemeToggle");
-
-    function applyProjectTheme(theme) {
-        const isDark = theme === "dark";
-
-        document.body.classList.toggle("light-mode", !isDark);
-        document.body.classList.toggle("dark-mode", isDark);
-
-        if (!toggle) return;
-
-        toggle.innerHTML = isDark
-            ? '<i class="fas fa-sun"></i>'
-            : '<i class="fas fa-moon"></i>';
-
-        toggle.setAttribute(
-            "aria-label",
-            isDark ? "Switch to light mode" : "Switch to dark mode"
-        );
+function renderResultMedia(filename, title, index) {
+    const extension = filename.split(".").pop().toLowerCase();
+    const source = escapeHtml(`assets/projects/${encodeURIComponent(filename)}`);
+    if (resultVideoTypes[extension]) {
+        return `<div class="result-media-slot result-media-video-slot">
+            <video class="result-media-video" muted loop playsinline controls preload="none" aria-label="Result ${index + 1} video for ${escapeHtml(title)}">
+                <source src="${source}" type="${resultVideoTypes[extension]}">
+            </video>
+        </div>`;
     }
 
-    applyProjectTheme("light");
+    return `<div class="result-media-slot">
+        <img class="result-media-image" src="${source}" alt="Result ${index + 1} for ${escapeHtml(title)}" loading="lazy">
+    </div>`;
+}
 
-    if (toggle) {
-        toggle.addEventListener("click", () => {
-            const nextTheme =
-                document.body.classList.contains("dark-mode")
-                    ? "light"
-                    : "dark";
+function setupResultVideoPreviews(root) {
+    const videos = Array.from(root.querySelectorAll(".result-media-video"));
+    if (!videos.length) return;
 
-            applyProjectTheme(nextTheme);
+    const visibleVideos = new Set();
+    let observer = null;
+    const playVideo = video => {
+        if (document.hidden || !video.paused) return;
+        video.playbackRate = 1.5;
+        const playback = video.play();
+        playback?.catch(() => { video.controls = true; });
+    };
+
+    videos.forEach(video => {
+        video.addEventListener("loadedmetadata", () => { video.playbackRate = 1.5; }, { once: true });
+        video.addEventListener("error", () => {
+            visibleVideos.delete(video);
+            observer?.unobserve(video);
+            const message = document.createElement("span");
+            message.className = "result-media-error";
+            message.textContent = "Video preview unavailable";
+            video.closest(".result-media-slot")?.replaceChildren(message);
+        }, { once: true });
+    });
+
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    if (!("IntersectionObserver" in window)) {
+        videos.forEach(video => {
+            const bounds = video.getBoundingClientRect();
+            if (bounds.bottom > 0 && bounds.top < window.innerHeight) playVideo(video);
         });
+        return;
     }
+
+    observer = new IntersectionObserver(entries => {
+        entries.forEach(entry => {
+            const video = entry.target;
+            if (entry.isIntersecting && entry.intersectionRatio >= 0.35) {
+                visibleVideos.add(video);
+                playVideo(video);
+            } else {
+                visibleVideos.delete(video);
+                video.pause();
+            }
+        });
+    }, { threshold: [0, 0.35] });
+
+    videos.forEach(video => observer.observe(video));
+    document.addEventListener("visibilitychange", () => {
+        if (document.hidden) videos.forEach(video => video.pause());
+        else visibleVideos.forEach(playVideo);
+    });
 }
 
-function getProjectId() {
-    const params = new URLSearchParams(window.location.search);
-    return params.get("id");
-}
-
-function escapeHtml(value) {
-    return String(value)
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#039;");
-}
-
-function renderProjectDescription(description) {
-    const lines = String(description || "").replace(/\r\n/g, "\n").split("\n");
-    const blocks = [];
-    let paragraph = [];
-    let list = [];
-    let listType = null;
+function renderDescription(description) {
+    const paragraphs = [];
+    const output = [];
+    let items = [];
+    let listType = "";
 
     const flushParagraph = () => {
-        if (paragraph.length) {
-            blocks.push(`<p>${paragraph.map(escapeHtml).join("<br>")}</p>`);
-            paragraph = [];
-        }
+        if (paragraphs.length) output.push(`<p>${paragraphs.map(escapeHtml).join("<br>")}</p>`);
+        paragraphs.length = 0;
     };
     const flushList = () => {
-        if (list.length) {
-            const tag = listType === "ordered" ? "ol" : "ul";
-            const items = list.map((item, index) => {
-                const content = escapeHtml(item);
-                return listType === "ordered"
-                    ? `<li><span class="project-list-number">${index + 1}.</span><span>${content}</span></li>`
-                    : `<li>${content}</li>`;
-            }).join("");
-            blocks.push(`<${tag}>${items}</${tag}>`);
-            list = [];
-            listType = null;
-        }
+        if (!items.length) return;
+        const tag = listType === "ordered" ? "ol" : "ul";
+        output.push(`<${tag}>${items.map(text => `<li>${escapeHtml(text)}</li>`).join("")}</${tag}>`);
+        items = [];
+        listType = "";
     };
 
-    lines.forEach(line => {
+    String(description || "").replace(/\r\n/g, "\n").split("\n").forEach(line => {
         const bullet = line.match(/^\s*[-*•]\s+(.+)$/);
-        const numbered = line.match(/^\s*\d+[.)]\s+(.+)$/);
-
-        if (bullet || numbered) {
-            const nextType = numbered ? "ordered" : "unordered";
+        const ordered = line.match(/^\s*\d+[.)]\s+(.+)$/);
+        if (bullet || ordered) {
+            const nextType = ordered ? "ordered" : "unordered";
             if (listType && listType !== nextType) flushList();
             flushParagraph();
             listType = nextType;
-            list.push((bullet || numbered)[1]);
+            items.push((bullet || ordered)[1]);
         } else if (!line.trim()) {
             flushParagraph();
             flushList();
         } else {
             flushList();
-            paragraph.push(line.trim());
+            paragraphs.push(line.trim());
         }
     });
-
     flushParagraph();
     flushList();
-    return blocks.join("");
+    return output.join("");
 }
 
 async function loadProject() {
-
-    const id = getProjectId();
-    const container = document.getElementById("projectDetails");
-
+    const id = safeDocumentId(new URLSearchParams(location.search).get("id"));
     if (!id) {
-        container.innerHTML = "<h2>No project selected</h2>";
+        container.innerHTML = '<section class="project-section"><h2>Project not selected</h2><p>Choose a project from the portfolio to read its notes.</p></section>';
         return;
     }
 
-    const docRef = doc(db, "projects", id);
-    const docSnap = await getDoc(docRef);
+    try {
+        const snapshot = await getDoc(doc(db, "projects", id));
+        if (!snapshot.exists()) {
+            container.innerHTML = '<section class="project-section"><h2>Project not found</h2><p>This project may have moved or been removed.</p></section>';
+            return;
+        }
 
-    if (!docSnap.exists()) {
-        container.innerHTML = "<h2>Project not found</h2>";
-        return;
+        const data = snapshot.data();
+        const title = String(data.title || "Project notes");
+        document.title = `${title} — Parthajit Das`;
+        const rawResults = Array.isArray(data.screenshots)
+            ? data.screenshots
+            : typeof data.screenshots === "string" ? data.screenshots.split(",") : [];
+        const screenshots = rawResults.slice(0, 2).map(value => {
+            const filename = safeAssetFilename(value);
+            if (!filename) return "";
+            const extension = filename.split(".").pop().toLowerCase();
+            return resultImageExtensions.has(extension) || resultVideoTypes[extension] ? filename : "";
+        });
+        const resultMedia = screenshots.filter(Boolean);
+        const hasResults = resultMedia.length > 0;
+        const github = safeExternalUrl(data.github);
+        const paper = safeExternalUrl(data.paper);
+
+        container.innerHTML = `
+            <p class="section-kicker">Project notes</p>
+            <h1>${escapeHtml(title)}</h1>
+            ${data.description ? `<section class="project-section"><h2>Overview</h2><div class="project-description">${renderDescription(data.description)}</div></section>` : ""}
+            ${(data.techStack || data.dataset) ? `<div class="meta-grid">
+                ${data.techStack ? `<section class="project-section"><h2>Tools & methods</h2><p>${escapeHtml(data.techStack)}</p></section>` : ""}
+                ${data.dataset ? `<section class="project-section"><h2>Data</h2><p>${escapeHtml(data.dataset)}</p></section>` : ""}
+            </div>` : ""}
+            ${(github || paper) ? `<div class="button-row">
+                ${github ? `<a href="${escapeHtml(github)}" rel="noopener noreferrer" target="_blank" class="btn">Source code ↗</a>` : ""}
+                ${paper ? `<a href="${escapeHtml(paper)}" rel="noopener noreferrer" target="_blank" class="text-link">Research paper ↗</a>` : ""}
+            </div>` : ""}
+            ${hasResults ? `<section class="project-section"><h2>Results</h2><div class="result-gallery">${resultMedia.map((filename, index) => renderResultMedia(filename, title, index)).join("")}</div></section>` : ""}`;
+        setupResultVideoPreviews(container);
+        setupReveal(container);
+    } catch (error) {
+        console.error("Unable to load project details.", error);
+        container.innerHTML = '<section class="project-section"><h2>Project details are unavailable</h2><p>Please return to the portfolio and try again later.</p></section>';
     }
-
-    const data = docSnap.data();
-
-    container.innerHTML = `
-        <h1 style="text-align:center; margin-bottom:40px;">${data.title}</h1>
-
-        ${data.description ? `
-            <div class="project-section">
-                <h3>Description</h3>
-                <div class="project-description">${renderProjectDescription(data.description)}</div>
-            </div>
-        ` : ""}
-
-        <div class="meta-grid">
-            ${data.techStack ? `
-                <div class="project-section">
-                    <h3>Tech Stack</h3>
-                    <p>${data.techStack}</p>
-                </div>
-            ` : ""}
-
-            ${data.dataset ? `
-                <div class="project-section">
-                    <h3>Dataset</h3>
-                    <p>${data.dataset}</p>
-                </div>
-            ` : ""}
-        </div>
-
-        ${Array.isArray(data.screenshots) && data.screenshots.length > 0 ? `
-            <div class="project-section">
-                <h3>Results</h3>
-                <div class="result-gallery">
-                    ${data.screenshots.map(img =>
-                        `<img src="assets/projects/${img}" class="result-img">`
-                    ).join("")}
-                </div>
-            </div>
-        ` : ""}
-
-        <div class="button-row">
-            ${data.github ? `
-                <a href="${data.github}" target="_blank" class="btn">GitHub</a>
-            ` : ""}
-
-            ${data.paper ? `
-                <a href="${data.paper}" target="_blank" class="btn">Research Paper</a>
-            ` : ""}
-        </div>
-    `;
 }
 
 loadProject();

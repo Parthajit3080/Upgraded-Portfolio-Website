@@ -1,6 +1,4 @@
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import {
-    getFirestore,
     collection,
     addDoc,
     getDocs,
@@ -14,24 +12,15 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
 import {
-    getAuth,
     signInWithEmailAndPassword,
     signOut,
     onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+import { auth, db } from "./js/firebase.js";
+import { escapeHtml, safeExternalUrl, safeAssetFilename, safeGalleryPath, safeDocumentId } from "./js/safe-content.js";
 
-const firebaseConfig = {
-    apiKey: "AIzaSyC3VAj6pHUPZOrOVoWti64EZgVt0wDEqYE",
-    authDomain: "parthajit-portfolio.firebaseapp.com",
-    projectId: "parthajit-portfolio",
-    storageBucket: "parthajit-portfolio.firebasestorage.app",
-    messagingSenderId: "368597265378",
-    appId: "1:368597265378:web:8b1352aac8da9dd2ada7bb"
-};
-
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-const auth = getAuth(app);
+const projectPreviewExtensions = new Set(["jpg", "jpeg", "png", "webp", "gif", "mp4", "webm", "ogg", "ogv", "pdf"]);
+const projectResultExtensions = new Set(["jpg", "jpeg", "png", "webp", "gif", "mp4", "webm", "ogg", "ogv"]);
 
 /* =========================
    🔹 EDITING STATE
@@ -42,7 +31,7 @@ let editingAchievementId = null;
 let editingResearchId = null;
 
 function sortByDisplayOrder(documents) {
-    return [...documents].sort((a, b) => {
+    return [...documents].filter(item => safeDocumentId(item.id)).sort((a, b) => {
         const orderA = a.data().order ?? Number.MAX_SAFE_INTEGER;
         const orderB = b.data().order ?? Number.MAX_SAFE_INTEGER;
         return orderA - orderB || a.id.localeCompare(b.id);
@@ -55,6 +44,9 @@ async function nextDisplayOrder(collectionName) {
 }
 
 window.moveContentItem = async function(collectionName, id, direction) {
+    const allowedCollections = ["projects", "certificates", "achievements", "research"];
+    id = safeDocumentId(id);
+    if (!id || !allowedCollections.includes(collectionName) || ![-1, 1].includes(direction)) return;
     const snapshot = await getDocs(collection(db, collectionName));
     const documents = sortByDisplayOrder(snapshot.docs);
     const currentIndex = documents.findIndex(item => item.id === id);
@@ -81,6 +73,8 @@ window.moveContentItem = async function(collectionName, id, direction) {
 };
 
 function reorderButtons(collectionName, id) {
+    id = safeDocumentId(id);
+    if (!id) return "";
     return `
         <button class="order-btn" title="Move up" onclick="moveContentItem('${collectionName}', '${id}', -1)">↑</button>
         <button class="order-btn" title="Move down" onclick="moveContentItem('${collectionName}', '${id}', 1)">↓</button>
@@ -109,15 +103,23 @@ document.addEventListener("DOMContentLoaded", () => {
     showAdminSection("projects");
 
     // 🔐 LOGIN
-    document.getElementById("loginBtn").addEventListener("click", async () => {
+    loginSection.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        if (!loginSection.reportValidity()) return;
         const email = document.getElementById("adminEmail").value.trim();
         const password = document.getElementById("adminPassword").value.trim();
+        const status = document.getElementById("adminStatus");
+        const submitButton = document.getElementById("loginBtn");
+        status.textContent = "Signing in…";
+        submitButton.disabled = true;
 
         try {
             await signInWithEmailAndPassword(auth, email, password);
         } catch (error) {
-            console.error(error);
-            alert("Login Failed");
+            console.error("Administrator sign-in failed.", error);
+            status.textContent = "Sign-in failed. Check your credentials and try again.";
+        } finally {
+            submitButton.disabled = false;
         }
     });
 
@@ -184,19 +186,40 @@ document.getElementById("addProjectBtn").addEventListener("click", async () => {
     const description = document.getElementById("projectFullDesc").value.trim();
     const techStack = document.getElementById("projectTechStack").value.trim();
     const dataset = document.getElementById("projectDataset").value.trim();
-    const github = document.getElementById("projectGithub").value.trim();
-    const paper = document.getElementById("projectPaper").value.trim();
-    const screenshotsInput = document.getElementById("projectScreenshots").value.trim();
-    const fileName = document.getElementById("projectFileName").value.trim();
+    const githubInput = document.getElementById("projectGithub").value.trim();
+    const paperInput = document.getElementById("projectPaper").value.trim();
+    const github = githubInput ? safeExternalUrl(githubInput) : "";
+    const paper = paperInput ? safeExternalUrl(paperInput) : "";
+    const resultInputs = [
+        document.getElementById("projectResult1").value.trim(),
+        document.getElementById("projectResult2").value.trim()
+    ];
+    const screenshots = resultInputs.map(input => input ? safeAssetFilename(input) : "");
+    const fileInput = document.getElementById("projectFileName").value.trim();
+    const fileName = fileInput ? safeAssetFilename(fileInput) : "";
 
     if (!title || !description) {
         alert("Title and Description are required");
         return;
     }
+    if ((githubInput && !github) || (paperInput && !paper)) {
+        alert("Use HTTP(S) links for project URLs.");
+        return;
+    }
+    if (fileInput && (!fileName || !projectPreviewExtensions.has(fileName.split(".").pop().toLowerCase()))) {
+        alert("Preview must be an image, PDF, or MP4, WebM, or OGG file from the project assets folder.");
+        return;
+    }
 
-    const screenshots = screenshotsInput
-        ? screenshotsInput.split(",").map(s => s.trim())
-        : [];
+    const invalidResult = screenshots.some((filename, index) => {
+        if (!resultInputs[index]) return false;
+        const extension = filename.split(".").pop().toLowerCase();
+        return !filename || !projectResultExtensions.has(extension);
+    });
+    if (invalidResult) {
+        alert("Each result must be an image or MP4, WebM, or OGG video filename from the project assets folder.");
+        return;
+    }
 
     try {
 
@@ -248,7 +271,8 @@ document.getElementById("addProjectBtn").addEventListener("click", async () => {
         document.getElementById("projectDataset").value = "";
         document.getElementById("projectGithub").value = "";
         document.getElementById("projectPaper").value = "";
-        document.getElementById("projectScreenshots").value = "";
+        document.getElementById("projectResult1").value = "";
+        document.getElementById("projectResult2").value = "";
         document.getElementById("projectFileName").value = "";
 
         loadProjects();
@@ -264,10 +288,11 @@ document.getElementById("addCertBtn").addEventListener("click", async () => {
 
     const title = document.getElementById("certTitle").value.trim();
     const issuer = document.getElementById("certIssuer").value.trim();
-    const fileName = document.getElementById("certFileName").value.trim();
+    const fileInput = document.getElementById("certFileName").value.trim();
+    const fileName = safeAssetFilename(fileInput);
 
     if (!title || !issuer || !fileName) {
-        alert("Fill all fields");
+        alert("Enter a title, issuer, and a valid certificate file name.");
         return;
     }
 
@@ -400,11 +425,17 @@ document.getElementById("addResearchBtn").addEventListener("click", async () => 
     const title = document.getElementById("researchTitle").value.trim();
     const subtitle = document.getElementById("researchSubtitle").value.trim();
     const description = document.getElementById("researchDesc").value.trim();
-    const paper = document.getElementById("researchPaper").value.trim();
-    const github = document.getElementById("researchGithub").value.trim();
+    const paperInput = document.getElementById("researchPaper").value.trim();
+    const githubInput = document.getElementById("researchGithub").value.trim();
+    const paper = paperInput ? safeExternalUrl(paperInput) : "";
+    const github = githubInput ? safeExternalUrl(githubInput) : "";
 
     if (!title) {
         alert("Enter title");
+        return;
+    }
+    if ((paperInput && !paper) || (githubInput && !github)) {
+        alert("Research links must use HTTP or HTTPS.");
         return;
     }
 
@@ -475,9 +506,22 @@ async function loadMessages() {
 
     const querySnapshot = await getDocs(collection(db, "messages"));
 
-    sortByDisplayOrder(querySnapshot.docs).forEach((docSnap) => {
-        const data = docSnap.data();
-        const id = docSnap.id;
+    const toDate = value => {
+        if (value?.toDate) return value.toDate();
+        if (value instanceof Date) return value;
+        if (Number.isFinite(value?.seconds)) return new Date(value.seconds * 1000);
+        return null;
+    };
+    const messages = querySnapshot.docs
+        .map(docSnap => ({ id: docSnap.id, data: docSnap.data() }))
+        .sort((left, right) => (toDate(right.data.createdAt)?.getTime() || 0) - (toDate(left.data.createdAt)?.getTime() || 0));
+
+    messages.forEach(({ id, data }) => {
+        const sentAt = toDate(data.createdAt);
+        const hasSentAt = sentAt && !Number.isNaN(sentAt.getTime());
+        const sentLabel = hasSentAt
+            ? `Sent ${sentAt.toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" })}`
+            : "Date unavailable";
 
         container.innerHTML += `
             <div class="message-card">
@@ -486,15 +530,17 @@ async function loadMessages() {
                 </button>
 
                 <div class="message-name">
-                    ${data.name || "No Name"}
+                    ${escapeHtml(data.name || "No Name")}
                 </div>
 
                 <div class="message-email">
-                    ${data.email || "No Email"}
+                    ${escapeHtml(data.email || "No Email")}
                 </div>
 
+                <time class="message-date"${hasSentAt ? ` datetime="${escapeHtml(sentAt.toISOString())}"` : ""}>${escapeHtml(sentLabel)}</time>
+
                 <div class="message-text">
-                    ${data.message || ""}
+                    ${escapeHtml(data.message || "")}
                 </div>
             </div>
         `;
@@ -517,10 +563,10 @@ async function loadProjects() {
             <div class="project-admin-card">
                 <div class="project-admin-content">
                     <div class="project-admin-title">
-                        ${data.title}
+                        ${escapeHtml(data.title)}
                     </div>
                     <div class="project-admin-file">
-                        ${data.fileName || "No file attached"}
+                        ${escapeHtml(data.fileName || "No file attached")}
                     </div>
                 </div>
 
@@ -551,10 +597,10 @@ async function loadCertificates() {
             <div class="certificate-admin-card">
                 <div class="certificate-admin-content">
                     <div class="certificate-admin-title">
-                        ${data.title}
+                        ${escapeHtml(data.title)}
                     </div>
                     <div class="certificate-admin-issuer">
-                        ${data.issuer || "No issuer"}
+                        ${escapeHtml(data.issuer || "No issuer")}
                     </div>
                 </div>
 
@@ -584,8 +630,8 @@ async function loadSkills() {
 
         container.innerHTML += `
             <div class="skill-admin-card">
-                <span>${data.icon || "⚡"}</span>
-                <span>${data.name}</span>
+                <span>${escapeHtml(data.icon || "⚡")}</span>
+                <span>${escapeHtml(data.name)}</span>
                 <button onclick="deleteSkill('${id}')">×</button>
             </div>
         `;
@@ -606,31 +652,18 @@ async function loadAchievements() {
         const id = docSnap.id;
 
        container.innerHTML += `
-<div class="message-card">
-
-    <button class="message-delete" onclick="deleteAchievement('${id}')">
-        Delete
-    </button>
-
-    <div class="message-name">
-        ${data.icon || "🏆"} ${data.title}
+<article class="achievement-admin-card">
+    <div class="achievement-admin-copy">
+        <div class="message-name">${escapeHtml(data.icon || "🏆")} ${escapeHtml(data.title || "Untitled achievement")}</div>
+        <div class="message-email">${escapeHtml(data.subtitle || "")}${data.year ? ` · ${escapeHtml(data.year)}` : ""}</div>
+        ${data.description ? `<p class="achievement-admin-description">${escapeHtml(data.description)}</p>` : ""}
     </div>
-
-    <div class="message-email">
-        ${data.subtitle || ""} ${data.year ? " • " + data.year : ""}
+    <div class="achievement-admin-actions">
+        <button class="edit-btn" onclick="editAchievement('${id}')">Edit</button>
+        <span class="reorder-actions">${reorderButtons("achievements", id)}</span>
+        <button class="message-delete" onclick="deleteAchievement('${id}')">Delete</button>
     </div>
-
-    <div class="message-text">
-        ${data.description || ""}
-    </div>
-
-    <button class="edit-btn" style="margin-top:10px;" 
-        onclick="editAchievement('${id}')">
-        Edit
-    </button>
-    <span class="reorder-actions">${reorderButtons("achievements", id)}</span>
-
-</div>
+</article>
 `;
     });
 }
@@ -657,27 +690,27 @@ async function loadResearch() {
     </button>
 
     <div class="message-name">
-        ${data.icon || "🔬"} ${data.title}
+        ${escapeHtml(data.icon || "🔬")} ${escapeHtml(data.title)}
     </div>
 
     <div class="message-email">
-        ${data.subtitle || ""}
+        ${escapeHtml(data.subtitle)}
     </div>
 
     <div class="message-text">
-        ${data.description || ""}
+        ${escapeHtml(data.description)}
     </div>
 
     <div style="margin-top:10px; display:flex; gap:10px; flex-wrap:wrap;">
         ${
             data.paper 
-            ? `<a href="${data.paper}" target="_blank" class="btn-small">Paper</a>` 
+            ? `<a href="${escapeHtml(safeExternalUrl(data.paper))}" target="_blank" rel="noopener noreferrer" class="btn-small">Paper</a>` 
             : ""
         }
 
         ${
             data.github 
-            ? `<a href="${data.github}" target="_blank" class="btn-small">GitHub</a>` 
+            ? `<a href="${escapeHtml(safeExternalUrl(data.github))}" target="_blank" rel="noopener noreferrer" class="btn-small">GitHub</a>` 
             : ""
         }
     </div>
@@ -700,29 +733,39 @@ async function loadResearch() {
 
 // ❌ DELETE FUNCTIONS
 window.deleteProject = async function(id) {
+    id = safeDocumentId(id);
+    if (!id) return;
     await deleteDoc(doc(db, "projects", id));
     alert("Project Deleted");
     loadProjects();
 };
 
 window.deleteCertificate = async function(id) {
+    id = safeDocumentId(id);
+    if (!id) return;
     await deleteDoc(doc(db, "certificates", id));
     alert("Certificate Deleted");
     loadCertificates();
 };
 
 window.deleteSkill = async function(id) {
+    id = safeDocumentId(id);
+    if (!id) return;
     await deleteDoc(doc(db, "skills", id));
     alert("Skill Deleted");
     loadSkills();
 };
 
 window.deleteAchievement = async function(id) {
+    id = safeDocumentId(id);
+    if (!id) return;
     await deleteDoc(doc(db, "achievements", id));
     loadAchievements();
 };
 
 window.deleteResearch = async function(id) {
+    id = safeDocumentId(id);
+    if (!id) return;
     await deleteDoc(doc(db, "research", id));
     loadResearch();
 };
@@ -732,6 +775,8 @@ window.deleteResearch = async function(id) {
 // ❌ EDIT FUNCTIONS
 
 window.editProject = async function(id) {
+    id = safeDocumentId(id);
+    if (!id) return;
 
     const docSnap = await getDoc(doc(db, "projects", id));
     if (!docSnap.exists()) return;
@@ -745,8 +790,11 @@ window.editProject = async function(id) {
     document.getElementById("projectDataset").value = data.dataset || "";
     document.getElementById("projectGithub").value = data.github || "";
     document.getElementById("projectPaper").value = data.paper || "";
-    document.getElementById("projectScreenshots").value =
-        data.screenshots ? data.screenshots.join(", ") : "";
+    const existingResults = Array.isArray(data.screenshots)
+        ? data.screenshots
+        : typeof data.screenshots === "string" ? data.screenshots.split(",") : [];
+    document.getElementById("projectResult1").value = existingResults[0] || "";
+    document.getElementById("projectResult2").value = existingResults[1] || "";
     document.getElementById("projectFileName").value = data.fileName || "";
 
     editingProjectId = id;
@@ -756,6 +804,8 @@ window.editProject = async function(id) {
 
 
 window.editCertificate = async function(id) {
+    id = safeDocumentId(id);
+    if (!id) return;
 
     const docSnap = await getDoc(doc(db, "certificates", id));
     if (!docSnap.exists()) return;
@@ -772,6 +822,8 @@ window.editCertificate = async function(id) {
 };
 
 window.editAchievement = async function(id) {
+    id = safeDocumentId(id);
+    if (!id) return;
     const docSnap = await getDoc(doc(db, "achievements", id));
     const data = docSnap.data();
 
@@ -786,6 +838,8 @@ document.getElementById("achievementYear").value = data.year || "";
 };
 
 window.editResearch = async function(id) {
+    id = safeDocumentId(id);
+    if (!id) return;
     const docSnap = await getDoc(doc(db, "research", id));
     const data = docSnap.data();
 
@@ -807,6 +861,8 @@ window.editResearch = async function(id) {
 
 
 window.deleteMessage = async function(id) {
+    id = safeDocumentId(id);
+    if (!id) return;
     await deleteDoc(doc(db, "messages", id));
     loadMessages();
 };
@@ -842,45 +898,27 @@ async function loadGalleryEvents() {
 
         const data = docSnap.data();
 
+        const id = safeDocumentId(docSnap.id);
+        if (!id) return;
         const div = document.createElement("div");
 
         div.className = "gallery-admin-card";
 
         div.innerHTML = `
 
-    <h3>${data.title}</h3>
-
-    <div class="gallery-meta">
-        📅 ${data.date} &nbsp; | &nbsp; 🔢 ${data.order || 999}
+    <div class="gallery-admin-header">
+        <div>
+            <h3>${escapeHtml(data.title || "Untitled event")}</h3>
+            <div class="gallery-meta">📅 ${escapeHtml(data.date || "No date")} · Order ${Number(data.order) || 999}</div>
+        </div>
+        <div class="gallery-admin-actions">
+            <button class="gallery-edit-btn" onclick="editGallery('${id}')">Edit</button>
+            <button class="gallery-delete-btn" onclick="deleteGallery('${id}')">Delete</button>
+        </div>
     </div>
 
-    <p class="gallery-desc">
-        ${
-            data.description.length > 120
-            ? data.description.substring(0,120) + "..."
-            : data.description
-        }
-    </p>
-
-    <div class="gallery-image-count">
-        📷 ${(data.images || []).length} Images
-    </div>
-
-    <div class="gallery-admin-actions">
-
-        <button
-            class="gallery-edit-btn"
-            onclick="editGallery('${docSnap.id}')">
-            Edit
-        </button>
-
-        <button
-            class="gallery-delete-btn"
-            onclick="deleteGallery('${docSnap.id}')">
-            Delete
-        </button>
-
-    </div>
+    ${data.description ? `<p class="gallery-desc">${escapeHtml(String(data.description))}</p>` : ""}
+    <div class="gallery-image-count">📷 ${(data.images || []).length} images</div>
 
 `;
 
@@ -921,13 +959,21 @@ if (galleryForm) {
             .split(",")
             .map(img => img.trim())
             .filter(img => img !== "");
+        const safeImages = images.map(safeGalleryPath).filter(Boolean);
+        const coverInput = coverImage;
+        const safeCover = coverInput ? safeGalleryPath(coverInput) : "";
+
+        if (!title || !date || safeImages.length !== images.length || (coverInput && !safeCover)) {
+            alert("Enter an event title and date, and use image paths inside assets/gallery/.");
+            return;
+        }
 
         const galleryData = {
             title,
             date,
             description,
-            images,
-            coverImage: coverImage || images[0] || "",
+            images: safeImages,
+            coverImage: safeCover || safeImages[0] || "",
             order,
             updatedAt: new Date()
         };
@@ -984,6 +1030,8 @@ if (galleryForm) {
 ========================= */
 
 window.deleteGallery = async function(id) {
+    id = safeDocumentId(id);
+    if (!id) return;
 
     const confirmDelete =
         confirm("Delete this gallery event?");
@@ -1000,6 +1048,8 @@ window.deleteGallery = async function(id) {
 ========================= */
 
 window.editGallery = async function(id) {
+    id = safeDocumentId(id);
+    if (!id) return;
 
     const docSnap =
         await getDoc(doc(db, "gallery", id));
