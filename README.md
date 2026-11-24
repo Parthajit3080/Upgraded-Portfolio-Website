@@ -10,9 +10,9 @@ Use a local HTTP server so JavaScript modules and Firebase work correctly. From 
 python -m http.server 8000
 ```
 
-Open `http://localhost:8000`. The home page, project pages, and gallery read public content from Firestore. The editor is at `http://localhost:8000/admin.html` and uses Firebase Authentication.
+Open `http://localhost:8000`. The home page and project pages show bundled HTML/content first, then refresh from Firestore when it is reachable. The editor is at `http://localhost:8000/admin.html` and uses Firebase Authentication.
 
-The site loads Firebase's browser SDK from `gstatic.com`, so an internet connection is required for dynamic content and the admin editor. Static page structure and local assets can still be inspected without Firebase access.
+The public pages load Firebase's browser SDK from `gstatic.com` only for the optional Firestore refresh. Their bundled content and local assets remain available without Firebase access. The admin editor still needs an internet connection.
 
 ## Firebase setup and security
 
@@ -32,6 +32,7 @@ No `.env` file is used in this browser-only setup. If the Firebase project chang
 - `js/safe-content.js` centralizes text escaping, allowed external URLs, document IDs, and asset paths.
 - `js/theme.js` keeps the theme toggle and preference consistent across pages.
 - `js/reveal.js` adds small on-scroll transitions while respecting reduced-motion preferences.
+- `js/fallback-content.js` provides local project notes for the prerendered project cards.
 - `style.css` defines the shared responsive visual system; `admin.css` contains editor-specific layout rules.
 - `favicon.svg` provides the portfolio’s PD browser-tab mark.
 - `assets/` holds the original résumé, certificates, education, project, and gallery files.
@@ -45,6 +46,8 @@ No `.env` file is used in this browser-only setup. If the Firebase project chang
 - Escaped Firestore text before rendering; restricted external links to HTTP(S), project and certificate previews to file names, gallery photos to `assets/gallery/`, and inline admin actions to safe Firestore document IDs.
 - Added independent loading, empty, and unavailable states for public database content, plus accessible contact form success/failure feedback.
 - Added labels, keyboard-operable photo previews, focus states, reduced-motion support, page titles/descriptions, social preview metadata, and a non-indexed editor page.
+- Added HTML snapshots for projects, certificates, skills, achievements, and research so crawlers and visitors get useful content before any database request; Firestore replaces the snapshot when it returns published records.
+- Added project filters, manually assigned project and toolkit categories in the admin portal, a certificate image carousel, four formal portfolio highlights, a cursor-reactive neural-network canvas, equal-width education image/text columns, and a typewriter line in the hero.
 - Removed third-party font and icon downloads; the design uses system fonts and text marks.
 - Updated the Pages workflow to publish only website files instead of the repository archive and documentation.
 

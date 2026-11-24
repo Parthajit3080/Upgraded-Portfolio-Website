@@ -10,8 +10,6 @@
     <meta property="og:description" content="Research and engineering across machine learning, deep learning, and applied AI.">
     <meta property="og:type" content="website">
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
-    <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
-
     <link rel="stylesheet" href="style.css">
 </head>
 <body class="light-mode">
@@ -28,12 +26,14 @@
 
         <nav aria-label="Primary navigation">
             <ul>
-                <li><a href="#about">About</a></li>
-                <li><a href="#education">Education</a></li>
-                <li><a href="#projects">Projects</a></li>
-                <li><a href="#certificates">Certificates</a></li>
-                <li><a href="#research">Research</a></li>
-                <li><a href="#contact">Contact</a></li>
+                <li><a href="#about"><span class="nav-index">01</span><span>About</span></a></li>
+                <li><a href="#achievements"><span class="nav-index">02</span><span>Timeline</span></a></li>
+                <li><a href="#education"><span class="nav-index">03</span><span>Background</span></a></li>
+                <li><a href="#projects"><span class="nav-index">04</span><span>Work</span></a></li>
+                <li><a href="#certificates"><span class="nav-index">05</span><span>Learning</span></a></li>
+                <li><a href="#skills"><span class="nav-index">06</span><span>Toolkit</span></a></li>
+                <li><a href="#research"><span class="nav-index">07</span><span>Inquiry</span></a></li>
+                <li><a href="#contact"><span class="nav-index">08</span><span>Contact</span></a></li>
             </ul>
         </nav>
 
@@ -55,13 +55,16 @@
         </div>
 
     </div>
+    <div id="pageProgress" class="page-progress" role="progressbar" aria-label="Page reading progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-valuetext="0% of page read">
+        <span id="pageProgressFill"></span>
+    </div>
 </header>
 
 
 <!-- ABOUT -->
 <main id="main-content">
 <section id="about" class="hero">
-    
+    <canvas class="hero-network" id="heroNetwork" aria-hidden="true"></canvas>
     <div class="container">
         
         <div class="profile-node">
@@ -77,6 +80,8 @@
                 M.Tech scholar in Computer Science at IIT Kharagpur
            </p>
 
+            <p class="hero-typed-line"><span id="heroTypedText" aria-hidden="true">Building practical machine learning systems</span><span class="typing-caret" aria-hidden="true"></span><span class="sr-only">Building practical machine learning systems.</span></p>
+
             <p class="hero-ethos">Where research meets engineering, mathematics learn to compute, and ideas evolve into technologies that shape tomorrow.</p>
             <p>I work at the intersection of machine learning research and software engineering, turning mathematical ideas into thoughtful, useful systems.</p>
 
@@ -84,16 +89,199 @@
                 <a href="#projects" class="btn">Explore selected work <span aria-hidden="true">↗</span></a>
                 <a href="assets/Resume.pdf" target="_blank" rel="noopener noreferrer" class="text-link">Read résumé <span aria-hidden="true">↗</span></a>
             </div>
+
+            <ul class="hero-highlights" aria-label="Selected experience">
+                <li><strong>06</strong><span>Industry-relevant projects</span></li>
+                <li><strong>02</strong><span>GATE qualifications</span></li>
+                <li><strong>03</strong><span>Internship experiences</span></li>
+                <li><strong>03</strong><span>Research contributions</span></li>
+            </ul>
         </div>
 
     </div>
 </section>
 
 
+<!-- TIMELINE -->
+<section id="achievements" class="achievements-section">
+    <div class="container">
+        <div class="section-heading">
+            <p class="section-kicker">01 / Milestones</p>
+            <h2>A Path of Progress<span class="highlight">.</span></h2>
+        </div>
+        <div class="milestone-list" id="milestonesContainer" aria-label="Academic and professional timeline">
+            <svg class="milestone-path" aria-hidden="true" focusable="false" preserveAspectRatio="none"><path class="milestone-path-base"></path><path class="milestone-path-progress"></path></svg>
+            <div class="timeline-lane timeline-lane-two" role="group" aria-label="2024, Data Science Internship, 2025, then GATE; left to right">
+            <span class="timeline-year-node" style="--marker-drop:0px" aria-label="2024">2024</span>
+            <article class="milestone" data-milestone="internship-2024" style="--milestone-order:0; --marker-drop:8px">
+                <span class="milestone-node" aria-hidden="true"></span>
+                <div class="milestone-summary">
+                    <p class="milestone-date"><span class="milestone-date-period">July–October</span><span class="milestone-step">01</span></p>
+                    <button class="milestone-trigger" type="button" aria-expanded="false" aria-controls="milestone-detail-internship-2024">Data Science Internship</button>
+                    <p class="milestone-organization">IDEAS · Indian Statistical Institute, Kolkata</p>
+                    <span class="milestone-badge">Internship completed</span>
+                </div>
+                <div class="milestone-details" id="milestone-detail-internship-2024" aria-hidden="true">
+                    <p class="detail-kicker">Three-month online internship</p>
+                    <h3>Research and analytics experience</h3>
+                    <p>Completed an internship with the Institute of Data Engineering, Analytics and Science (IDEAS) Foundation at the Indian Statistical Institute, Kolkata, under the guidance of Agnimitra Biswas.</p>
+                    <p class="milestone-project-title">Project: “General Perception about Rise in AI/ML Applications.”</p>
+                    <p>Work included Python training, data collection and analysis, coding, report writing, and sessions on entrepreneurship, research methods, communication, aptitude, and digital marketing.</p>
+                    <button class="timeline-certificate-link" type="button" data-preview-path="assets/certificates/IDEAS Internship Certificate.pdf" aria-label="View Data Science Internship certificate">View Certificate <span aria-hidden="true">↗</span></button>
+                </div>
+            </article>
+
+            <span class="timeline-year-node" style="--marker-drop:16px" aria-label="2025">2025</span>
+            <article class="milestone" data-milestone="gate-2025" data-link-group="gate" style="--milestone-order:1; --marker-drop:24px">
+                <span class="milestone-node" aria-hidden="true"></span>
+                <div class="milestone-summary">
+                    <p class="milestone-date"><span class="milestone-date-period">March</span><span class="milestone-step">02</span></p>
+                    <button class="milestone-trigger" type="button" aria-expanded="false" aria-controls="milestone-detail-gate-2025">GATE Qualified · CSE/IT</button>
+                    <p class="milestone-organization">Graduate Aptitude Test in Engineering</p>
+                    <span class="milestone-badge">GATE qualified</span>
+                </div>
+                <div class="milestone-details" id="milestone-detail-gate-2025" aria-hidden="true">
+                    <p class="detail-kicker">Academic qualification</p>
+                    <h3>GATE CSE/IT qualification</h3>
+                    <dl class="milestone-facts"><div><dt>Paper</dt><dd>Computer Science and Information Technology (CS)</dd></div><div><dt>Status</dt><dd>Qualified</dd></div></dl>
+                    <p class="milestone-series-note">One of two consecutive GATE CSE qualifications.</p>
+                </div>
+            </article>
+
+            </div>
+            <div class="timeline-lane timeline-lane-two timeline-lane-reverse" role="group" aria-label="Summer School, Special Mention, then 2026; right to left">
+            <article class="milestone" data-milestone="isi-summer-school" style="--milestone-order:2; --marker-drop:0px">
+                <span class="milestone-node" aria-hidden="true"></span>
+                <div class="milestone-summary">
+                    <p class="milestone-date"><span class="milestone-date-period">June–July</span><span class="milestone-step">03</span></p>
+                    <button class="milestone-trigger" type="button" aria-expanded="false" aria-controls="milestone-detail-isi-summer-school">Tenth Summer School on Computer Vision</button>
+                    <p class="milestone-organization">Electronics and Communication Sciences Unit · ISI Kolkata</p>
+                    <span class="milestone-badge">Programme completed</span>
+                </div>
+                <div class="milestone-details" id="milestone-detail-isi-summer-school" aria-hidden="true">
+                    <p class="detail-kicker">June–July 2025</p>
+                    <h3>Tenth Summer School on Computer Vision, Image Processing, Machine Learning and Vision Language Models</h3>
+                    <p>Participated in and successfully completed the assigned project in the programme organized by the Electronics and Communication Sciences Unit, Indian Statistical Institute, Kolkata.</p>
+                    <button class="timeline-certificate-link" type="button" data-preview-path="assets/certificates/ECSU Participation.pdf" aria-label="View Tenth Summer School certificate">View Certificate <span aria-hidden="true">↗</span></button>
+                </div>
+            </article>
+
+            <article class="milestone milestone-featured" data-milestone="isi-special-mention" style="--milestone-order:3; --marker-drop:14px">
+                <span class="milestone-node" aria-hidden="true"></span>
+                <div class="milestone-summary">
+                    <p class="milestone-date"><span class="milestone-date-period">July</span><span class="milestone-step">04</span></p>
+                    <button class="milestone-trigger" type="button" aria-expanded="false" aria-controls="milestone-detail-isi-special-mention">Special Mention · ISI Kolkata</button>
+                    <p class="milestone-organization">Tenth Summer School · Team project recognition</p>
+                    <span class="milestone-badge milestone-badge-gold">Special Mention</span>
+                </div>
+                <div class="milestone-details" id="milestone-detail-isi-special-mention" aria-hidden="true">
+                    <p class="detail-kicker">Team project recognition · July 2025</p>
+                    <h3>“A Comparative Analysis of Generative Adversarial Network Architectures for Image Synthesis Across Diverse Data Distributions.”</h3>
+                    <p>Received a Special Mention for team project work connected with the Tenth Summer School, organized by the Electronics and Communication Sciences Unit, Indian Statistical Institute, Kolkata.</p>
+                    <p class="milestone-meta">Recognition was awarded for the team project.</p>
+                    <button class="timeline-certificate-link timeline-certificate-link-featured" type="button" data-preview-path="assets/certificates/ECSU Special Mention.pdf" aria-label="View ISI Kolkata Special Mention certificate">View Certificate <span aria-hidden="true">↗</span></button>
+                </div>
+            </article>
+
+            <span class="timeline-year-node" style="--marker-drop:24px" aria-label="2026">2026</span>
+            </div>
+            <div class="timeline-lane timeline-lane-three" role="group" aria-label="Steps 05 to 07, left to right">
+            <article class="milestone" data-milestone="gate-2026" data-link-group="gate" style="--milestone-order:4; --marker-drop:0px">
+                <span class="milestone-node" aria-hidden="true"></span>
+                <div class="milestone-summary">
+                    <p class="milestone-date"><span class="milestone-date-period">March</span><span class="milestone-step">05</span></p>
+                    <button class="milestone-trigger" type="button" aria-expanded="false" aria-controls="milestone-detail-gate-2026">GATE Qualified · CSE/IT</button>
+                    <p class="milestone-organization">Graduate Aptitude Test in Engineering</p>
+                    <span class="milestone-badge">GATE qualified</span>
+                </div>
+                <div class="milestone-details" id="milestone-detail-gate-2026" aria-hidden="true">
+                    <p class="detail-kicker">Academic qualification</p>
+                    <h3>GATE CSE/IT qualification</h3>
+                    <dl class="milestone-facts"><div><dt>Paper</dt><dd>Computer Science and Information Technology (CS)</dd></div><div><dt>Status</dt><dd>Qualified</dd></div></dl>
+                    <p class="milestone-series-note">Qualified in two consecutive years: 2025 and 2026.</p>
+                </div>
+            </article>
+
+            <article class="milestone" data-milestone="entrance-shortlists" style="--milestone-order:5; --marker-drop:12px">
+                <span class="milestone-node" aria-hidden="true"></span>
+                <div class="milestone-summary">
+                    <p class="milestone-date"><span class="milestone-date-period">April–May</span><span class="milestone-step">06</span></p>
+                    <button class="milestone-trigger" type="button" aria-expanded="false" aria-controls="milestone-detail-entrance-shortlists">MS Entrance Shortlist</button>
+                    <p class="milestone-organization">IISc · Four IITs · ISI Kolkata</p>
+                    <span class="milestone-badge">Shortlisted</span>
+                </div>
+                <div class="milestone-details" id="milestone-detail-entrance-shortlists" aria-hidden="true">
+                    <p class="detail-kicker">April–May 2026 entrance examinations</p>
+                    <h3>Research examination shortlist</h3>
+                    <p>Shortlisted for MS (Research) entrance examinations at IISc Bangalore, IIT Madras, IIT Bombay, IIT Kanpur, IIT Delhi, and ISI Kolkata. This records shortlisting only; it does not imply admission.</p>
+                </div>
+            </article>
+
+            <article class="milestone milestone-admission" data-milestone="iit-kharagpur-admission" style="--milestone-order:6; --marker-drop:24px">
+                <span class="milestone-node" aria-hidden="true"></span>
+                <div class="milestone-summary">
+                    <p class="milestone-date"><span class="milestone-step">07</span></p>
+                    <button class="milestone-trigger" type="button" aria-expanded="false" aria-controls="milestone-detail-iit-kharagpur-admission">Admitted · M.Tech CSE</button>
+                    <p class="milestone-organization">Indian Institute of Technology Kharagpur</p>
+                    <span class="milestone-badge">Admitted · IIT Kharagpur</span>
+                </div>
+                <div class="milestone-details" id="milestone-detail-iit-kharagpur-admission" aria-hidden="true">
+                    <p class="detail-kicker">Postgraduate admission · 2026</p>
+                    <h3>Postgraduate admission</h3>
+                    <p>Secured admission to the M.Tech programme in CSE at the Indian Institute of Technology Kharagpur.</p>
+                </div>
+            </article>
+
+            </div>
+            <div class="timeline-choice-heading"><span>Two Opportunities. One Choice.</span><small>Both programmes are scheduled for Nov–Dec 2026.</small></div>
+            <div class="timeline-lane timeline-lane-two timeline-lane-reverse" role="group" aria-label="Steps 08 to 09, right to left">
+            <article class="milestone milestone-programme" data-milestone="shield-bootcamp" data-link-group="winter-programmes" style="--milestone-order:7; --marker-drop:0px">
+                <span class="milestone-node" aria-hidden="true"></span>
+                <div class="milestone-summary">
+                    <p class="milestone-date"><span class="milestone-date-period">Nov–Dec</span><span class="milestone-step">08</span></p>
+                    <button class="milestone-trigger" type="button" aria-expanded="false" aria-controls="milestone-detail-shield-bootcamp">Shortlisted · SHIELD Bootcamp</button>
+                    <p class="milestone-organization">SEAL · @IIT Kharagpur</p>
+                    <span class="milestone-badge">Shortlisted</span>
+                </div>
+                <div class="milestone-details" id="milestone-detail-shield-bootcamp" aria-hidden="true">
+                    <p class="detail-kicker">Nov–Dec 2026 · IIT Kharagpur</p>
+                    <h3>Hardware security programme</h3>
+                    <p>Shortlisted for the SHIELD Bootcamp by SEAL, IIT Kharagpur, under the ISEA Phase III Project supported by MeitY, Government of India. This records shortlisting only; it does not indicate attendance or completion.</p>
+                    <p class="milestone-choice-note">Later chose the CyStar Winter School at IIT Madras because the programme dates overlapped.</p>
+                </div>
+            </article>
+
+            <article class="milestone milestone-chosen" data-milestone="cystar-winter-school" data-link-group="winter-programmes" style="--milestone-order:8; --marker-drop:18px">
+                <span class="milestone-node" aria-hidden="true"></span>
+                <div class="milestone-summary">
+                    <p class="milestone-date"><span class="milestone-date-period">Nov–Dec</span><span class="milestone-step">09</span></p>
+                    <button class="milestone-trigger" type="button" aria-expanded="false" aria-controls="milestone-detail-cystar-winter-school">CyStar Winter School on Decentralised Trust 2026 @IIT Madras</button>
+                    <span class="milestone-badge milestone-badge-chosen">Chosen programme · Registration confirmed</span>
+                </div>
+                <div class="milestone-details" id="milestone-detail-cystar-winter-school" aria-hidden="true">
+                    <p class="detail-kicker">Chosen programme · Registration confirmed</p>
+                    <h3>Decentralised trust programme</h3>
+                    <p>Received registration confirmation for the seven-day winter school organized by the Centre for Cybersecurity, Trust and Reliability (CyStar), IIT Madras. The programme is scheduled for the future; this records confirmation, not attendance or completion.</p>
+                    <p class="milestone-choice-note">Chosen over the overlapping SHIELD Bootcamp opportunity at IIT Kharagpur.</p>
+                </div>
+            </article>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+
+
+
+
+
+
+
 <!-- EDUCATION -->
 <section id="education" class="education-section">
     <div class="container">
-        <div class="section-heading"><p class="section-kicker">01 / Background</p><h2>Where I’ve <span class="highlight">learned.</span></h2></div>
+        <div class="section-heading"><p class="section-kicker">02 / Background</p><h2>Where I’ve <span class="highlight">learned.</span></h2></div>
 
         <!-- MTECH -->
      <div class="edu-row">
@@ -101,8 +289,9 @@
         <img src="assets/edu/IITKGP.jpeg" alt="IIT Kharagpur">
     </div>
     <div class="edu-content">
+        <p class="edu-date">2026 — Present</p>
         <div class="edu-college">Indian Institute of Technology, Kharagpur</div>
-    <div class="edu-degree">M.Tech in Computer Science & Engineering</div>
+    <div class="edu-degree">M.Tech in CSE</div>
         <div class="edu-desc">
             Pursuing my M.Tech in CSE at IIT Kharagpur, I’m diving deeper into AI and intelligent systems — from statistical ML and algorithms to the mathematics and logic behind them. I’m exploring how mathematics, logic, and computation come together to turn ideas into real-world projects and build systems that go beyond the classroom.
 
@@ -116,6 +305,7 @@
         <img src="assets/edu/TMSL.jpg" alt="Techno Main Salt Lake">
     </div>
     <div class="edu-content">
+        <p class="edu-date">2022 — 2026</p>
         <div class="edu-college">Techno Main Salt Lake, West Bengal</div>
     <div class="edu-degree">B.Tech in Computer Science & Engineering</div>
         <div class="edu-desc">
@@ -132,6 +322,7 @@
         <img src="assets/edu/CMS.jpg" alt="Central Modern School">
     </div>
     <div class="edu-content">
+        <p class="edu-date">2008 — 2026</p>
         <div class="edu-college">Central Modern School</div>
     <div class="edu-degree">Higher Secondary & Secondary Education</div>
         <div class="edu-desc">
@@ -146,7 +337,7 @@
 
 
 
-<!-- PROJECTS (Dynamic) -->
+<!-- PROJECTS (Prerendered fallback, refreshed from Firestore when available) -->
 <section id="projects" class="projects-section">
     <div class="container">
         <div class="projects-header">
@@ -154,9 +345,42 @@
             <button id="toggleViewBtn" class="see-all-btn">See All</button>
         </div>
 
+        <div class="filter-tabs" data-filter-group="projects" aria-label="Filter projects">
+            <button type="button" data-filter="all" aria-pressed="true">All</button>
+            <button type="button" data-filter="Applied AI" aria-pressed="false">Applied AI</button>
+            <button type="button" data-filter="Computer Vision" aria-pressed="false">Computer Vision</button>
+            <button type="button" data-filter="Systems" aria-pressed="false">Systems</button>
+        </div>
+
         <div class="projects-carousel-wrapper" id="projectsCarousel">
             <button class="arrow project-arrow" id="projectPrev" type="button" aria-label="Scroll projects left">&#8592;</button>
-            <div class="project-grid" id="projectsContainer"><p class="content-state" role="status">Loading projects…</p></div>
+            <div class="project-grid" id="projectsContainer">
+                <article class="project-item" data-category="Computer Vision">
+                    <div class="project-preview project-preview-video"><video class="project-preview-media project-video" muted loop playsinline preload="none" poster="assets/projects/AgrIVision Preview.jpg" data-fallback-src="assets/projects/AgrIVision Preview.jpg" data-preview-title="AgrIVision" aria-label="Video preview of AgrIVision"><source src="assets/projects/AgriVision.mp4" type="video/mp4"></video><span class="preview-video-badge" aria-hidden="true">VIDEO</span></div>
+                    <p class="section-kicker">Computer Vision</p><h3>AgrIVision</h3><p>A computer vision project exploring visual analysis for agriculture.</p>
+                    <a class="details-btn" href="project.html?id=agrivision">Read project notes <span aria-hidden="true">↗</span></a>
+                </article>
+                <article class="project-item" data-category="Applied AI">
+                    <div class="project-preview"><img src="assets/projects/GAN preview.png" alt="Generated image preview for a GAN project" loading="lazy"></div>
+                    <p class="section-kicker">Applied AI</p><h3>GAN Architecture Comparison</h3><p>A comparative analysis of GAN architectures for image synthesis.</p>
+                    <a class="details-btn" href="project.html?id=gan">Read project notes <span aria-hidden="true">↗</span></a>
+                </article>
+                <article class="project-item" data-category="Applied AI">
+                    <div class="project-preview"><img src="assets/projects/movie preview.png" alt="Movie recommendation project preview" loading="lazy"></div>
+                    <p class="section-kicker">Applied AI</p><h3>Movie Recommendation System</h3><p>A recommendation systems project focused on movie discovery.</p>
+                    <a class="details-btn" href="project.html?id=movie-recommendation">Read project notes <span aria-hidden="true">↗</span></a>
+                </article>
+                <article class="project-item" data-category="Systems">
+                    <div class="project-preview project-preview-video"><video class="project-preview-media project-video" muted loop playsinline preload="none" poster="assets/projects/Terminal.jpg" data-fallback-src="assets/projects/Terminal.jpg" data-preview-title="Terminal" aria-label="Video preview of Terminal"><source src="assets/projects/Terminal.mp4" type="video/mp4"></video><span class="preview-video-badge" aria-hidden="true">VIDEO</span></div>
+                    <p class="section-kicker">Systems</p><h3>Terminal</h3><p>A command-line project exploring core systems concepts.</p>
+                    <a class="details-btn" href="project.html?id=terminal">Read project notes <span aria-hidden="true">↗</span></a>
+                </article>
+                <article class="project-item" data-category="Systems">
+                    <div class="project-preview project-preview-video"><video class="project-preview-media project-video" muted loop playsinline preload="none" poster="assets/projects/Weather Orion preview.png" data-fallback-src="assets/projects/Weather Orion preview.png" data-preview-title="Weather Orion" aria-label="Video preview of Weather Orion"><source src="assets/projects/Weather Orion.mp4" type="video/mp4"></video><span class="preview-video-badge" aria-hidden="true">VIDEO</span></div>
+                    <p class="section-kicker">Systems</p><h3>Weather Orion</h3><p>A weather-focused application with a data-driven interface.</p>
+                    <a class="details-btn" href="project.html?id=weather-orion">Read project notes <span aria-hidden="true">↗</span></a>
+                </article>
+            </div>
             <button class="arrow project-arrow" id="projectNext" type="button" aria-label="Scroll projects right">&#8594;</button>
         </div>
     </div>
@@ -166,19 +390,26 @@
 
 
     
-<!-- CERTIFICATES (Dynamic) -->
+<!-- CERTIFICATES (Prerendered fallback, refreshed from Firestore when available) -->
 <section id="certificates" class="certificates-section">
     <div class="container">
 
         <div class="cert-header">
-            <div class="section-heading"><p class="section-kicker">03 / Learning</p><h2>Courses & <span class="highlight">certificates.</span></h2></div>
+            <div class="section-heading"><p class="section-kicker">03 / Learning</p><h2>Certificates &amp; Achievements <span aria-hidden="true">🏆</span></h2></div>
             <button id="certToggleBtn" class="see-all-btn">See All</button>
+            <p class="cert-subtitle">Selected certifications and academic achievements.</p>
         </div>
 
         <div class="cert-carousel-wrapper" id="certCarousel">
             <button class="arrow left" id="certPrev" type="button" aria-label="Scroll certificates left">&#8592;</button>
 
-            <div class="cert-carousel-track" id="certificatesContainer"><p class="content-state" role="status">Loading certificates…</p></div>
+            <div class="cert-carousel-track" id="certificatesContainer">
+                <article class="certificate-item"><div class="certificate-art"><iframe class="certificate-document" src="assets/certificates/ECSU Participation.pdf#toolbar=0&amp;navpanes=0&amp;scrollbar=0&amp;view=FitH" title="Tenth Summer School on Computer Vision certificate" loading="lazy" tabindex="-1" aria-hidden="true"></iframe><button class="certificate-open" type="button" data-preview-path="assets/certificates/ECSU Participation.pdf" aria-label="Preview Tenth Summer School on Computer Vision certificate"><span>Preview certificate ↗</span></button></div><h3>Tenth Summer School on Computer Vision</h3><p>Indian Statistical Institute, Kolkata · 2025</p></article>
+                <article class="certificate-item"><div class="certificate-art"><iframe class="certificate-document" src="assets/certificates/ECSU Special Mention.pdf#toolbar=0&amp;navpanes=0&amp;scrollbar=0&amp;view=FitH" title="GAN Architecture Special Mention certificate" loading="lazy" tabindex="-1" aria-hidden="true"></iframe><button class="certificate-open" type="button" data-preview-path="assets/certificates/ECSU Special Mention.pdf" aria-label="Preview GAN Architecture Special Mention certificate"><span>Preview certificate ↗</span></button></div><h3>GAN Architecture Special Mention</h3><p>Comparative GAN analysis · ISI Kolkata · 2025</p></article>
+                <article class="certificate-item"><div class="certificate-art"><iframe class="certificate-document" src="assets/certificates/IDEAS Internship Certificate.pdf#toolbar=0&amp;navpanes=0&amp;scrollbar=0&amp;view=FitH" title="Data Science Internship certificate" loading="lazy" tabindex="-1" aria-hidden="true"></iframe><button class="certificate-open" type="button" data-preview-path="assets/certificates/IDEAS Internship Certificate.pdf" aria-label="Preview Data Science Internship certificate"><span>Preview certificate ↗</span></button></div><h3>Data Science Internship</h3><p>IDEAS-TIH, ISI Kolkata · 3 months · ~120 hours</p></article>
+                <article class="certificate-item"><div class="certificate-art"><iframe class="certificate-document" src="assets/certificates/NPTEL.pdf#toolbar=0&amp;navpanes=0&amp;scrollbar=0&amp;view=FitH" title="Introduction to Machine Learning certificate" loading="lazy" tabindex="-1" aria-hidden="true"></iframe><button class="certificate-open" type="button" data-preview-path="assets/certificates/NPTEL.pdf" aria-label="Preview Introduction to Machine Learning certificate"><span>Preview certificate ↗</span></button></div><h3>Introduction to Machine Learning</h3><p>NPTEL Elite · Jul–Oct 2025 · 69%</p></article>
+                <article class="certificate-item"><div class="certificate-art"><iframe class="certificate-document" src="assets/certificates/Ramanujan.pdf#toolbar=0&amp;navpanes=0&amp;scrollbar=0&amp;view=FitH" title="Ramanujan Memorial Math Talent Search certificate" loading="lazy" tabindex="-1" aria-hidden="true"></iframe><button class="certificate-open" type="button" data-preview-path="assets/certificates/Ramanujan.pdf" aria-label="Preview Ramanujan Memorial Math Talent Search certificate"><span>Preview certificate ↗</span></button></div><h3>Ramanujan Memorial Math Talent Search</h3><p>Class IX · 2018 · Rank 3 · Grade A</p></article>
+            </div>
 
             <button class="arrow right" id="certNext" type="button" aria-label="Scroll certificates right">&#8594;</button>
         </div>
@@ -193,26 +424,14 @@
 <section id="skills" class="skills-section">
     <div class="container">
         <div class="section-heading"><p class="section-kicker">04 / Toolkit</p><h2>Tools for the <span class="highlight">work.</span></h2></div>
-        <div id="skillsContainer" class="skills-grid"><p class="content-state" role="status">Loading skills…</p></div>
-    </div>
-</section>
-
-
-
-
-
-
-<!-- ACHIEVEMENTS -->
-<section id="achievements" class="achievements-section">
-    <div class="container">
-        <div class="achievements-header">
-            <div class="section-heading"><p class="section-kicker">05 / Milestones</p><h2>Selected <span class="highlight">recognition.</span></h2></div>
-            <button id="achievementsToggleBtn" class="see-all-btn" type="button">See All</button>
+        <div id="skillsContainer" class="skills-grid">
+            <section class="skill-group"><h3>Programming</h3><div class="skill-group-items"><div class="skill-pill"><span aria-hidden="true">⌘</span><span>Python</span></div></div></section>
+            <section class="skill-group"><h3>AI & Machine Learning</h3><div class="skill-group-items"><div class="skill-pill"><span aria-hidden="true">⌘</span><span>PyTorch</span></div><div class="skill-pill"><span aria-hidden="true">⌘</span><span>Machine Learning</span></div><div class="skill-pill"><span aria-hidden="true">⌘</span><span>Computer Vision</span></div><div class="skill-pill"><span aria-hidden="true">⌘</span><span>Generative Models</span></div></div></section>
+            <section class="skill-group"><h3>Databases &amp; Cloud</h3><div class="skill-group-items"><div class="skill-pill"><span aria-hidden="true">⌘</span><span>Data Structures & Algorithms</span></div><div class="skill-pill"><span aria-hidden="true">⌘</span><span>Operating Systems</span></div><div class="skill-pill"><span aria-hidden="true">⌘</span><span>Computer Networks</span></div><div class="skill-pill"><span aria-hidden="true">⌘</span><span>DBMS</span></div></div></section>
         </div>
-
-       <div class="achievements-grid" id="achievementsContainer"><p class="content-state" role="status">Loading achievements…</p></div>
     </div>
 </section>
+
 
 
 
@@ -222,7 +441,11 @@
 <section id="research" class="research-section">
     <div class="container">
         <div class="section-heading"><p class="section-kicker">06 / Inquiry</p><h2>Questions worth <span class="highlight">pursuing.</span></h2></div>
-        <div class="research-grid" id="researchContainer"><p class="content-state" role="status">Loading research…</p></div>
+        <div class="research-grid" id="researchContainer">
+            <article class="research-card"><div class="research-icon" aria-hidden="true">📄</div><h3>Putting Fair Division on the Map</h3><p class="research-main">Seminar at IIT Kharagpur</p><p class="research-sub">This report explores how mathematical models can represent real-world fair-division problems. It examines utility matrices, valuation distances, and two-dimensional mapping techniques to analyze allocation instances. The study focuses on Multidimensional Scaling (MDS) and explicit maps based on singular values, using real-world and synthetic datasets to explore patterns in resource allocation.</p></article>
+            <article class="research-card"><div class="research-icon" aria-hidden="true">🌐</div><h3>An Ensemble Learning Framework for Hybrid Movie Recommendation Systems Using Transformers</h3><p class="research-main">B.Tech Final Year Research Project</p><p class="research-sub">Developed a research-oriented hybrid recommender combining DistilBERT, Neural Collaborative Filtering (NCF), SVD, and LightGBM to address recommendation accuracy, cold-start, and data-sparsity challenges. Evaluated the approach with RMSE, Precision, Recall, and F1-Score against individual recommendation models.</p></article>
+            <article class="research-card"><div class="research-icon" aria-hidden="true">🔬</div><h3>Comparative Analysis of Generative Adversarial Network Architectures</h3><p class="research-main">ISI Summer School</p><p class="research-sub">Conducted a comparative study of Vanilla GAN, WGAN, and WGAN-GP during the ISI Kolkata Summer School. Evaluated the architectures on benchmark image datasets, examining training stability, convergence, mode collapse, gradient penalties, and image-generation quality.</p></article>
+        </div>
     </div>
 </section>
 

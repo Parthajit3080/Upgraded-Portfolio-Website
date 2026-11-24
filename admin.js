@@ -26,6 +26,7 @@ const projectResultExtensions = new Set(["jpg", "jpeg", "png", "webp", "gif", "m
    🔹 EDITING STATE
 ========================= */
 let editingProjectId = null;
+let editingSkillId = null;
 let editingCertificateId = null;
 let editingAchievementId = null;
 let editingResearchId = null;
@@ -183,13 +184,16 @@ document.getElementById("addProjectBtn").addEventListener("click", async () => {
 
     const title = document.getElementById("projectTitle").value.trim();
     const shortDesc = document.getElementById("shortDesc").value.trim();
+    const category = document.getElementById("projectCategory").value;
     const description = document.getElementById("projectFullDesc").value.trim();
     const techStack = document.getElementById("projectTechStack").value.trim();
     const dataset = document.getElementById("projectDataset").value.trim();
     const githubInput = document.getElementById("projectGithub").value.trim();
+    const liveWebsiteInput = document.getElementById("projectLiveWebsite").value.trim();
     const paperInput = document.getElementById("projectPaper").value.trim();
     const github = githubInput ? safeExternalUrl(githubInput) : "";
     const paper = paperInput ? safeExternalUrl(paperInput) : "";
+    const liveWebsite = liveWebsiteInput ? safeExternalUrl(liveWebsiteInput) : "";
     const resultInputs = [
         document.getElementById("projectResult1").value.trim(),
         document.getElementById("projectResult2").value.trim()
@@ -198,11 +202,11 @@ document.getElementById("addProjectBtn").addEventListener("click", async () => {
     const fileInput = document.getElementById("projectFileName").value.trim();
     const fileName = fileInput ? safeAssetFilename(fileInput) : "";
 
-    if (!title || !description) {
-        alert("Title and Description are required");
+    if (!title || !description || !category) {
+        alert("Title, description, and a project category are required.");
         return;
     }
-    if ((githubInput && !github) || (paperInput && !paper)) {
+    if ((githubInput && !github) || (liveWebsiteInput && !liveWebsite) || (paperInput && !paper)) {
         alert("Use HTTP(S) links for project URLs.");
         return;
     }
@@ -229,10 +233,12 @@ document.getElementById("addProjectBtn").addEventListener("click", async () => {
             await updateDoc(doc(db, "projects", editingProjectId), {
                 title,
                 shortDesc,
+                category: category || null,
                 description,
                 techStack: techStack || null,
                 dataset: dataset || null,
                 github: github || null,
+                liveWebsite: liveWebsite || null,
                 paper: paper || null,
                 screenshots,
                 fileName: fileName || null,
@@ -250,10 +256,12 @@ document.getElementById("addProjectBtn").addEventListener("click", async () => {
         await addDoc(collection(db, "projects"), {
             title,
             shortDesc,
+            category: category || null,
             description,
             techStack: techStack || null,
             dataset: dataset || null,
             github: github || null,
+            liveWebsite: liveWebsite || null,
             paper: paper || null,
             screenshots,
             fileName: fileName || null,
@@ -266,10 +274,12 @@ document.getElementById("addProjectBtn").addEventListener("click", async () => {
         // Clear form
         document.getElementById("projectTitle").value = "";
         document.getElementById("shortDesc").value = "";
+        document.getElementById("projectCategory").value = "";
         document.getElementById("projectFullDesc").value = "";
         document.getElementById("projectTechStack").value = "";
         document.getElementById("projectDataset").value = "";
         document.getElementById("projectGithub").value = "";
+        document.getElementById("projectLiveWebsite").value = "";
         document.getElementById("projectPaper").value = "";
         document.getElementById("projectResult1").value = "";
         document.getElementById("projectResult2").value = "";
@@ -336,21 +346,37 @@ document.getElementById("addCertBtn").addEventListener("click", async () => {
     document.getElementById("addSkillBtn").addEventListener("click", async () => {
         const name = document.getElementById("skillName").value.trim();
         const icon = document.getElementById("skillIcon").value.trim();
+        const category = document.getElementById("skillCategory").value;
 
-        if (!name) {
-            alert("Enter skill name");
+        if (!name || !category) {
+            alert("Enter a skill name and choose a category.");
             return;
         }
 
-        await addDoc(collection(db, "skills"), {
-            name,
-            icon,
-            createdAt: new Date()
-        });
+        const wasEditing = Boolean(editingSkillId);
+        if (wasEditing) {
+            await updateDoc(doc(db, "skills", editingSkillId), {
+                name,
+                icon: icon || null,
+                category,
+                updatedAt: new Date()
+            });
+            editingSkillId = null;
+            document.getElementById("addSkillBtn").textContent = "Add Skill";
+        } else {
+            await addDoc(collection(db, "skills"), {
+                name,
+                icon: icon || null,
+                category,
+                order: await nextDisplayOrder("skills"),
+                createdAt: new Date()
+            });
+        }
 
-        alert("Skill Added");
+        alert(wasEditing ? "Skill Updated" : "Skill Saved");
         document.getElementById("skillName").value = "";
         document.getElementById("skillIcon").value = "";
+        document.getElementById("skillCategory").value = "";
         loadSkills();
     });
 
@@ -568,6 +594,12 @@ async function loadProjects() {
                     <div class="project-admin-file">
                         ${escapeHtml(data.fileName || "No file attached")}
                     </div>
+                    <div class="project-admin-file">
+                        Category: ${escapeHtml(data.category || "Category not set")}
+                    </div>
+                    ${safeExternalUrl(data.liveWebsite || data.website)
+                        ? `<a class="project-admin-website" href="${escapeHtml(safeExternalUrl(data.liveWebsite || data.website))}" target="_blank" rel="noopener noreferrer">View live site ↗</a>`
+                        : `<div class="project-admin-file">No live website set</div>`}
                 </div>
 
                 <div class="project-admin-actions">
@@ -627,12 +659,16 @@ async function loadSkills() {
     sortByDisplayOrder(querySnapshot.docs).forEach((docSnap) => {
         const data = docSnap.data();
         const id = docSnap.id;
+        const skillCategory = data.category === "Computer Science Foundations"
+            ? "Databases & Cloud"
+            : data.category || "Uncategorized";
 
         container.innerHTML += `
             <div class="skill-admin-card">
                 <span>${escapeHtml(data.icon || "⚡")}</span>
-                <span>${escapeHtml(data.name)}</span>
-                <button onclick="deleteSkill('${id}')">×</button>
+                <span class="skill-admin-details"><strong>${escapeHtml(data.name)}</strong><small>${escapeHtml(skillCategory)}</small></span>
+                <button class="edit-btn" type="button" onclick="editSkill('${id}')">Edit</button>
+                <button class="delete-btn" type="button" aria-label="Delete ${escapeHtml(data.name || "skill")}" onclick="deleteSkill('${id}')">×</button>
             </div>
         `;
     });
@@ -752,6 +788,13 @@ window.deleteSkill = async function(id) {
     id = safeDocumentId(id);
     if (!id) return;
     await deleteDoc(doc(db, "skills", id));
+    if (editingSkillId === id) {
+        editingSkillId = null;
+        document.getElementById("skillName").value = "";
+        document.getElementById("skillIcon").value = "";
+        document.getElementById("skillCategory").value = "";
+        document.getElementById("addSkillBtn").textContent = "Add Skill";
+    }
     alert("Skill Deleted");
     loadSkills();
 };
@@ -774,6 +817,22 @@ window.deleteResearch = async function(id) {
 
 // ❌ EDIT FUNCTIONS
 
+window.editSkill = async function(id) {
+    id = safeDocumentId(id);
+    if (!id) return;
+    const docSnap = await getDoc(doc(db, "skills", id));
+    if (!docSnap.exists()) return;
+    const data = docSnap.data();
+    document.getElementById("skillName").value = data.name || "";
+    document.getElementById("skillIcon").value = data.icon || "";
+    document.getElementById("skillCategory").value = data.category === "Computer Science Foundations"
+        ? "Databases & Cloud"
+        : data.category || "";
+    editingSkillId = id;
+    document.getElementById("addSkillBtn").textContent = "Update Skill";
+    document.getElementById("skillName").focus();
+};
+
 window.editProject = async function(id) {
     id = safeDocumentId(id);
     if (!id) return;
@@ -785,10 +844,12 @@ window.editProject = async function(id) {
 
     document.getElementById("projectTitle").value = data.title || "";
     document.getElementById("shortDesc").value = data.shortDesc || "";
+    document.getElementById("projectCategory").value = data.category || "";
     document.getElementById("projectFullDesc").value = data.description || "";
     document.getElementById("projectTechStack").value = data.techStack || "";
     document.getElementById("projectDataset").value = data.dataset || "";
     document.getElementById("projectGithub").value = data.github || "";
+    document.getElementById("projectLiveWebsite").value = data.liveWebsite || data.website || "";
     document.getElementById("projectPaper").value = data.paper || "";
     const existingResults = Array.isArray(data.screenshots)
         ? data.screenshots

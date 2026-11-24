@@ -8,6 +8,7 @@
     min-height: 40px; padding: 8px 13px; border: 1px solid var(--line); border-radius: 2px; background: var(--surface); color: var(--ink); font-size: .8rem; font-weight: 700; cursor: pointer;
 }
 #loginBtn, .admin-btn { border-color: var(--accent); background: var(--accent); color: white; }
+.dark-mode #loginBtn, .dark-mode .admin-btn { color: var(--paper); }
 #loginBtn:hover, .admin-btn:hover { background: var(--accent-dark); }
 #adminStatus { min-height: 1.5em; color: var(--accent); font-size: .85rem; }
 #adminPanel > h1 { display: inline-block; margin-right: 20px; font-size: clamp(2.6rem, 5vw, 4rem); }
@@ -23,10 +24,12 @@
 .admin-section.is-active { display: block; }
 .admin-card { min-width: 0; padding: clamp(20px, 4vw, 34px); border: 1px solid var(--line); background: var(--surface); }
 .admin-card > .section-primary { margin: 0 0 22px; font-size: 2rem; }
+.admin-help { margin: -12px 0 20px; color: var(--muted); font-size: .82rem; }
 .admin-card .section-secondary { margin: 35px 0 15px; padding-top: 21px; border-top: 1px solid var(--line); font-size: 1.4rem; }
 .admin-card small { color: var(--muted); font-family: var(--sans); font-size: .68rem; font-weight: 500; }
 .project-form, .cert-form, .skill-form, .admin-grid, .gallery-form { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
 .project-form textarea, .admin-grid textarea, .gallery-form textarea { grid-column: 1 / -1; }
+.project-form select, .cert-form select, .skill-form select { width: 100%; min-height: 44px; padding: 10px 12px; border: 1px solid var(--line); border-radius: 2px; background: var(--surface); color: var(--ink); }
 .project-preview-hint { grid-column: 1 / -1; margin-top: -8px; }
 .project-form #projectFullDesc, #galleryDescription, #galleryImages { min-height: 125px; }
 .admin-btn { justify-self: start; }
@@ -34,9 +37,14 @@
 .project-admin-title, .certificate-admin-title, .message-name { font-weight: 750; }
 .project-admin-file, .certificate-admin-issuer, .message-email, .gallery-meta, .gallery-image-count { margin-top: 3px; color: var(--muted); font-size: .78rem; }
 .project-admin-actions, .certificate-admin-actions, .gallery-admin-actions { display: flex; flex-wrap: wrap; gap: 6px; }
-.edit-btn, .gallery-edit-btn { color: var(--green); }
+.edit-btn, .gallery-edit-btn { color: var(--muted); }
 .delete-btn, .message-delete, .gallery-delete-btn { color: var(--accent); }
 .skill-admin-card { display: inline-flex; align-items: center; gap: 9px; margin: 5px; padding: 8px 10px; border: 1px solid var(--line); }
+.skill-admin-details { display: grid; gap: 2px; }
+.skill-admin-details small { color: var(--muted); font-size: .67rem; }
+.skill-admin-card .edit-btn, .skill-admin-card .delete-btn { min-height: 30px; padding: 4px 7px; border: 1px solid var(--line); background: transparent; cursor: pointer; }
+.skill-admin-card .edit-btn { color: var(--muted); }
+.skill-admin-card .delete-btn { color: var(--accent); }
 .skill-admin-card button { border: 0; background: transparent; color: var(--accent); cursor: pointer; }
 .emoji-picker { display: flex; flex-wrap: wrap; grid-column: 1 / -1; gap: 5px; }
 .emoji-picker span { display: grid; width: 36px; height: 36px; place-items: center; border: 1px solid var(--line); cursor: pointer; }
@@ -46,7 +54,7 @@
 .message-card .message-delete { position: absolute; top: 10px; right: 10px; min-height: 32px; padding: 5px 9px; }
 .message-name { padding-right: 72px; }
 .message-email { padding-right: 72px; }
-.message-date { display: block; margin-top: 6px; color: var(--green); font-size: .75rem; font-weight: 700; }
+.message-date { display: block; margin-top: 6px; color: var(--muted); font-size: .75rem; font-weight: 700; }
 .message-text { margin: 10px 0 0; color: var(--muted); font-size: .96rem; line-height: 1.65; white-space: pre-wrap; overflow-wrap: anywhere; }
 #adminAchievementsContainer { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
 .achievement-admin-card { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 14px; margin: 0; padding: 11px 12px; border: 1px solid var(--line); background: var(--paper); }

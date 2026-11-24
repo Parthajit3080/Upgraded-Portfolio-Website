@@ -61,11 +61,18 @@
             <div class="admin-card project-section admin-section" data-admin-section="projects">
 
                 <h3 class="section-primary">Projects</h3>
+                <p class="admin-help">Choose the classification used by the public project filters for each project.</p>
 
                 <!-- ADD PROJECT -->
                 <div class="project-form">
                     <input type="text" id="projectTitle" placeholder="Project Title" aria-label="Project Title">
                     <input type="text" id="shortDesc" placeholder="Short Description (for preview)" aria-label="Short Description (for preview)">
+                    <select id="projectCategory" aria-label="Project category" required>
+                        <option value="">Choose a project category</option>
+                        <option value="Applied AI">Applied AI</option>
+                        <option value="Computer Vision">Computer Vision</option>
+                        <option value="Systems">Systems</option>
+                    </select>
                     
                     <textarea id="projectFullDesc" placeholder="Full Description&#10;&#10;Use blank lines for paragraphs. Use - for bullet points, or 1. for numbered points." aria-label="Full Description&#10;&#10;Use blank lines for paragraphs. Use - for bullet points, or 1. for numbered points."></textarea>
 
@@ -73,6 +80,7 @@
                     <input type="text" id="projectDataset" placeholder="Dataset (optional)" aria-label="Dataset (optional)">
 
                     <input type="text" id="projectGithub" placeholder="GitHub Link" aria-label="GitHub Link">
+                    <input type="url" id="projectLiveWebsite" placeholder="Live Website URL (optional)" aria-label="Live Website URL (optional)">
                     <input type="text" id="projectPaper" placeholder="Research Paper Link (optional)" aria-label="Research Paper Link (optional)">
 
                     <input type="text" id="projectResult1" placeholder="Result 1 — image or video filename" aria-label="Result 1 image or video filename">
@@ -121,11 +129,18 @@
            <div class="admin-card skill-section admin-section" data-admin-section="skills">
 
                 <h3 class="section-primary">Skills</h3>
+                <p class="admin-help">Choose the group where each tool should appear in the public toolkit.</p>
 
                 <!-- ADD SKILL -->
                 <div class="skill-form">
                     <input type="text" id="skillName" placeholder="Skill Name" aria-label="Skill Name">
                     <input type="text" id="skillIcon" placeholder="Icon (emoji like 🚀)" aria-label="Icon (emoji like 🚀)">
+                    <select id="skillCategory" aria-label="Skill category" required>
+                        <option value="">Choose a skill category</option>
+                        <option value="Programming">Programming</option>
+                        <option value="AI & Machine Learning">AI &amp; Machine Learning</option>
+                        <option value="Databases & Cloud">Databases &amp; Cloud</option>
+                    </select>
                     <button id="addSkillBtn" class="admin-btn">Add Skill</button>
                 </div>
 

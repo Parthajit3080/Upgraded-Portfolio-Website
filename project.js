@@ -1,6 +1,5 @@
-import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-import { db } from "./js/firebase.js";
 import { escapeHtml, safeExternalUrl, safeAssetFilename, safeDocumentId } from "./js/safe-content.js";
+import { FALLBACK_PROJECT_BY_ID } from "./js/fallback-content.js";
 import { setupThemeToggle } from "./js/theme.js";
 import { setupReveal } from "./js/reveal.js";
 
@@ -119,6 +118,42 @@ function renderDescription(description) {
     return output.join("");
 }
 
+function renderProjectDetails(data) {
+    const title = String(data.title || "Project notes");
+    document.title = `${title} — Parthajit Das`;
+    const rawResults = Array.isArray(data.screenshots)
+        ? data.screenshots
+        : typeof data.screenshots === "string" ? data.screenshots.split(",") : [];
+    const screenshots = rawResults.slice(0, 2).map(value => {
+        const filename = safeAssetFilename(value);
+        if (!filename) return "";
+        const extension = filename.split(".").pop().toLowerCase();
+        return resultImageExtensions.has(extension) || resultVideoTypes[extension] ? filename : "";
+    });
+    const resultMedia = screenshots.filter(Boolean);
+    const hasResults = resultMedia.length > 0;
+    const github = safeExternalUrl(data.github);
+    const paper = safeExternalUrl(data.paper);
+    const liveWebsite = safeExternalUrl(data.liveWebsite || data.website);
+
+    container.innerHTML = `
+        <p class="section-kicker">Project notes</p>
+        <h1>${escapeHtml(title)}</h1>
+        ${data.description ? `<section class="project-section"><h2>Overview</h2><div class="project-description">${renderDescription(data.description)}</div></section>` : ""}
+        ${(data.techStack || data.dataset) ? `<div class="meta-grid">
+            ${data.techStack ? `<section class="project-section"><h2>Tools & methods</h2><p>${escapeHtml(data.techStack)}</p></section>` : ""}
+            ${data.dataset ? `<section class="project-section"><h2>Data</h2><p>${escapeHtml(data.dataset)}</p></section>` : ""}
+        </div>` : ""}
+        ${(liveWebsite || github || paper) ? `<div class="button-row">
+            ${liveWebsite ? `<a href="${escapeHtml(liveWebsite)}" rel="noopener noreferrer" target="_blank" class="btn project-live-detail-link"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9"></circle><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18M5 7.5h14M5 16.5h14"></path></svg>View live website <span aria-hidden="true">↗</span></a>` : ""}
+            ${github ? `<a href="${escapeHtml(github)}" rel="noopener noreferrer" target="_blank" class="btn">Source code ↗</a>` : ""}
+            ${paper ? `<a href="${escapeHtml(paper)}" rel="noopener noreferrer" target="_blank" class="text-link">Research paper ↗</a>` : ""}
+        </div>` : ""}
+        ${hasResults ? `<section class="project-section"><h2>Results</h2><div class="result-gallery">${resultMedia.map((filename, index) => renderResultMedia(filename, title, index)).join("")}</div></section>` : ""}`;
+    setupResultVideoPreviews(container);
+    setupReveal(container);
+}
+
 async function loadProject() {
     const id = safeDocumentId(new URLSearchParams(location.search).get("id"));
     if (!id) {
@@ -126,48 +161,27 @@ async function loadProject() {
         return;
     }
 
+    let data = FALLBACK_PROJECT_BY_ID[id] || null;
+    if (data) renderProjectDetails(data);
     try {
+        const [{ doc, getDoc }, { db }] = await Promise.all([
+            import("https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js"),
+            import("./js/firebase.js")
+        ]);
         const snapshot = await getDoc(doc(db, "projects", id));
-        if (!snapshot.exists()) {
+        if (snapshot.exists()) {
+            data = snapshot.data();
+            renderProjectDetails(data);
+        } else if (!data) {
             container.innerHTML = '<section class="project-section"><h2>Project not found</h2><p>This project may have moved or been removed.</p></section>';
-            return;
         }
-
-        const data = snapshot.data();
-        const title = String(data.title || "Project notes");
-        document.title = `${title} — Parthajit Das`;
-        const rawResults = Array.isArray(data.screenshots)
-            ? data.screenshots
-            : typeof data.screenshots === "string" ? data.screenshots.split(",") : [];
-        const screenshots = rawResults.slice(0, 2).map(value => {
-            const filename = safeAssetFilename(value);
-            if (!filename) return "";
-            const extension = filename.split(".").pop().toLowerCase();
-            return resultImageExtensions.has(extension) || resultVideoTypes[extension] ? filename : "";
-        });
-        const resultMedia = screenshots.filter(Boolean);
-        const hasResults = resultMedia.length > 0;
-        const github = safeExternalUrl(data.github);
-        const paper = safeExternalUrl(data.paper);
-
-        container.innerHTML = `
-            <p class="section-kicker">Project notes</p>
-            <h1>${escapeHtml(title)}</h1>
-            ${data.description ? `<section class="project-section"><h2>Overview</h2><div class="project-description">${renderDescription(data.description)}</div></section>` : ""}
-            ${(data.techStack || data.dataset) ? `<div class="meta-grid">
-                ${data.techStack ? `<section class="project-section"><h2>Tools & methods</h2><p>${escapeHtml(data.techStack)}</p></section>` : ""}
-                ${data.dataset ? `<section class="project-section"><h2>Data</h2><p>${escapeHtml(data.dataset)}</p></section>` : ""}
-            </div>` : ""}
-            ${(github || paper) ? `<div class="button-row">
-                ${github ? `<a href="${escapeHtml(github)}" rel="noopener noreferrer" target="_blank" class="btn">Source code ↗</a>` : ""}
-                ${paper ? `<a href="${escapeHtml(paper)}" rel="noopener noreferrer" target="_blank" class="text-link">Research paper ↗</a>` : ""}
-            </div>` : ""}
-            ${hasResults ? `<section class="project-section"><h2>Results</h2><div class="result-gallery">${resultMedia.map((filename, index) => renderResultMedia(filename, title, index)).join("")}</div></section>` : ""}`;
-        setupResultVideoPreviews(container);
-        setupReveal(container);
     } catch (error) {
-        console.error("Unable to load project details.", error);
-        container.innerHTML = '<section class="project-section"><h2>Project details are unavailable</h2><p>Please return to the portfolio and try again later.</p></section>';
+        if (!data) {
+            console.error("Unable to load project details.", error);
+            container.innerHTML = '<section class="project-section"><h2>Project details are unavailable</h2><p>Please return to the portfolio and try again later.</p></section>';
+        } else {
+            console.info("Using bundled project notes because Firestore is unavailable.", error);
+        }
     }
 }
 
