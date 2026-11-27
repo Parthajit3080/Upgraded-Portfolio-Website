@@ -36,7 +36,7 @@ jobs:
       - name: Assemble static website
         run: |
           mkdir -p _site
-          cp index.html project.html galleria.html admin.html style.css admin.css script.js project.js gallery.js admin.js favicon.svg img.jpg img2.jpeg _site/
+          cp index.html project.html galleria.html admin.html style.css admin.css script.js project.js gallery.js admin.js favicon.svg img.jpg _site/
           cp -R js assets _site/
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
