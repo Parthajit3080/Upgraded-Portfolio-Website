@@ -268,11 +268,13 @@ document.getElementById("addProjectBtn").addEventListener("click", async () => {
 
             await updateDoc(doc(db, "projects", editingProjectId), {
                 title,
+                titleManual: true,
                 year: year || null,
                 shortDesc,
                 category: category || null,
                 description,
                 techStack: techStack || null,
+                techStackManual: true,
                 dataset: dataset || null,
                 github: github || null,
                 liveWebsite: liveWebsite || null,
@@ -292,11 +294,13 @@ document.getElementById("addProjectBtn").addEventListener("click", async () => {
         // ➕ ADD MODE (THIS WAS MISSING)
         await addDoc(collection(db, "projects"), {
             title,
+            titleManual: true,
             year: year || null,
             shortDesc,
             category: category || null,
             description,
             techStack: techStack || null,
+            techStackManual: true,
             dataset: dataset || null,
             github: github || null,
             liveWebsite: liveWebsite || null,
