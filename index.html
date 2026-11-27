@@ -503,37 +503,74 @@
 
 
     
-<!-- CERTIFICATES (Prerendered fallback, refreshed from Firestore when available) -->
-<section id="certificates" class="certificates-section">
+<!-- CERTIFICATES (Prerendered gallery, refreshed from Firestore when available) -->
+<section id="certificates" class="certificates-section certificate-gallery-section">
     <div class="container">
-
-        <div class="cert-header">
-            <div class="section-heading"><p class="section-kicker">03 / Learning</p><h2>Certificates &amp; Achievements <svg class="certificate-trophy" viewBox="0 0 48 48" aria-hidden="true" focusable="false"><path class="trophy-laurel" d="M8 13c-4 5-3 14 3 19m29-19c4 5 3 14-3 19M9 18l5 2m-4 5 5 1m22-8-5 2m4 5-5 1M13 14c3-3 6-4 10-4m12 4c-3-3-6-4-10-4"/><path class="trophy-cup" d="M16 9h16v9c0 6-3 10-8 11-5-1-8-5-8-11V9Zm0 4H9v4c0 5 3 8 9 8m14-12h7v4c0 5-3 8-9 8M24 29v7m-7 4h14m-12-4h10v4H19v-4Z"/><path class="trophy-shine" d="M20 13v6m-4-4c0 4 1 7 3 9"/></svg></h2></div>
-            <button id="certToggleBtn" class="see-all-btn" type="button" aria-expanded="false">See All (5)</button>
-            <p class="cert-subtitle">Selected certifications and academic achievements.</p>
-            <div class="filter-tabs certificate-filters" data-filter-group="certificates" aria-label="Filter credentials">
-                <button type="button" data-filter="all" aria-pressed="true">All</button>
-                <button type="button" data-filter="award" aria-pressed="false">Awards</button>
-                <button type="button" data-filter="internship" aria-pressed="false">Internships</button>
-                <button type="button" data-filter="certification" aria-pressed="false">Certifications</button>
-                <button type="button" data-filter="competition" aria-pressed="false">Competitions</button>
+        <header class="certificate-gallery-header">
+            <div class="certificate-gallery-heading">
+                <p class="section-kicker">03 / Learning</p>
+                <h2>Certificates &amp; Achievements <svg class="certificate-trophy" viewBox="0 0 48 48" aria-hidden="true" focusable="false"><path class="trophy-laurel" d="M8 13c-4 5-3 14 3 19m29-19c4 5 3 14-3 19M9 18l5 2m-4 5 5 1m22-8-5 2m4 5-5 1M13 14c3-3 6-4 10-4m12 4c-3-3-6-4-10-4"/><path class="trophy-cup" d="M16 9h16v9c0 6-3 10-8 11-5-1-8-5-8-11V9Zm0 4H9v4c0 5 3 8 9 8m14-12h7v4c0 5-3 8-9 8M24 29v7m-7 4h14m-12-4h10v4H19v-4Z"/><path class="trophy-shine" d="M20 13v6m-4-4c0 4 1 7 3 9"/></svg></h2>
+                <p class="certificate-gallery-subtitle">A considered record of the work, learning and recognition that shaped my path.</p>
             </div>
+            <p class="certificate-gallery-note"><span>THE ARCHIVE</span><span>Selected credentials, kept in view.</span></p>
+        </header>
+
+        <div class="certificate-gallery-toolbar">
+            <div class="certificate-gallery-filter-stack">
+                <div class="filter-tabs certificate-filters" data-filter-group="certificates" aria-label="Filter certificates and achievements">
+                    <button type="button" data-filter="all" aria-pressed="true">All</button>
+                    <button type="button" data-filter="award" aria-pressed="false">Awards</button>
+                    <button type="button" data-filter="internship" aria-pressed="false">Internships</button>
+                    <button type="button" data-filter="certification" aria-pressed="false">Certifications</button>
+                    <button type="button" data-filter="competition" aria-pressed="false">Competitions</button>
+                </div>
+                <div class="filter-status certificate-filter-status" role="status" hidden></div>
+            </div>
+            <button class="certificate-gallery-toggle" id="certificateGalleryToggle" type="button" aria-expanded="false">See All (5)</button>
         </div>
 
-        <div class="cert-carousel-wrapper" id="certCarousel">
-            <button class="arrow left" id="certPrev" type="button" aria-label="Scroll certificates left">&#8592;</button>
-
-            <div class="cert-carousel-track" id="certificatesContainer">
-                <article class="certificate-item is-featured" data-category="award" style="--certificate-accent:#1E40AF"><button class="certificate-card-trigger" type="button" data-certificate-id="isi-top3" aria-label="View Special Mention, ISI Kolkata credential"><span class="certificate-art"><img class="certificate-thumbnail" src="assets/certificates/thumbnails/isi-top3.png" alt="" loading="lazy"><span class="certificate-ribbon">Featured</span></span><span class="certificate-copy"><span class="certificate-category"><i aria-hidden="true"></i>Award</span><span class="certificate-title">Special Mention · ISI Kolkata</span><span class="certificate-meta">Tenth Summer School on Computer Vision · 2025</span><span class="certificate-skills"><span>Computer Vision</span><span>GANs</span></span></span></button></article>
-                <article class="certificate-item" data-category="internship" style="--certificate-accent:#536B58"><button class="certificate-card-trigger" type="button" data-certificate-id="isi-participation" aria-label="View Tenth Summer School on Computer Vision credential"><span class="certificate-art"><img class="certificate-thumbnail" src="assets/certificates/thumbnails/isi-participation.png" alt="" loading="lazy"></span><span class="certificate-copy"><span class="certificate-category"><i aria-hidden="true"></i>Internship</span><span class="certificate-title">Tenth Summer School on Computer Vision</span><span class="certificate-meta">Electronics and Communication Sciences Unit · ISI Kolkata · 2025</span><span class="certificate-skills"><span>Computer Vision</span><span>Deep Learning</span></span></span></button></article>
-                <article class="certificate-item" data-category="internship" style="--certificate-accent:#A6402B"><button class="certificate-card-trigger" type="button" data-certificate-id="ideas-internship" aria-label="View Data Science Internship credential"><span class="certificate-art"><img class="certificate-thumbnail" src="assets/certificates/thumbnails/ideas-internship.png" alt="" loading="lazy"></span><span class="certificate-copy"><span class="certificate-category"><i aria-hidden="true"></i>Internship</span><span class="certificate-title">Data Science Internship</span><span class="certificate-meta">IDEAS · ISI Kolkata · 2024</span><span class="certificate-skills"><span>Data Science</span><span>Python</span></span></span></button></article>
-                <article class="certificate-item" data-category="certification" style="--certificate-accent:#881337"><button class="certificate-card-trigger" type="button" data-certificate-id="nptel-ml" aria-label="View Introduction to Machine Learning credential"><span class="certificate-art"><img class="certificate-thumbnail" src="assets/certificates/thumbnails/nptel-ml.png" alt="" loading="lazy"></span><span class="certificate-copy"><span class="certificate-category"><i aria-hidden="true"></i>Certification</span><span class="certificate-title">Introduction to Machine Learning</span><span class="certificate-meta">NPTEL · Elite · 2025</span><span class="certificate-skills"><span>Machine Learning</span><span>Evaluation</span></span></span></button></article>
-                <article class="certificate-item is-featured" data-category="competition" style="--certificate-accent:#B45309"><button class="certificate-card-trigger" type="button" data-certificate-id="ramanujan-rank3" aria-label="View Ramanujan Math Talent Search, Rank 3 credential"><span class="certificate-art"><img class="certificate-thumbnail" src="assets/certificates/thumbnails/ramanujan-rank3.png" alt="" loading="lazy"><span class="certificate-ribbon">Featured</span></span><span class="certificate-copy"><span class="certificate-category"><i aria-hidden="true"></i>Competition</span><span class="certificate-title">Ramanujan Math Talent Search · Rank 3</span><span class="certificate-meta">JMMC · Ramanujan Memorial · 2018</span><span class="certificate-skills"><span>Mathematics</span><span>Problem Solving</span></span></span></button></article>
+        <div class="certificate-gallery-stage">
+            <button class="certificate-gallery-arrow" id="certificateGalleryPrevious" type="button" aria-label="Previous certificate" title="Previous certificate"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m14.5 5-7 7 7 7"/></svg></button>
+            <div class="certificate-gallery-grid" id="certificatesContainer" role="list" aria-label="Certificates and achievements" data-expanded="false">
+            <article class="certificate-item is-featured" data-category="award" style="--certificate-accent:#1E40AF" role="listitem">
+                <button class="certificate-card-trigger" type="button" data-certificate-id="isi-top3" aria-haspopup="dialog" aria-label="View Special Mention, ISI Kolkata certificate">
+                    <span class="certificate-card-topline"><span class="certificate-card-category">Award</span><span class="certificate-card-year">2025</span></span>
+                    <span class="certificate-card-art"><img class="certificate-thumbnail" src="assets/certificates/thumbnails/isi-top3.png" alt="" decoding="async"><span class="certificate-card-number">01</span><span class="certificate-card-reflection" aria-hidden="true"></span><span class="certificate-card-ribbon">Featured</span></span>
+                    <span class="certificate-card-copy"><span class="certificate-card-title">Special Mention · ISI Kolkata</span><span class="certificate-card-meta">Tenth Summer School on Computer Vision</span></span>
+                </button>
+            </article>
+            <article class="certificate-item" data-category="internship" style="--certificate-accent:#536B58" role="listitem">
+                <button class="certificate-card-trigger" type="button" data-certificate-id="isi-participation" aria-haspopup="dialog" aria-label="View Tenth Summer School on Computer Vision certificate">
+                    <span class="certificate-card-topline"><span class="certificate-card-category">Internship</span><span class="certificate-card-year">2025</span></span>
+                    <span class="certificate-card-art"><img class="certificate-thumbnail" src="assets/certificates/thumbnails/isi-participation.png" alt="" decoding="async"><span class="certificate-card-number">02</span><span class="certificate-card-reflection" aria-hidden="true"></span></span>
+                    <span class="certificate-card-copy"><span class="certificate-card-title">Tenth Summer School on Computer Vision</span><span class="certificate-card-meta">Electronics and Communication Sciences Unit · ISI Kolkata</span></span>
+                </button>
+            </article>
+            <article class="certificate-item" data-category="internship" style="--certificate-accent:#A6402B" role="listitem">
+                <button class="certificate-card-trigger" type="button" data-certificate-id="ideas-internship" aria-haspopup="dialog" aria-label="View Data Science Internship certificate">
+                    <span class="certificate-card-topline"><span class="certificate-card-category">Internship</span><span class="certificate-card-year">2024</span></span>
+                    <span class="certificate-card-art"><img class="certificate-thumbnail" src="assets/certificates/thumbnails/ideas-internship.png" alt="" decoding="async"><span class="certificate-card-number">03</span><span class="certificate-card-reflection" aria-hidden="true"></span></span>
+                    <span class="certificate-card-copy"><span class="certificate-card-title">Data Science Internship</span><span class="certificate-card-meta">IDEAS · ISI Kolkata</span></span>
+                </button>
+            </article>
+            <article class="certificate-item" data-category="certification" style="--certificate-accent:#881337" role="listitem">
+                <button class="certificate-card-trigger" type="button" data-certificate-id="nptel-ml" aria-haspopup="dialog" aria-label="View Introduction to Machine Learning certificate">
+                    <span class="certificate-card-topline"><span class="certificate-card-category">Certification</span><span class="certificate-card-year">2025</span></span>
+                    <span class="certificate-card-art"><img class="certificate-thumbnail" src="assets/certificates/thumbnails/nptel-ml.png" alt="" decoding="async"><span class="certificate-card-number">04</span><span class="certificate-card-reflection" aria-hidden="true"></span></span>
+                    <span class="certificate-card-copy"><span class="certificate-card-title">Introduction to Machine Learning</span><span class="certificate-card-meta">NPTEL · Elite</span></span>
+                </button>
+            </article>
+            <article class="certificate-item is-featured" data-category="competition" style="--certificate-accent:#B45309" role="listitem">
+                <button class="certificate-card-trigger" type="button" data-certificate-id="ramanujan-rank3" aria-haspopup="dialog" aria-label="View Ramanujan Math Talent Search Rank 3 certificate">
+                    <span class="certificate-card-topline"><span class="certificate-card-category">Competition</span><span class="certificate-card-year">2018</span></span>
+                    <span class="certificate-card-art"><img class="certificate-thumbnail" src="assets/certificates/thumbnails/ramanujan-rank3.png" alt="" decoding="async"><span class="certificate-card-number">05</span><span class="certificate-card-reflection" aria-hidden="true"></span><span class="certificate-card-ribbon">Featured</span></span>
+                    <span class="certificate-card-copy"><span class="certificate-card-title">Ramanujan Math Talent Search · Rank 3</span><span class="certificate-card-meta">JMMC · Ramanujan Memorial</span></span>
+                </button>
+            </article>
             </div>
-
-            <button class="arrow right" id="certNext" type="button" aria-label="Scroll certificates right">&#8594;</button>
+            <button class="certificate-gallery-arrow" id="certificateGalleryNext" type="button" aria-label="Next certificate" title="Next certificate"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9.5 5 7 7-7 7"/></svg></button>
         </div>
-
+        <p class="certificate-gallery-count" id="certificateGalleryCount" aria-live="polite">Showing 4 of 5 credentials</p>
     </div>
 </section>
 
@@ -744,7 +781,11 @@ I’m glad to hear from researchers, engineers, students, and curious minds. Sen
                 <p class="certificate-modal-meta" id="certificateModalMeta"></p>
                 <p class="certificate-modal-summary" id="certificateModalSummary"></p>
                 <div class="certificate-modal-skills" id="certificateModalSkills" aria-label="Related skills"></div>
-                <a class="certificate-verify-link" id="certificateVerifyLink" target="_blank" rel="noopener noreferrer" hidden>Verify credential <span aria-hidden="true">↗</span></a>
+                <div class="certificate-modal-actions">
+                    <a class="certificate-modal-action" id="certificateViewLink" target="_blank" rel="noopener noreferrer">View Original <span aria-hidden="true">↗</span></a>
+                    <a class="certificate-modal-action" id="certificateDownloadLink" download><span data-download-label>Download PDF</span><span aria-hidden="true">↓</span></a>
+                </div>
+                <a class="certificate-verify-link" id="certificateVerifyLink" target="_blank" rel="noopener noreferrer" hidden><span data-verify-label>Verify Credential</span><span aria-hidden="true">↗</span></a>
             </div>
         </div>
     </div>

@@ -14,6 +14,7 @@ import { escapeHtml, safeAssetFilename, safeExternalUrl } from "./safe-content.j
  * @property {string[]} skills
  * @property {string} summary
  * @property {string=} verifyUrl
+ * @property {string=} verifyLabel
  * @property {string=} fileName
  */
 
@@ -40,7 +41,8 @@ export const certificateSeeds = [
         id: "nptel-ml", title: "Introduction to Machine Learning", issuer: "NPTEL · Elite", year: "2025",
         image: "assets/certificates/thumbnails/nptel-ml.png", fileName: "NPTEL.pdf", category: "Certification", featured: false,
         accentColor: "#881337", skills: ["Machine Learning", "Model Evaluation"],
-        summary: "Completed NPTEL’s Introduction to Machine Learning course with an Elite certification and a final score of 69%."
+        summary: "Completed NPTEL’s Introduction to Machine Learning course with an Elite certification and a final score of 69%.",
+        verifyUrl: "https://nptel.ac.in/courses", verifyLabel: "NPTEL certificate portal"
     },
     {
         id: "ramanujan-rank3", title: "Ramanujan Math Talent Search · Rank 3", issuer: "JMMC · Ramanujan Memorial", year: "2018",
@@ -54,7 +56,6 @@ const categories = new Set(["Award", "Internship", "Certification", "Competition
 const seedById = new Map(certificateSeeds.map(item => [item.id, item]));
 const cardItems = new Map(certificateSeeds.map(item => [item.id, item]));
 const categoryClass = value => String(value || "Certification").toLowerCase();
-let suppressCertificateClickUntil = 0;
 
 function findSeed(record) {
     const data = record.data || {};
@@ -104,7 +105,8 @@ export function normalizeCertificate(record) {
         skills: [...new Set((Array.isArray(skills) ? skills : []).map(value => String(value).trim()).filter(Boolean))].slice(0, 4),
         summary: String(data.summary || data.description || seed.summary || "Credential awarded for completed academic or professional work."),
         fileName,
-        verifyUrl: safeExternalUrl(data.verifyUrl || data.verificationUrl || seed.verifyUrl || "")
+        verifyUrl: safeExternalUrl(data.verifyUrl || data.verificationUrl || seed.verifyUrl || ""),
+        verifyLabel: String(data.verifyLabel || seed.verifyLabel || "Verify with issuer")
     };
     cardItems.set(id, item);
     return item;
@@ -112,130 +114,238 @@ export function normalizeCertificate(record) {
 
 export function renderCertificateCard(item) {
     const accent = /^#[0-9a-f]{6}$/i.test(item.accentColor) ? item.accentColor : "#A6402B";
-    const image = item.image || "";
-    const fileName = safeAssetFilename(item.fileName || "");
-    const skills = item.skills.slice(0, 2).map(skill => `<span>${escapeHtml(skill)}</span>`).join("");
-    return `<article class="certificate-item${item.featured ? " is-featured" : ""}" data-category="${escapeHtml(categoryClass(item.category))}" style="--certificate-accent:${accent}">
-        <button class="certificate-card-trigger" type="button" data-certificate-id="${escapeHtml(item.id)}" aria-label="View ${escapeHtml(item.title)} credential">
-            <span class="certificate-art"><img class="certificate-thumbnail" src="${escapeHtml(image)}" alt="" loading="lazy">${item.featured ? `<span class="certificate-ribbon">Featured</span>` : ""}</span>
-            <span class="certificate-copy"><span class="certificate-category"><i aria-hidden="true"></i>${escapeHtml(item.category)}</span><span class="certificate-title">${escapeHtml(item.title)}</span><span class="certificate-meta">${escapeHtml(item.issuer)}${item.year ? ` · ${escapeHtml(item.year)}` : ""}</span>${skills ? `<span class="certificate-skills">${skills}</span>` : ""}</span>
-        </button>
-        <span class="certificate-file-path" hidden>${escapeHtml(fileName)}</span>
-    </article>`;
+    const title = escapeHtml(item.title);
+    const id = escapeHtml(item.id);
+    const category = escapeHtml(item.category);
+    const image = escapeHtml(item.image || "");
+    const year = escapeHtml(item.year || "");
+    const issuer = escapeHtml(item.issuer || "");
+    const ribbon = item.featured ? '<span class="certificate-card-ribbon">Featured</span>' : "";
+    return '<article class="certificate-item' + (item.featured ? " is-featured" : "") + '" data-category="' + escapeHtml(categoryClass(item.category)) + '" style="--certificate-accent:' + accent + '" role="listitem">' +
+        '<button class="certificate-card-trigger" type="button" data-certificate-id="' + id + '" aria-haspopup="dialog" aria-label="View ' + title + ' certificate">' +
+            '<span class="certificate-card-topline"><span class="certificate-card-category">' + category + '</span><span class="certificate-card-year">' + year + '</span></span>' +
+            '<span class="certificate-card-art"><img class="certificate-thumbnail" src="' + image + '" alt="" loading="lazy" decoding="async"><span class="certificate-card-number"></span><span class="certificate-card-reflection" aria-hidden="true"></span>' + ribbon + '</span>' +
+            '<span class="certificate-card-copy"><span class="certificate-card-title">' + title + '</span><span class="certificate-card-meta">' + issuer + '</span></span>' +
+        '</button></article>';
 }
 
 export function setupCertificateControls() {
     const track = document.getElementById("certificatesContainer");
-    const toggle = document.getElementById("certToggleBtn");
     if (!track) return;
-    const setToggleText = () => {
-        const expanded = track.classList.contains("cert-grid");
-        const count = track.querySelectorAll(":scope > .certificate-item").length;
-        if (toggle) {
-            toggle.textContent = expanded ? "Show Carousel" : `See All (${count})`;
-            toggle.setAttribute("aria-expanded", String(expanded));
-            toggle.hidden = count < 2;
-        }
-        track.closest(".cert-carousel-wrapper")?.classList.toggle("is-grid", expanded);
-    };
-    if (track.dataset.certificateControlsReady) { setToggleText(); return; }
-    track.dataset.certificateControlsReady = "true";
+    const toggle = document.getElementById("certificateGalleryToggle");
+    const countLabel = document.getElementById("certificateGalleryCount");
+    const previousArrow = document.getElementById("certificateGalleryPrevious");
+    const nextArrow = document.getElementById("certificateGalleryNext");
+    const filterGroup = document.querySelector('.filter-tabs[data-filter-group="certificates"]');
+    const cards = () => [...track.querySelectorAll(":scope > .certificate-item")];
+    const categoryVisibleCards = () => cards().filter(card => !card.hidden);
+    const displayCards = () => categoryVisibleCards();
     const reducedMotion = () => window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    const scrollBehavior = () => reducedMotion() ? "auto" : "smooth";
-    toggle?.addEventListener("click", () => {
-        track.classList.toggle("cert-grid");
-        setToggleText();
-    });
-    document.getElementById("certPrev")?.addEventListener("click", () => {
-        const card = track.querySelector(":scope > .certificate-item:not([hidden])");
-        track.scrollBy({ left: -Math.max(250, (card?.getBoundingClientRect().width || 280) + 16), behavior: scrollBehavior() });
-    });
-    document.getElementById("certNext")?.addEventListener("click", () => {
-        const card = track.querySelector(":scope > .certificate-item:not([hidden])");
-        track.scrollBy({ left: Math.max(250, (card?.getBoundingClientRect().width || 280) + 16), behavior: scrollBehavior() });
-    });
-    let drag = null;
-    track.addEventListener("pointerdown", event => {
-        if (track.classList.contains("cert-grid") || event.target.closest("button")) return;
-        if (event.pointerType === "mouse" && event.button !== 0) return;
-        drag = { x: event.clientX, scroll: track.scrollLeft, id: event.pointerId, moved: false };
-        track.classList.add("is-dragging");
-        track.setPointerCapture?.(event.pointerId);
-    });
-    track.addEventListener("pointermove", event => {
-        if (!drag || drag.id !== event.pointerId) return;
-        const delta = event.clientX - drag.x;
-        if (Math.abs(delta) > 4) {
-            drag.moved = true;
-            track.scrollLeft = drag.scroll - delta;
-            event.preventDefault();
-        }
-    }, { passive: false });
-    const endDrag = event => {
-        if (!drag || drag.id !== event.pointerId) return;
-        if (drag.moved) suppressCertificateClickUntil = performance.now() + 260;
-        drag = null;
-        track.classList.remove("is-dragging");
-    };
-    track.addEventListener("pointerup", endDrag);
-    track.addEventListener("pointercancel", endDrag);
-    track.addEventListener("lostpointercapture", endDrag);
-    let centerFrame = 0;
-    track.addEventListener("scroll", () => {
-        if (track.classList.contains("cert-grid")) return;
-        if (centerFrame) return;
-        centerFrame = requestAnimationFrame(() => {
-            centerFrame = 0;
-            if (track.classList.contains("cert-grid")) return;
-            const center = track.getBoundingClientRect().left + track.clientWidth / 2;
-            let closest = null;
-            let distance = Infinity;
-            track.querySelectorAll(":scope > .certificate-item:not([hidden])").forEach(card => {
-                const bounds = card.getBoundingClientRect();
-                const delta = Math.abs(bounds.left + bounds.width / 2 - center);
-                if (delta < distance) { distance = delta; closest = card; }
-            });
-            track.querySelectorAll(".certificate-item.is-centered").forEach(card => card.classList.remove("is-centered"));
-            closest?.classList.add("is-centered");
-        });
-    }, { passive: true });
-    track.dispatchEvent(new Event("scroll"));
 
-    if (!reducedMotion() && "IntersectionObserver" in window) {
-        const reveal = new IntersectionObserver(entries => entries.forEach(entry => {
-            if (!entry.isIntersecting) return;
-            entry.target.classList.add("is-certificate-visible");
-            reveal.unobserve(entry.target);
-        }), { root: track, threshold: .35 });
-        const observeCards = () => track.querySelectorAll(":scope > .certificate-item:not([data-certificate-reveal])").forEach((card, index) => {
-            card.dataset.certificateReveal = "true";
-            card.style.setProperty("--certificate-order", String(index));
-            reveal.observe(card);
+    if (track.certificateGalleryController) {
+        track.certificateGalleryController.refresh();
+        return;
+    }
+
+    let expanded = false;
+    let revealObserver = null;
+    let activeCardId = null;
+
+    const observeCards = () => {
+        const all = cards();
+        all.forEach((card, index) => {
+            card.style.setProperty("--gallery-order", String(index));
+            const number = card.querySelector(".certificate-card-number");
+            if (number) number.textContent = String(index + 1).padStart(2, "0");
+            if (card.dataset.galleryReveal) return;
+            card.dataset.galleryReveal = "true";
+            if (reducedMotion() || !("IntersectionObserver" in window)) {
+                card.classList.add("is-gallery-visible");
+                return;
+            }
+            revealObserver ||= new IntersectionObserver(entries => entries.forEach(entry => {
+                if (!entry.isIntersecting) return;
+                entry.target.classList.add("is-gallery-visible");
+                revealObserver.unobserve(entry.target);
+            }), { threshold: .08, rootMargin: "0px 0px -5% 0px" });
+            revealObserver.observe(card);
         });
+    };
+
+    const updateArrowState = () => {
+        const maxScroll = Math.max(0, track.scrollWidth - track.clientWidth);
+        const canScroll = !expanded && maxScroll > 2;
+        if (previousArrow) previousArrow.disabled = !canScroll || track.scrollLeft <= 1;
+        if (nextArrow) nextArrow.disabled = !canScroll || track.scrollLeft >= maxScroll - 1;
+    };
+
+    const syncActiveCardToScroll = () => {
+        if (expanded) return;
+        const visible = categoryVisibleCards();
+        if (!visible.length) return;
+        const trackLeft = track.getBoundingClientRect().left;
+        const active = visible.reduce((closest, card) => {
+            return Math.abs(card.getBoundingClientRect().left - trackLeft) < Math.abs(closest.getBoundingClientRect().left - trackLeft) ? card : closest;
+        }, visible[0]);
+        activeCardId = active.querySelector("[data-certificate-id]")?.dataset.certificateId || null;
+        cards().forEach(card => card.classList.toggle("is-gallery-current", card === active));
+    };
+
+    const handleTrackScroll = () => {
+        updateArrowState();
+        syncActiveCardToScroll();
+    };
+
+    const updateGalleryState = () => {
+        const all = cards();
+        const eligible = categoryVisibleCards();
+        track.dataset.visibleCount = String(eligible.length);
+        eligible.forEach(card => {
+            card.removeAttribute("data-gallery-limited");
+            card.setAttribute("aria-hidden", "false");
+            card.removeAttribute("inert");
+        });
+        all.filter(card => card.hidden).forEach(card => {
+            card.setAttribute("aria-hidden", "true");
+            card.setAttribute("inert", "");
+        });
+        const cardWidth = eligible[0]?.getBoundingClientRect().width || 0;
+        const gap = parseFloat(window.getComputedStyle(track).columnGap) || 0;
+        const visibleCapacity = cardWidth ? Math.max(1, Math.floor((track.clientWidth + gap) / (cardWidth + gap))) : 4;
+        const shown = Math.min(eligible.length, expanded ? eligible.length : visibleCapacity);
+        const displayed = displayCards();
+        if (!displayed.some(card => card.querySelector("[data-certificate-id]")?.dataset.certificateId === activeCardId)) {
+            activeCardId = displayed[0]?.querySelector("[data-certificate-id]")?.dataset.certificateId || null;
+        }
+        all.forEach(card => {
+            const id = card.querySelector("[data-certificate-id]")?.dataset.certificateId;
+            card.classList.toggle("is-gallery-current", Boolean(id && id === activeCardId));
+        });
+        if (toggle) {
+            toggle.hidden = eligible.length <= 4;
+            toggle.textContent = expanded ? "Show Less" : "See All (" + eligible.length + ")";
+            toggle.setAttribute("aria-expanded", String(expanded));
+        }
+        if (countLabel) countLabel.textContent = "Showing " + shown + " of " + eligible.length + (eligible.length === 1 ? " credential" : " credentials");
+        track.dataset.expanded = String(expanded);
+        track.closest(".certificate-gallery-stage")?.classList.toggle("is-expanded", expanded);
+        updateArrowState();
+    };
+
+    const setExpanded = next => {
+        if (expanded === next) {
+            updateGalleryState();
+            return;
+        }
+        expanded = next;
+        if (!next) track.scrollTo({ left: 0, behavior: reducedMotion() ? "auto" : "smooth" });
+        updateGalleryState();
         observeCards();
-        new MutationObserver(observeCards).observe(track, { childList: true });
-    } else {
-        track.querySelectorAll(".certificate-item").forEach(card => card.classList.add("is-certificate-visible"));
+    };
+
+    const navigate = (direction, { focusTarget = false } = {}) => {
+        const eligible = categoryVisibleCards();
+        if (eligible.length < 2) return;
+        let index = eligible.findIndex(card => card.querySelector("[data-certificate-id]")?.dataset.certificateId === activeCardId);
+        if (index < 0) index = direction > 0 ? 0 : eligible.length - 1;
+        const nextIndex = index + direction;
+        if (nextIndex < 0 || nextIndex >= eligible.length) return;
+        index = nextIndex;
+        const target = eligible[index];
+        activeCardId = target.querySelector("[data-certificate-id]")?.dataset.certificateId || null;
+        updateGalleryState();
+        if (expanded) {
+            if (focusTarget) {
+                target.scrollIntoView({ behavior: reducedMotion() ? "auto" : "smooth", block: "nearest" });
+                target.querySelector(".certificate-card-trigger")?.focus({ preventScroll: true });
+            }
+            return;
+        }
+        const cardWidth = eligible[0].getBoundingClientRect().width;
+        const gap = parseFloat(window.getComputedStyle(track).columnGap) || 0;
+        track.scrollBy({ left: direction * (cardWidth + gap), behavior: reducedMotion() ? "auto" : "smooth" });
+        if (focusTarget) target.querySelector(".certificate-card-trigger")?.focus({ preventScroll: true });
+    };
+
+    const refresh = () => {
+        observeCards();
+        updateGalleryState();
+    };
+
+    track.applyCertificateGalleryFilter = () => {
+        if (expanded) setExpanded(false);
+        else {
+            activeCardId = null;
+            track.scrollTo({ left: 0, behavior: reducedMotion() ? "auto" : "smooth" });
+            updateGalleryState();
+        }
+    };
+    track.certificateGalleryController = { refresh, setExpanded };
+    track.addEventListener("pointermove", event => {
+        if (event.pointerType && event.pointerType !== "mouse") return;
+        const card = event.target.closest?.(".certificate-item");
+        if (!card || card.hidden) return;
+        const button = card.querySelector(".certificate-card-trigger");
+        if (!button) return;
+        const bounds = card.getBoundingClientRect();
+        const x = Math.min(1, Math.max(0, (event.clientX - bounds.left) / bounds.width));
+        const y = Math.min(1, Math.max(0, (event.clientY - bounds.top) / bounds.height));
+        card.style.setProperty("--card-tilt-x", ((.5 - y) * 4.3).toFixed(2) + "deg");
+        card.style.setProperty("--card-tilt-y", ((x - .5) * 5.2).toFixed(2) + "deg");
+        button.style.setProperty("--card-glare-x", (x * 100).toFixed(1) + "%");
+        button.style.setProperty("--card-glare-y", (y * 100).toFixed(1) + "%");
+    }, { passive: true });
+    track.addEventListener("pointerout", event => {
+        const card = event.target.closest?.(".certificate-item");
+        if (!card || card.contains(event.relatedTarget)) return;
+        card.style.setProperty("--card-tilt-x", "0deg");
+        card.style.setProperty("--card-tilt-y", "0deg");
+    }, { passive: true });
+    track.addEventListener("pointerleave", () => {
+        cards().forEach(card => {
+            card.style.setProperty("--card-tilt-x", "0deg");
+            card.style.setProperty("--card-tilt-y", "0deg");
+        });
+    });
+    track.addEventListener("scroll", handleTrackScroll, { passive: true });
+    window.addEventListener("resize", updateGalleryState, { passive: true });
+    track.addEventListener("keydown", event => {
+        if (!["ArrowLeft", "ArrowRight"].includes(event.key)) return;
+        const current = event.target.closest?.(".certificate-card-trigger");
+        if (!current) return;
+        if (!displayCards().some(card => card.contains(current))) return;
+        event.preventDefault();
+        navigate(event.key === "ArrowRight" ? 1 : -1, { focusTarget: true });
+    });
+    track.addEventListener("click", event => {
+        const card = event.target.closest?.(".certificate-item");
+        if (!card) return;
+        activeCardId = card.querySelector("[data-certificate-id]")?.dataset.certificateId || null;
+        updateGalleryState();
+    });
+    previousArrow?.addEventListener("click", () => navigate(-1));
+    nextArrow?.addEventListener("click", () => navigate(1));
+    toggle?.addEventListener("click", () => setExpanded(!expanded));
+    filterGroup?.addEventListener("click", event => {
+        if (!event.target.closest("[data-filter]")) return;
+        window.requestAnimationFrame(() => {
+            if (expanded) setExpanded(false);
+            else {
+                activeCardId = null;
+                track.scrollTo({ left: 0, behavior: reducedMotion() ? "auto" : "smooth" });
+                updateGalleryState();
+            }
+        });
+    });
+    if ("MutationObserver" in window) {
+        new MutationObserver(() => {
+            observeCards();
+            updateGalleryState();
+        }).observe(track, { childList: true, attributes: true, attributeFilter: ["hidden"] });
     }
-    if (window.matchMedia("(pointer: fine)").matches && !reducedMotion()) {
-        track.addEventListener("pointermove", event => {
-            const card = event.target.closest(".certificate-item");
-            if (!card || !track.contains(card)) return;
-            const bounds = card.getBoundingClientRect();
-            const x = (event.clientX - bounds.left) / Math.max(1, bounds.width);
-            const y = (event.clientY - bounds.top) / Math.max(1, bounds.height);
-            card.style.setProperty("--certificate-tilt-x", `${((.5 - y) * 8).toFixed(2)}deg`);
-            card.style.setProperty("--certificate-tilt-y", `${((x - .5) * 8).toFixed(2)}deg`);
-            card.style.setProperty("--certificate-pointer-x", `${(x * 100).toFixed(1)}%`);
-            card.style.setProperty("--certificate-pointer-y", `${(y * 100).toFixed(1)}%`);
-        }, { passive: true });
-        track.addEventListener("pointerout", event => {
-            const card = event.target.closest(".certificate-item");
-            if (!card || card.contains(event.relatedTarget)) return;
-            ["--certificate-tilt-x", "--certificate-tilt-y"].forEach(name => card.style.removeProperty(name));
-        }, { passive: true });
-    }
-    setToggleText();
+
+    track.classList.add("is-ready");
+    refresh();
 }
 
 export function setupCertificateModal() {
@@ -245,6 +355,7 @@ export function setupCertificateModal() {
     modal.dataset.ready = "true";
     const closeButton = modal.querySelector("[data-certificate-close]");
     const zoomLabel = modal.querySelector("[data-certificate-zoom-label]");
+    const track = document.getElementById("certificatesContainer");
     let previousFocus = null;
     let zoom = 1;
     let closeTimer = 0;
@@ -275,6 +386,9 @@ export function setupCertificateModal() {
         const summary = document.getElementById("certificateModalSummary");
         const skills = document.getElementById("certificateModalSkills");
         const verify = document.getElementById("certificateVerifyLink");
+        const viewLink = document.getElementById("certificateViewLink");
+        const downloadLink = document.getElementById("certificateDownloadLink");
+        const fileName = safeAssetFilename(item.fileName || "");
         const issuerLine = `${item.issuer}${item.year ? ` · ${item.year}` : ""}`;
         title.textContent = item.title;
         metadata.textContent = issuerLine;
@@ -288,13 +402,25 @@ export function setupCertificateModal() {
         }));
         verify.hidden = !item.verifyUrl;
         if (item.verifyUrl) verify.href = item.verifyUrl;
+        else verify.removeAttribute("href");
+        const verifyLabel = verify.querySelector("[data-verify-label]");
+        if (verifyLabel) verifyLabel.textContent = item.verifyLabel || "Verify with issuer";
+
+        const originalUrl = fileName ? `assets/certificates/${encodeURIComponent(fileName)}` : item.image;
+        const downloadName = fileName || item.image.split("/").pop() || `${item.id}-certificate`;
+        viewLink.href = originalUrl;
+        viewLink.hidden = !originalUrl;
+        downloadLink.href = originalUrl;
+        downloadLink.download = downloadName;
+        downloadLink.hidden = !originalUrl;
+        const downloadLabel = downloadLink.querySelector("[data-download-label]");
+        if (downloadLabel) downloadLabel.textContent = /\.pdf$/i.test(fileName) ? "Download PDF" : "Download scan";
 
         documentStage.replaceChildren();
-        const fileName = safeAssetFilename(item.fileName || "");
         const extension = fileName.split(".").pop().toLowerCase();
         if (fileName && extension === "pdf") {
             const frame = document.createElement("iframe");
-            frame.src = `assets/certificates/${encodeURIComponent(fileName)}#toolbar=0&navpanes=0&view=FitH`;
+            frame.src = `assets/certificates/${encodeURIComponent(fileName)}#toolbar=0&navpanes=0&view=Fit`;
             frame.title = `${item.title} certificate scan`;
             frame.className = "certificate-modal-pdf";
             documentStage.append(frame);
@@ -313,13 +439,8 @@ export function setupCertificateModal() {
         closeButton?.focus();
     };
 
-    document.getElementById("certificatesContainer")?.addEventListener("click", event => {
-        if (performance.now() < suppressCertificateClickUntil) {
-            event.preventDefault();
-            event.stopPropagation();
-            return;
-        }
-        const trigger = event.target.closest("[data-certificate-id]");
+    track?.addEventListener("click", event => {
+        const trigger = event.target.closest?.(".certificate-card-trigger");
         if (!trigger) return;
         const item = cardItems.get(trigger.dataset.certificateId);
         if (item) open(trigger, item);
@@ -346,14 +467,18 @@ export function setupCertificateModal() {
             if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
             else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
         } else if (event.key === "ArrowLeft" || event.key === "ArrowRight") {
-            const cards = [...document.querySelectorAll("#certificatesContainer .certificate-card-trigger")];
+            const cards = [...document.querySelectorAll('#certificatesContainer .certificate-item:not([hidden]) .certificate-card-trigger')];
             const current = cards.indexOf(previousFocus);
-            const nextIndex = current + (event.key === "ArrowRight" ? 1 : -1);
-            if (cards[nextIndex]) {
+            const activeIndex = current >= 0 ? current : 0;
+            const nextIndex = cards.length ? (activeIndex + (event.key === "ArrowRight" ? 1 : -1) + cards.length) % cards.length : -1;
+            if (nextIndex >= 0 && cards[nextIndex]) {
                 event.preventDefault();
                 const next = cards[nextIndex];
                 const nextItem = cardItems.get(next.dataset.certificateId);
-                if (nextItem) { open(next, nextItem); closeButton?.focus(); }
+                if (nextItem) {
+                    open(next, nextItem);
+                    closeButton?.focus();
+                }
             }
         }
     });

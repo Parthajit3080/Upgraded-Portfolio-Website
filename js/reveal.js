@@ -13,7 +13,7 @@ export function setupReveal(root = document) {
     }, { rootMargin: "0px 0px -7% 0px", threshold: 0.08 });
 
     const targets = root.querySelectorAll(
-        ".section-heading, .edu-row, .project-item, .certificate-item, .achievement-card, .research-card, .contact-info, .contact-form-wrapper, .gallery-year-section, .event-folder, .gallery-event, .gallery-photo"
+        ".section-heading, .edu-row, .project-item, .achievement-card, .research-card, .contact-info, .contact-form-wrapper, .gallery-year-section, .event-folder, .gallery-event, .gallery-photo"
     );
     targets.forEach((target, index) => {
         if (target.dataset.revealReady) return;
