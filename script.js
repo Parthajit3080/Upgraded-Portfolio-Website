@@ -1,6 +1,9 @@
 import { escapeHtml, safeAssetFilename, safeExternalUrl } from "./js/safe-content.js";
 import { setupThemeToggle } from "./js/theme.js";
 import { setupReveal } from "./js/reveal.js";
+import { normalizeCertificate, renderCertificateCard, setupCertificateControls, setupCertificateModal } from "./js/certificates.js";
+import { renderSkillGroups, setupToolkitInteractions } from "./js/toolkit.js";
+import { withProjectPresentation } from "./js/fallback-content.js";
 
 const $ = (selector, root = document) => root.querySelector(selector);
 const byOrder = (left, right) =>
@@ -87,20 +90,6 @@ function assetPreview(folder, value, title) {
         : `<span class="preview-file">Preview ${escapeHtml(filename)} ↗</span>`;
 
     return `<button class="project-preview file-preview" type="button" data-preview-path="${escapedPath}" aria-label="Preview ${escapeHtml(title)}">${content}</button>`;
-}
-
-function certificatePreview(value, title) {
-    const filename = safeAssetFilename(value);
-    if (!filename) return `<div class="certificate-art"><div class="certificate-document-fallback">Certificate preview unavailable</div></div>`;
-    const path = escapeHtml(`assets/certificates/${filename}`);
-    const extension = filename.split(".").pop().toLowerCase();
-    let visual = `<div class="certificate-document-fallback">${escapeHtml(title || "Certificate")}</div>`;
-    if (["jpg", "jpeg", "png", "webp", "gif"].includes(extension)) {
-        visual = `<img class="certificate-document" src="${path}" alt="" loading="lazy">`;
-    } else if (extension === "pdf") {
-        visual = `<iframe class="certificate-document" src="${path}#toolbar=0&amp;navpanes=0&amp;scrollbar=0&amp;view=FitH" title="${escapeHtml(title || "Certificate")}" loading="lazy" tabindex="-1" aria-hidden="true"></iframe>`;
-    }
-    return `<div class="certificate-art">${visual}<button class="certificate-open" type="button" data-preview-path="${path}" aria-label="Preview ${escapeHtml(title || "certificate")}"><span>Preview certificate ↗</span></button></div>`;
 }
 
 function projectPreview(value, title, screenshots = []) {
@@ -208,14 +197,21 @@ function setupProjectVideoPreviews() {
 
 async function loadProjects() {
     await renderCollection("projects", "#projectsContainer", ({ id, data }) => `
-        <article class="project-item" data-category="${escapeHtml(projectCategory(data))}">
-            ${projectLiveLink(data.liveWebsite || data.website, data.title || "project")}
-            ${projectPreview(data.fileName, data.title || "project", data.screenshots)}
-            <p class="section-kicker">${escapeHtml(projectCategory(data))}</p>
-            <h3>${escapeHtml(data.title || "Untitled project")}</h3>
-            <p>${escapeHtml(data.shortDesc || "")}</p>
-            <a class="details-btn" href="project.html?id=${encodeURIComponent(id)}">Read project notes <span aria-hidden="true">↗</span></a>
-        </article>
+        ${(() => {
+            const project = withProjectPresentation(data, id);
+            const category = projectCategory(project);
+            const technologies = String(project.techStack || "").split(",").map(value => value.trim()).filter(Boolean);
+            const year = String(project.year || project.date || "");
+            return `<article class="project-item" data-category="${escapeHtml(category)}" data-year="${escapeHtml(project.year || project.date || "")}">
+            ${projectLiveLink(project.liveWebsite || project.website, project.title || "project")}
+            ${projectPreview(project.fileName, project.title || "project", project.screenshots)}
+            <div class="project-card-meta"><p class="section-kicker">${escapeHtml(category)}</p>${year ? `<span class="project-year-tag">${escapeHtml(year)}</span>` : ""}</div>
+            <h3>${escapeHtml(project.title || "Untitled project")}</h3>
+            <p>${escapeHtml(project.shortDesc || "")}</p>
+            ${technologies.length ? `<ul class="project-tech-tags" aria-label="Technologies used">${technologies.map(technology => `<li>${escapeHtml(technology)}</li>`).join("")}</ul>` : ""}
+            <a class="details-btn" href="project.html?id=${encodeURIComponent(id)}">Explore project <span aria-hidden="true">↗</span></a>
+            </article>`;
+        })()}
     `, "Project details will appear here when available.");
 
     setupProjectVideoPreviews();
@@ -228,71 +224,384 @@ function setupProjectCarousel() {
     const previous = $("#projectPrev");
     const next = $("#projectNext");
     const toggle = $("#toggleViewBtn");
+    const titleOutput = $("#projectGalleryTitle");
+    const categoryOutput = $("#projectGalleryCategory");
+    const yearOutput = $("#projectGalleryYear");
+    const positionOutput = $("#projectGalleryPosition");
+    const caption = $("#projectGalleryCaption");
     if (!track) return;
-    const canBrowse = track.querySelectorAll(":scope > .project-item").length > 1;
+
+    const preferredRank = title => {
+        const name = String(title || "").trim().toLowerCase();
+        if (name.includes("agrivision")) return 0;
+        if (name.includes("weather orion")) return 1;
+        if (name.includes("terminator") || name === "terminal") return 4;
+        return 2;
+    };
+    Array.from(track.querySelectorAll(":scope > .project-item"))
+        .map((card, index) => ({ card, index, rank: preferredRank(card.querySelector("h3")?.textContent) }))
+        .sort((left, right) => left.rank - right.rank || left.index - right.index)
+        .forEach(({ card }) => track.append(card));
+
+    const allCards = () => Array.from(track.querySelectorAll(":scope > .project-item"));
+    const visibleCards = () => allCards().filter(card => !card.hidden);
+    const wrapIndex = (value, length) => length ? ((value % length) + length) % length : 0;
+    const circularOffset = (index, position, length) => {
+        if (length <= 1) return 0;
+        const half = length / 2;
+        return ((index - position + half) % length + length) % length - half;
+    };
+    const carouselGeometry = (width, compact) => {
+        const angleStep = (compact ? 29 : 25) * Math.PI / 180;
+        const radiusX = Math.min(width * .62, compact ? 240 : 620);
+        return { angleStep, radiusX, dragStep: Math.max(64, radiusX * 2 * Math.sin(angleStep / 2)) };
+    };
+    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const state = track.projectGalleryState || { index: 0, position: 0, activeCard: null, dragging: false, rotating: false, hoverVelocity: 0, hoverTargetVelocity: 0, hoverFrame: 0, hoverLastTime: 0, suppressClickUntil: 0 };
+    track.projectGalleryState = state;
+    const canBrowse = allCards().length > 1;
     if (toggle) toggle.hidden = !canBrowse;
     if (previous) previous.hidden = !canBrowse;
     if (next) next.hidden = !canBrowse;
-    if (!canBrowse) return;
 
-    const updateArrows = () => {
-        const expanded = track.classList.contains("is-expanded");
-        if (previous) previous.disabled = expanded || track.scrollLeft <= 1;
-        if (next) next.disabled = expanded || track.scrollLeft + track.clientWidth >= track.scrollWidth - 1;
+    let galleryFrame = 0;
+    const updateGallery = (updateCaption = true) => {
+        galleryFrame = 0;
+        const cards = allCards();
+        if (track.classList.contains("is-expanded")) {
+            cards.forEach(card => {
+                card.classList.remove("is-gallery-active", "is-gallery-left", "is-gallery-right", "is-gallery-hidden");
+                card.removeAttribute("aria-hidden");
+                card.inert = false;
+                ["--gallery-x", "--gallery-y", "--gallery-z", "--gallery-yaw", "--gallery-hover-yaw", "--gallery-scale", "--gallery-opacity", "--gallery-order", "--gallery-brightness"].forEach(property => card.style.removeProperty(property));
+            });
+            if (carousel) carousel.classList.add("is-expanded");
+            caption?.classList.add("is-expanded");
+            if (previous) previous.disabled = true;
+            if (next) next.disabled = true;
+            return;
+        }
+
+        const visible = visibleCards();
+        if (!visible.length) {
+            cards.forEach(card => {
+                card.classList.remove("is-gallery-active", "is-gallery-left", "is-gallery-right", "is-gallery-hidden");
+                card.removeAttribute("aria-hidden");
+                card.inert = false;
+            });
+            if (previous) previous.disabled = true;
+            if (next) next.disabled = true;
+            return;
+        }
+
+        const previousActiveIndex = state.activeCard ? visible.indexOf(state.activeCard) : -1;
+        if (!state.dragging && !state.rotating) {
+            if (previousActiveIndex >= 0) state.index = previousActiveIndex;
+            else state.index = wrapIndex(state.index, visible.length);
+            state.position = state.index;
+            state.activeCard = visible[state.index];
+        } else {
+            state.position = wrapIndex(state.position, visible.length);
+            state.index = wrapIndex(Math.round(state.position), visible.length);
+            state.activeCard = visible[state.index];
+        }
+
+        const stageWidth = Math.max(1, track.clientWidth);
+        const compact = window.matchMedia("(max-width: 680px)").matches;
+        const { angleStep, radiusX } = carouselGeometry(stageWidth, compact);
+        const activeForCaption = visible[wrapIndex(Math.round(state.position), visible.length)];
+        const orbitCards = visible.map((card, index) => ({ card, index, offset: circularOffset(index, state.position, visible.length) }))
+            .sort((left, right) => Math.abs(left.offset) - Math.abs(right.offset) || left.index - right.index)
+            .slice(0, Math.min(5, visible.length));
+        const orbitIndices = new Set(orbitCards.map(item => item.index));
+
+        cards.forEach(card => {
+            const index = visible.indexOf(card);
+            if (index < 0) {
+                card.classList.remove("is-gallery-active", "is-gallery-left", "is-gallery-right", "is-gallery-hidden");
+                card.removeAttribute("aria-hidden");
+                card.inert = false;
+                return;
+            }
+
+            const offset = circularOffset(index, state.position, visible.length);
+            const distance = Math.abs(offset);
+            const direction = Math.sign(offset);
+            const angle = offset * angleStep;
+            const radiusY = compact ? 122 : 158;
+            const radiusZ = compact ? 260 : 420;
+            const x = Math.sin(angle) * radiusX;
+            const y = (1 - Math.cos(angle)) * radiusY - (compact ? 18 : 24);
+            const z = (Math.cos(angle) - 1) * radiusZ;
+            const yaw = distance < .015 ? 0 : -direction * Math.min(compact ? 34 : 38, Math.abs(angle) * .72 * 180 / Math.PI);
+            const scale = Math.max(compact ? .62 : .52, 1 - distance * (compact ? .14 : .13));
+            const opacity = Math.max(0, 1 - Math.max(0, distance - 1) * (compact ? .2 : .16));
+            const hidden = !orbitIndices.has(index);
+
+            card.classList.toggle("is-gallery-active", distance < .5);
+            card.classList.toggle("is-gallery-left", offset < -.5);
+            card.classList.toggle("is-gallery-right", offset > .5);
+            card.classList.toggle("is-gallery-hidden", hidden);
+            card.style.setProperty("--gallery-x", `${x.toFixed(1)}px`);
+            card.style.setProperty("--gallery-y", `${y.toFixed(1)}px`);
+            card.style.setProperty("--gallery-z", `${z.toFixed(1)}px`);
+            card.style.setProperty("--gallery-yaw", `${yaw.toFixed(2)}deg`);
+            card.style.setProperty("--gallery-hover-yaw", `${(yaw * .72).toFixed(2)}deg`);
+            card.style.setProperty("--gallery-scale", scale.toFixed(3));
+            card.style.setProperty("--gallery-opacity", opacity.toFixed(3));
+            card.style.setProperty("--gallery-order", String(Math.round(100 - distance * 20)));
+            card.style.setProperty("--gallery-brightness", (1 - Math.min(.2, distance * .065)).toFixed(3));
+            card.setAttribute("aria-hidden", String(hidden));
+            card.inert = hidden;
+        });
+
+        if (previous) previous.disabled = visible.length <= 1;
+        if (next) next.disabled = visible.length <= 1;
+        if (carousel) carousel.classList.remove("is-expanded");
+        caption?.classList.remove("is-expanded");
+
+        if (updateCaption && !state.dragging && activeForCaption) {
+            if (titleOutput) titleOutput.textContent = activeForCaption.querySelector("h3")?.textContent.trim() || "Project";
+            if (categoryOutput) categoryOutput.textContent = activeForCaption.dataset.category || activeForCaption.querySelector(".section-kicker")?.textContent.trim() || "Selected work";
+            const rawYear = String(activeForCaption.dataset.year || "");
+            const matchedYear = rawYear.match(/\b(?:19|20)\d{2}\b/);
+            if (yearOutput) {
+                yearOutput.textContent = matchedYear?.[0] || "—";
+                yearOutput.closest(".project-gallery-year")?.classList.toggle("is-unlisted", !matchedYear);
+            }
+            if (positionOutput) positionOutput.textContent = `${String(state.index + 1).padStart(2, "0")} / ${String(visible.length).padStart(2, "0")}`;
+        }
     };
-    track.updateProjectArrows = updateArrows;
-    if (track.dataset.carouselReady) {
-        requestAnimationFrame(updateArrows);
-        return;
+    const scheduleGallery = (updateCaption = true) => {
+        if (!galleryFrame) galleryFrame = requestAnimationFrame(() => updateGallery(updateCaption));
+    };
+    const stopHoverRotation = () => {
+        if (state.hoverFrame) cancelAnimationFrame(state.hoverFrame);
+        state.hoverFrame = 0;
+        state.hoverLastTime = 0;
+        state.hoverVelocity = 0;
+        state.hoverTargetVelocity = 0;
+        state.rotating = false;
+        track.classList.remove("is-hover-rotating");
+        const visible = visibleCards();
+        state.index = wrapIndex(state.index, visible.length);
+        state.position = state.index;
+        state.activeCard = visible[state.index] || null;
+        scheduleGallery();
+    };
+    const animateHoverRotation = timestamp => {
+        state.hoverFrame = 0;
+        if (reduceMotion || state.dragging || track.classList.contains("is-expanded") || visibleCards().length <= 1) {
+            stopHoverRotation();
+            return;
+        }
+
+        const visible = visibleCards();
+        const deltaTime = state.hoverLastTime ? Math.min(.05, (timestamp - state.hoverLastTime) / 1000) : 0;
+        state.hoverLastTime = timestamp;
+        const smoothing = 1 - Math.exp(-deltaTime / .2);
+        state.hoverVelocity += (state.hoverTargetVelocity - state.hoverVelocity) * smoothing;
+
+        if (Math.abs(state.hoverTargetVelocity) < .005 && Math.abs(state.hoverVelocity) < .012) {
+            state.hoverVelocity = 0;
+            state.hoverTargetVelocity = 0;
+            state.rotating = false;
+            track.classList.remove("is-hover-rotating");
+            state.position = state.index;
+            state.activeCard = visible[state.index] || null;
+            updateGallery();
+            return;
+        }
+
+        state.rotating = true;
+        track.classList.add("is-hover-rotating");
+        state.position = wrapIndex(state.position + state.hoverVelocity * deltaTime, visible.length);
+        state.index = wrapIndex(Math.round(state.position), visible.length);
+        state.activeCard = visible[state.index] || null;
+        if (galleryFrame) cancelAnimationFrame(galleryFrame);
+        updateGallery();
+        state.hoverFrame = requestAnimationFrame(animateHoverRotation);
+    };
+    const updateHoverVelocity = event => {
+        if (reduceMotion || track.classList.contains("is-expanded") || visibleCards().length <= 1) return;
+        const bounds = track.getBoundingClientRect();
+        const normalizedX = ((event.clientX - bounds.left) / Math.max(1, bounds.width)) * 2 - 1;
+        const deadZone = .22;
+        const intensity = Math.max(0, (Math.abs(normalizedX) - deadZone) / (1 - deadZone));
+        state.hoverTargetVelocity = -Math.sign(normalizedX) * Math.pow(intensity, 1.65) * 1.05;
+        if (!state.hoverFrame && (Math.abs(state.hoverTargetVelocity) > .005 || Math.abs(state.hoverVelocity) > .005)) {
+            state.hoverFrame = requestAnimationFrame(animateHoverRotation);
+        }
+    };
+    const selectIndex = index => {
+        const visible = visibleCards();
+        if (!visible.length) return;
+        if (state.hoverFrame) cancelAnimationFrame(state.hoverFrame);
+        state.hoverFrame = 0;
+        state.hoverLastTime = 0;
+        state.hoverVelocity = 0;
+        state.hoverTargetVelocity = 0;
+        state.rotating = false;
+        track.classList.remove("is-hover-rotating");
+        state.index = wrapIndex(index, visible.length);
+        state.position = state.index;
+        state.activeCard = visible[state.index];
+        scheduleGallery();
+    };
+
+    track.updateProjectArrows = () => {
+        const visible = visibleCards();
+        const activeIndex = state.activeCard ? visible.indexOf(state.activeCard) : -1;
+        if (activeIndex >= 0) state.index = activeIndex;
+        else state.index = 0;
+        state.position = state.index;
+        state.activeCard = visible[state.index] || null;
+        scheduleGallery();
+    };
+
+    if (!track.dataset.carouselReady) {
+        track.dataset.carouselReady = "true";
+        const stepBy = amount => selectIndex(state.index + amount);
+
+        previous?.addEventListener("click", () => stepBy(-1));
+        next?.addEventListener("click", () => stepBy(1));
+        track.addEventListener("click", event => {
+            if (performance.now() < state.suppressClickUntil) {
+                event.preventDefault();
+                event.stopPropagation();
+                return;
+            }
+            if (event.target.closest("a")) return;
+            const card = event.target.closest(".project-item");
+            if (!card || card.hidden) return;
+            const index = visibleCards().indexOf(card);
+            if (index >= 0) selectIndex(index);
+        });
+        track.addEventListener("keydown", event => {
+            if (track.classList.contains("is-expanded")) return;
+            if (event.key === "ArrowLeft") {
+                event.preventDefault();
+                stepBy(-1);
+            } else if (event.key === "ArrowRight") {
+                event.preventDefault();
+                stepBy(1);
+            } else if (event.key === "Home") {
+                event.preventDefault();
+                selectIndex(0);
+            } else if (event.key === "End") {
+                event.preventDefault();
+                selectIndex(visibleCards().length - 1);
+            }
+        });
+
+        track.addEventListener("pointerdown", event => {
+            const action = event.target.closest("a, button");
+            const previewAction = action?.matches(".project-preview.file-preview");
+            if (track.classList.contains("is-expanded") || (event.pointerType === "mouse" && event.button !== 0) || (action && !previewAction)) return;
+            if (event.pointerType === "mouse" && state.hoverFrame) stopHoverRotation();
+            state.dragging = false;
+            state.drag = { id: event.pointerId, startX: event.clientX, startPosition: state.index, moved: false, card: event.target.closest(".project-item") };
+            track.setPointerCapture?.(event.pointerId);
+        });
+        track.addEventListener("pointermove", event => {
+            if (state.drag && state.drag.id === event.pointerId) {
+                const delta = event.clientX - state.drag.startX;
+                if (Math.abs(delta) > 5) {
+                    state.drag.moved = true;
+                    state.dragging = true;
+                    track.classList.add("is-dragging");
+                    const stageWidth = Math.max(1, track.clientWidth);
+                    const compact = window.matchMedia("(max-width: 680px)").matches;
+                    const { dragStep } = carouselGeometry(stageWidth, compact);
+                    const step = dragStep;
+                    state.position = wrapIndex(state.drag.startPosition - delta / step, visibleCards().length);
+                    if (galleryFrame) cancelAnimationFrame(galleryFrame);
+                    galleryFrame = requestAnimationFrame(() => updateGallery(false));
+                    event.preventDefault();
+                }
+                return;
+            }
+
+            if (event.pointerType !== "mouse") return;
+            updateHoverVelocity(event);
+            const card = event.target.closest?.(".project-item");
+            if (!card || !track.contains(card) || track.classList.contains("is-dragging")) return;
+            const bounds = card.getBoundingClientRect();
+            const x = (event.clientX - bounds.left) / Math.max(1, bounds.width) - .5;
+            const y = (event.clientY - bounds.top) / Math.max(1, bounds.height) - .5;
+            card.style.setProperty("--project-tilt-x", `${(-y * 2.4).toFixed(2)}deg`);
+            card.style.setProperty("--project-tilt-y", `${(x * 3.2).toFixed(2)}deg`);
+        }, { passive: false });
+        const finishDrag = event => {
+            if (!state.drag || state.drag.id !== event.pointerId) return;
+            if (state.drag.moved) {
+                state.index = wrapIndex(Math.round(state.position), visibleCards().length);
+                state.activeCard = visibleCards()[state.index] || null;
+                state.position = state.index;
+                state.suppressClickUntil = performance.now() + 240;
+            } else if (state.drag.card && visibleCards().includes(state.drag.card)) {
+                selectIndex(visibleCards().indexOf(state.drag.card));
+            }
+            state.drag = null;
+            state.dragging = false;
+            track.classList.remove("is-dragging");
+            scheduleGallery();
+        };
+        track.addEventListener("pointerup", finishDrag);
+        track.addEventListener("pointercancel", finishDrag);
+        track.addEventListener("lostpointercapture", finishDrag);
+        track.addEventListener("pointerleave", event => {
+            if (event.pointerType === "mouse") stopHoverRotation();
+        });
+        track.addEventListener("pointerout", event => {
+            const card = event.target.closest?.(".project-item");
+            if (!card || !track.contains(card) || card.contains(event.relatedTarget)) return;
+            card.style.removeProperty("--project-tilt-x");
+            card.style.removeProperty("--project-tilt-y");
+        }, { passive: true });
+        window.addEventListener("resize", track.updateProjectArrows);
+
+        if (toggle) {
+            toggle.textContent = "See all projects";
+            toggle.setAttribute("aria-expanded", "false");
+            toggle.onclick = () => {
+                const expanded = track.classList.toggle("is-expanded");
+                if (carousel) carousel.classList.toggle("is-expanded", expanded);
+                toggle.textContent = expanded ? "View carousel" : "See all projects";
+                toggle.setAttribute("aria-expanded", String(expanded));
+                scheduleGallery();
+            };
+        }
     }
-    track.dataset.carouselReady = "true";
-    const scrollBehavior = () => window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth";
-    previous?.addEventListener("click", () => track.scrollBy({ left: -track.clientWidth, behavior: scrollBehavior() }));
-    next?.addEventListener("click", () => track.scrollBy({ left: track.clientWidth, behavior: scrollBehavior() }));
-    track.addEventListener("scroll", updateArrows, { passive: true });
-    window.addEventListener("resize", updateArrows);
-    updateArrows();
 
-    toggle.textContent = "See all projects";
-    toggle.setAttribute("aria-expanded", "false");
-    toggle.onclick = () => {
-        const expanded = track.classList.toggle("is-expanded");
-        carousel?.classList.toggle("is-expanded", expanded);
-        toggle.textContent = expanded ? "View carousel" : "See all projects";
-        toggle.setAttribute("aria-expanded", String(expanded));
-        if (!expanded) track.scrollTo({ left: 0, behavior: scrollBehavior() });
-        requestAnimationFrame(updateArrows);
-    };
+    const activeCard = visibleCards().find(card => card.classList.contains("is-gallery-active")) || state.activeCard;
+    if (activeCard && visibleCards().includes(activeCard)) state.activeCard = activeCard;
+    else if (!state.activeCard || !visibleCards().includes(state.activeCard)) state.activeCard = visibleCards()[Math.max(0, Math.min(state.index, visibleCards().length - 1))] || null;
+    if (state.activeCard) state.index = visibleCards().indexOf(state.activeCard);
+    state.position = state.index;
+    updateGallery();
 }
 
 async function loadCertificates() {
-    await renderCollection("certificates", "#certificatesContainer", ({ data }) => `
-        <article class="certificate-item">
-            ${certificatePreview(data.fileName, data.title || "Certificate")}
-            <h3>${escapeHtml(data.title || "Certificate")}</h3>
-            <p>${escapeHtml(data.issuer || "")}</p>
-        </article>
-    `, "No certificates have been added yet.");
-
-    setupCertificateControls();
-}
-
-function setupCertificateControls() {
     const container = $("#certificatesContainer");
-    const toggle = $("#certToggleBtn");
-    if (toggle && container) {
-        if (!container.dataset.controlsReady) {
-            container.dataset.controlsReady = "true";
-            toggle.onclick = () => {
-                const grid = container.classList.toggle("cert-grid");
-                toggle.textContent = grid ? "View as a row" : "View as a grid";
-            };
-            const behavior = () => window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth";
-            $("#certPrev")?.addEventListener("click", () => container.scrollBy({ left: -300, behavior: behavior() }));
-            $("#certNext")?.addEventListener("click", () => container.scrollBy({ left: 300, behavior: behavior() }));
+    if (!container) return;
+    try {
+        const { collection, getDocs, db } = await getFirebaseModules();
+        const snapshot = await getDocs(collection(db, "certificates"));
+        const records = snapshot.docs
+            .map(snapshotDoc => ({ id: snapshotDoc.id, data: snapshotDoc.data() }))
+            .sort(byOrder);
+        if (records.length) {
+            container.innerHTML = records.map(normalizeCertificate).map(renderCertificateCard).join("");
+            setupReveal(container);
+            container.querySelectorAll(":scope > .certificate-item").forEach((card, index) => card.style.setProperty("--reveal-delay", `${index * 75}ms`));
+            const filters = document.querySelector('.filter-tabs[data-filter-group="certificates"]');
+            filters?.applyFilter?.(filters.dataset.activeFilter || "all");
         }
-        toggle.hidden = container.querySelectorAll(":scope > .certificate-item").length <= 1;
+    } catch (error) {
+        console.info("Using bundled certificate content because Firestore is unavailable.", error);
     }
+    setupCertificateControls();
 }
 
 async function loadSkills() {
@@ -305,31 +614,69 @@ async function loadSkills() {
         const records = snapshot.docs
             .map(snapshotDoc => ({ id: snapshotDoc.id, data: snapshotDoc.data() }))
             .sort(byOrder);
-        if (!records.length) return;
 
-        const groups = ["Programming", "AI & Machine Learning", "Databases & Cloud"];
-        const categoryFor = data => {
-            if (data.category === "Computer Science Foundations") return "Databases & Cloud";
-            if (groups.includes(data.category)) return data.category;
-            const value = String(data.name || "").toLowerCase();
-            if (/python|javascript|typescript|java|c\+\+|programming/.test(value)) return "Programming";
-            if (/machine learning|computer vision|pytorch|deep learning|generative|\bai\b|\bgan\b|recommendation/.test(value)) return "AI & Machine Learning";
-            if (/database|\bdbms\b|sql|postgres|mysql|cloud|aws|azure|gcp/.test(value)) return "Databases & Cloud";
-            return "Databases & Cloud";
+        let categoryRecords = [];
+        try {
+            const categorySnapshot = await getDocs(collection(db, "skillCategories"));
+            categoryRecords = categorySnapshot.docs.map(item => ({ id: item.id, ...item.data() }))
+                .filter(item => String(item.name || "").trim());
+        } catch (error) {
+            console.info("Skill type records are unavailable; using skill assignments.", error);
+        }
+        if (!records.length) {
+            setupToolkitInteractions(container);
+            return;
+        }
+
+        const normalizeCategory = value => {
+            const name = String(value || "").trim();
+            return name === "Computer Science Foundations" ? "Databases & Cloud" : name;
         };
-        container.innerHTML = groups.map(group => {
-            const items = records.filter(({ data }) => categoryFor(data) === group);
-            if (!items.length) return "";
-            return `<section class="skill-group"><h3>${escapeHtml(group)}</h3><div class="skill-group-items">${items.map(({ data }) => `
-                <div class="skill-pill"><span aria-hidden="true">${escapeHtml(data.icon || "•")}</span><span>${escapeHtml(data.name || "")}</span></div>
-            `).join("")}</div></section>`;
-        }).join("");
-        setupReveal(container);
+        const categoryById = new Map(categoryRecords.map(category => [category.id, category]));
+        const categoryByName = new Map(categoryRecords.map(category => [normalizeCategory(category.name).toLocaleLowerCase(), category]));
+        const groups = categoryRecords.length
+            ? categoryRecords.map(category => ({ ...category, name: normalizeCategory(category.name) }))
+            : ["Programming", "AI & Machine Learning", "Databases & Cloud"].map((name, order) => ({ id: `default-${order}`, name, order }));
+        const ensureGroup = name => {
+            const normalized = normalizeCategory(name || "Uncategorized");
+            let group = groups.find(item => item.name.toLocaleLowerCase() === normalized.toLocaleLowerCase());
+            if (!group) {
+                group = { id: `legacy-${groups.length}`, name: normalized, order: groups.length };
+                groups.push(group);
+            }
+            return group;
+        };
+        const categoryFor = data => {
+            if (categoryById.has(data.categoryId)) return categoryById.get(data.categoryId);
+            const name = normalizeCategory(data.category || "Uncategorized");
+            return categoryByName.get(name.toLocaleLowerCase()) || ensureGroup(name);
+        };
+        const itemsByGroup = new Map(groups.map(group => [group.id, []]));
+        records.forEach(record => {
+            const group = categoryFor(record.data);
+            if (!itemsByGroup.has(group.id)) itemsByGroup.set(group.id, []);
+            itemsByGroup.get(group.id).push(record);
+        });
+        groups.sort((left, right) =>
+            (left.order ?? Number.MAX_SAFE_INTEGER) - (right.order ?? Number.MAX_SAFE_INTEGER) || left.name.localeCompare(right.name)
+        );
+        const renderedGroups = groups.map((group, index) => ({
+            ...group,
+            id: String(group.id || `skill-group-${index}`),
+            items: itemsByGroup.get(group.id) || []
+        }));
+        container.innerHTML = renderSkillGroups(renderedGroups);
+        setupToolkitInteractions(container, renderedGroups.map(group => ({
+            id: group.id,
+            name: group.name,
+            count: group.items.length
+        })));
     } catch (error) {
         console.info("Using bundled skills content because Firestore is unavailable.", error);
         if (!container.querySelector(".skill-pill")) {
             setState(container, "This content is temporarily unavailable. Please try again later.", "error");
         }
+        setupToolkitInteractions(container);
     }
 }
 
@@ -586,6 +933,8 @@ function setupMilestoneTimeline() {
     const pathSvg = timeline.querySelector(".milestone-path");
     const basePath = pathSvg?.querySelector(".milestone-path-base");
     const progressPath = pathSvg?.querySelector(".milestone-path-progress");
+    const paperPlane = pathSvg?.querySelector(".milestone-paper-plane");
+    const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     let frame = 0;
     const updateTimelinePath = () => {
         frame = 0;
@@ -597,8 +946,8 @@ function setupMilestoneTimeline() {
 
         pathSvg.setAttribute("viewBox", `0 0 ${width} ${height}`);
         pathSvg.style.height = `${height}px`;
-        const nodes = Array.from(timeline.querySelectorAll(".milestone-node, .timeline-year-node")).map(node => {
-            const rect = node?.getBoundingClientRect();
+        const nodes = Array.from(timeline.querySelectorAll(".milestone-node, .timeline-year-node")).map(element => {
+            const rect = element?.getBoundingClientRect();
             return rect ? {
                 x: rect.left + rect.width / 2 - bounds.left,
                 y: rect.top + rect.height / 2 - bounds.top
@@ -634,6 +983,22 @@ function setupMilestoneTimeline() {
         const distance = Math.min(bounds.height, Math.max(0, window.innerHeight * 0.72 - bounds.top));
         const progress = bounds.height ? distance / bounds.height : 0;
         progressPath.style.strokeDashoffset = String(length * (1 - progress));
+
+        if (paperPlane && length > 0) {
+            const scrollProgress = prefersReducedMotion ? 0 : Math.min(1, Math.max(0, progress));
+            const travelled = scrollProgress * length;
+            const point = basePath.getPointAtLength(travelled);
+            const tangentWindow = compactPath ? 20 : 12;
+            const tangentStart = basePath.getPointAtLength(Math.max(0, travelled - tangentWindow));
+            const tangentEnd = basePath.getPointAtLength(Math.min(length, travelled + tangentWindow));
+            const tangentX = tangentEnd.x - tangentStart.x;
+            const tangentY = tangentEnd.y - tangentStart.y;
+            const liftProgress = prefersReducedMotion ? 0 : Math.min(1, Math.max(0, (progress - 0.985) / 0.015));
+            const lift = liftProgress * liftProgress * (3 - 2 * liftProgress);
+            const angle = Math.atan2(tangentY, tangentX) * 180 / Math.PI - lift * 10;
+            paperPlane.setAttribute("transform", `translate(${point.x.toFixed(2)} ${(point.y - lift * 9).toFixed(2)}) rotate(${angle.toFixed(2)}) scale(1.4 1.05)`);
+            paperPlane.setAttribute("visibility", "visible");
+        }
     };
     const schedulePathUpdate = () => {
         if (!frame) frame = window.requestAnimationFrame(updateTimelinePath);
@@ -670,6 +1035,208 @@ function setupScrollProgress() {
     window.addEventListener("resize", scheduleUpdate, { passive: true });
     if ("ResizeObserver" in window) new ResizeObserver(scheduleUpdate).observe(document.documentElement);
     scheduleUpdate();
+}
+
+function setupHeroAtmosphere() {
+    const hero = $("#about");
+    if (!hero) return;
+
+    const laptop = $("#heroLaptop");
+    const laptopShadow = $("#heroLaptopShadow");
+    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const introStarted = performance.now();
+    let heroPageTop = hero.getBoundingClientRect().top + window.scrollY;
+    let frame = 0;
+
+    const update = time => {
+        frame = 0;
+        const fadeDistance = Math.max(560, Math.min(hero.offsetHeight, window.innerHeight * 1.15));
+        const scrolledPastHero = Math.max(0, window.scrollY - heroPageTop);
+        const scrollFade = Math.max(0, 1 - scrolledPastHero / fadeDistance);
+        const arrival = reducedMotion ? 1 : Math.min(1, (time - introStarted) / 760);
+        hero.style.setProperty("--hero-wash-opacity", (0.78 * arrival * scrollFade).toFixed(3));
+        const laptopArrival = reducedMotion ? 1 : Math.min(1, Math.max(0, (time - introStarted - 120) / 650));
+        const laptopOpacity = laptopArrival * scrollFade;
+        laptop?.style.setProperty("--laptop-opacity", laptopOpacity.toFixed(3));
+        if (laptop) laptop.classList.toggle("is-active", laptopOpacity > 0.015);
+        if (laptopShadow) laptopShadow.style.opacity = ((0.12 + 0.37 * laptopArrival) * scrollFade).toFixed(3);
+
+        if (arrival >= 1) hero.classList.add("wash-settled");
+        else frame = window.requestAnimationFrame(update);
+    };
+    const scheduleUpdate = () => {
+        if (!frame) frame = window.requestAnimationFrame(update);
+    };
+
+    hero.classList.add("wash-ready");
+    window.addEventListener("scroll", scheduleUpdate, { passive: true });
+    window.addEventListener("resize", () => {
+        heroPageTop = hero.getBoundingClientRect().top + window.scrollY;
+        scheduleUpdate();
+    }, { passive: true });
+    if ("ResizeObserver" in window) new ResizeObserver(scheduleUpdate).observe(hero);
+    scheduleUpdate();
+}
+
+function setupEducationTimeline() {
+    const path = $("#educationPath");
+    if (!path) return;
+
+    const compass = path.querySelector(".edu-compass");
+    const rows = Array.from(path.querySelectorAll(".edu-row"));
+    const nodes = rows.map(row => row.querySelector(".edu-node")).filter(Boolean);
+    if (rows.length < 2 || nodes.length < 2) return;
+
+    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const compassAngles = [-32, 0, 32];
+    let activeRowIndex = -1;
+    let frame = 0;
+    const clamp = value => Math.min(1, Math.max(0, value));
+
+    const positionCompass = index => {
+        if (!compass || index < 0 || !nodes[index]) return;
+        const pathRect = path.getBoundingClientRect();
+        const nodeRect = nodes[index].getBoundingClientRect();
+        const activeY = `${(nodeRect.top + nodeRect.height / 2 - pathRect.top).toFixed(1)}px`;
+        if (path.style.getPropertyValue("--edu-active-y") !== activeY) {
+            path.style.setProperty("--edu-active-y", activeY);
+        }
+    };
+
+    const setActiveRow = index => {
+        if (index < 0 || index >= rows.length) return;
+        const changed = index !== activeRowIndex;
+        activeRowIndex = index;
+        rows.forEach((row, rowIndex) => {
+            const active = rowIndex === index;
+            row.classList.toggle("is-current", active);
+            if (active) nodes[rowIndex].setAttribute("aria-current", "step");
+            else nodes[rowIndex].removeAttribute("aria-current");
+        });
+        positionCompass(index);
+        if (changed) compass?.style.setProperty("--edu-compass-angle", `${compassAngles[index] ?? 0}deg`);
+    };
+
+    const update = () => {
+        frame = 0;
+        const pathRect = path.getBoundingClientRect();
+        const firstRect = nodes[0].getBoundingClientRect();
+        const lastRect = nodes[nodes.length - 1].getBoundingClientRect();
+        const firstY = firstRect.top + firstRect.height / 2;
+        const lastY = lastRect.top + lastRect.height / 2;
+        const lineLength = Math.max(1, lastY - firstY);
+
+        path.style.setProperty("--edu-line-left", `${firstRect.left + firstRect.width / 2 - pathRect.left}px`);
+        path.style.setProperty("--edu-line-top", `${firstY - pathRect.top}px`);
+        path.style.setProperty("--edu-line-height", `${lineLength}px`);
+
+        const progress = reducedMotion ? 1 : clamp((window.innerHeight * 0.72 - firstY) / lineLength);
+        path.style.setProperty("--edu-progress", progress.toFixed(3));
+        if (activeRowIndex >= 0) positionCompass(activeRowIndex);
+        if (!("IntersectionObserver" in window)) {
+            const viewportCenter = window.innerHeight / 2;
+            let nearestIndex = 0;
+            let nearestDistance = Infinity;
+            rows.forEach((row, index) => {
+                const rect = row.getBoundingClientRect();
+                const distance = Math.abs(rect.top + rect.height / 2 - viewportCenter);
+                if (distance < nearestDistance) {
+                    nearestDistance = distance;
+                    nearestIndex = index;
+                }
+            });
+            if (nearestIndex !== activeRowIndex) setActiveRow(nearestIndex);
+        }
+    };
+
+    const scheduleUpdate = () => {
+        if (!frame) frame = window.requestAnimationFrame(update);
+    };
+
+    if (reducedMotion || !("IntersectionObserver" in window)) {
+        rows.forEach(row => row.classList.add("is-visible"));
+    }
+    setActiveRow(0);
+    nodes.forEach((node, index) => {
+        node.addEventListener("click", () => {
+            setActiveRow(index);
+            rows[index].scrollIntoView({
+                behavior: reducedMotion ? "auto" : "smooth",
+                block: "center"
+            });
+        });
+    });
+    if ("IntersectionObserver" in window) {
+        const visibleRows = new Map();
+        const observer = new IntersectionObserver(entries => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) visibleRows.set(entry.target, entry.intersectionRatio);
+                else visibleRows.delete(entry.target);
+            });
+
+            const viewportCenter = window.innerHeight / 2;
+            let bestIndex = -1;
+            let bestScore = -1;
+            visibleRows.forEach((ratio, row) => {
+                const index = rows.indexOf(row);
+                if (index < 0) return;
+                const rect = row.getBoundingClientRect();
+                const centerDistance = Math.abs(rect.top + rect.height / 2 - viewportCenter);
+                const centerScore = 1 - Math.min(1, centerDistance / Math.max(1, window.innerHeight));
+                const score = ratio * .7 + centerScore * .3;
+                if (score > bestScore) {
+                    bestScore = score;
+                    bestIndex = index;
+                }
+            });
+            if (bestIndex >= 0) setActiveRow(bestIndex);
+        }, { threshold: [0, .1, .25, .5, .75, 1] });
+        rows.forEach(row => observer.observe(row));
+    }
+    window.addEventListener("scroll", scheduleUpdate, { passive: true });
+    window.addEventListener("resize", scheduleUpdate, { passive: true });
+    if ("ResizeObserver" in window) {
+        const resizeObserver = new ResizeObserver(scheduleUpdate);
+        resizeObserver.observe(path);
+        rows.forEach(row => resizeObserver.observe(row));
+    }
+    update();
+}
+function setupHeroLaptop() {
+    const hero = $("#about");
+    const laptop = $("#heroLaptop");
+    const model = $("#laptopModel");
+    const keyboard = $("#laptopKeyboard");
+    if (!hero || !laptop || !model) return;
+
+    if (keyboard) {
+        keyboard.innerHTML = [13, 13, 13, 11].map(count => `
+            <div class="laptop-key-row">${Array.from({ length: count }, () => "<span></span>").join("")}</div>
+        `).join("");
+    }
+
+    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (reducedMotion) laptop.classList.add("laptop-static", "is-active", "is-visible");
+    else if ("IntersectionObserver" in window) {
+        new IntersectionObserver(entries => {
+            laptop.classList.toggle("is-visible", entries[0].isIntersecting);
+        }, { rootMargin: "120px" }).observe(laptop);
+    } else laptop.classList.add("is-visible");
+
+    const canTilt = !reducedMotion && window.matchMedia("(hover: hover) and (pointer: fine)").matches;
+    if (!canTilt) return;
+
+    hero.addEventListener("pointermove", event => {
+        const bounds = hero.getBoundingClientRect();
+        const horizontal = Math.min(1, Math.max(0, (event.clientX - bounds.left) / bounds.width));
+        const vertical = Math.min(1, Math.max(0, (event.clientY - bounds.top) / bounds.height));
+        model.style.setProperty("--laptop-tilt-x", `${((0.5 - vertical) * 7).toFixed(2)}deg`);
+        model.style.setProperty("--laptop-tilt-y", `${((0.5 - horizontal) * 7).toFixed(2)}deg`);
+    }, { passive: true });
+    hero.addEventListener("pointerleave", () => {
+        model.style.setProperty("--laptop-tilt-x", "0deg");
+        model.style.setProperty("--laptop-tilt-y", "0deg");
+    }, { passive: true });
 }
 
 function setupFilters() {
@@ -720,33 +1287,23 @@ function setupFilters() {
 
 function setupHeroTyping() {
     const target = $("#heroTypedText");
-    if (!target || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-    const lines = [
-        "Building practical machine learning systems",
-        "Turning research into working software",
-        "Exploring ideas through intelligent systems"
-    ];
-    let line = 0;
-    let position = target.textContent.length;
-    let deleting = false;
+    if (!target) return;
+    const line = "Building practical machine learning systems";
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+        target.textContent = line;
+        return;
+    }
+
+    let position = 0;
 
     const write = () => {
-        const current = lines[line];
-        target.textContent = current.slice(0, position);
-        let delay = deleting ? 18 : 31;
-        if (!deleting && position === current.length) {
-            deleting = true;
-            delay = 1050;
-        } else if (deleting && position === 0) {
-            deleting = false;
-            line = (line + 1) % lines.length;
-            delay = 250;
-        }
-        position += deleting ? -1 : 1;
-        window.setTimeout(write, delay);
+        target.textContent = line.slice(0, position);
+        position += 1;
+        if (position <= line.length) window.setTimeout(write, 19);
     };
 
-    window.setTimeout(write, 500);
+    target.textContent = "";
+    window.setTimeout(write, 160);
 }
 
 function setupHeroNetwork() {
@@ -766,8 +1323,8 @@ function setupHeroNetwork() {
     const draw = time => {
         frame = 0;
         context.clearRect(0, 0, width, height);
-        const accent = getComputedStyle(document.body).getPropertyValue("--accent").trim() || "#a6402b";
-        const maxDistance = Math.min(150, Math.max(90, width * 0.12));
+        const accent = getComputedStyle(document.body).getPropertyValue("--hero-signal").trim() || "#28777c";
+        const maxDistance = Math.min(166, Math.max(108, width * 0.13));
         nodes.forEach((node, index) => {
             if (!reducedMotion && time) {
                 node.x += Math.cos(node.phase + time * 0.00013) * node.drift;
@@ -790,14 +1347,14 @@ function setupHeroNetwork() {
                 context.moveTo(x, y);
                 context.lineTo(other.x, other.y);
                 context.strokeStyle = accent;
-                context.globalAlpha = (1 - distance / maxDistance) * 0.16;
-                context.lineWidth = 0.7;
+                context.globalAlpha = (1 - distance / maxDistance) * 0.2;
+                context.lineWidth = 0.82;
                 context.stroke();
             }
             context.beginPath();
-            context.arc(x, y, pointerDistance < 125 ? 2.1 : 1.35, 0, Math.PI * 2);
+            context.arc(x, y, pointerDistance < 125 ? 2.3 : 1.5, 0, Math.PI * 2);
             context.fillStyle = accent;
-            context.globalAlpha = pointerDistance < 125 ? 0.48 : 0.3;
+            context.globalAlpha = pointerDistance < 125 ? 0.66 : 0.42;
             context.fill();
         });
         context.globalAlpha = 1;
@@ -813,7 +1370,7 @@ function setupHeroNetwork() {
         canvas.height = Math.round(height * scale);
         context.setTransform(scale, 0, 0, scale, 0, 0);
         nodes.length = 0;
-        const count = Math.max(24, Math.round(width / 15));
+        const count = Math.max(24, Math.round(width / 20));
         for (let index = 0; index < count; index++) {
             nodes.push({ x: Math.random() * width, y: Math.random() * height, phase: Math.random() * Math.PI * 2, drift: 0.12 + Math.random() * 0.22 });
         }
@@ -841,17 +1398,22 @@ function setupHeroNetwork() {
 document.addEventListener("DOMContentLoaded", async () => {
     setupThemeToggle($("#themeToggle"));
     setupFileModal();
+    setupCertificateModal();
     setupContactForm();
     setupActiveNavigation();
     setupMilestoneTimeline();
     setupScrollProgress();
+    setupHeroAtmosphere();
+    setupHeroLaptop();
     setupFilters();
     setupProjectCarousel();
     setupCertificateControls();
     setupHeroNetwork();
     setupHeroTyping();
     setupReveal();
+    setupEducationTimeline();
     setupProjectVideoPreviews();
+    setupToolkitInteractions($("#skillsContainer"));
     const year = $("#currentYear");
     if (year) year.textContent = String(new Date().getFullYear());
 

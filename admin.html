@@ -66,6 +66,7 @@
                 <!-- ADD PROJECT -->
                 <div class="project-form">
                     <input type="text" id="projectTitle" placeholder="Project Title" aria-label="Project Title">
+                    <input type="number" id="projectYear" min="1900" max="2099" step="1" placeholder="Year (optional)" aria-label="Project year (optional)">
                     <input type="text" id="shortDesc" placeholder="Short Description (for preview)" aria-label="Short Description (for preview)">
                     <select id="projectCategory" aria-label="Project category" required>
                         <option value="">Choose a project category</option>
@@ -129,18 +130,25 @@
            <div class="admin-card skill-section admin-section" data-admin-section="skills">
 
                 <h3 class="section-primary">Skills</h3>
-                <p class="admin-help">Choose the group where each tool should appear in the public toolkit.</p>
+                <p class="admin-help">Manage the skill types shown on your website, then assign each tool to the right type.</p>
+
+                <h3 class="section-secondary">Skill Types</h3>
+                <div id="adminSkillCategoriesContainer" class="skill-category-list"></div>
+                <div class="skill-category-add-form">
+                    <input type="text" id="newSkillCategoryName" maxlength="60" placeholder="New skill type" aria-label="New skill type">
+                    <button id="addSkillCategoryBtn" class="admin-btn" type="button">Add Skill Type</button>
+                </div>
+                <p id="skillCategoryStatus" class="skill-category-status" role="status" aria-live="polite"></p>
 
                 <!-- ADD SKILL -->
                 <div class="skill-form">
                     <input type="text" id="skillName" placeholder="Skill Name" aria-label="Skill Name">
-                    <input type="text" id="skillIcon" placeholder="Icon (emoji like 🚀)" aria-label="Icon (emoji like 🚀)">
+                    <input type="url" id="skillIconUrl" placeholder="Official brand icon URL (optional)" aria-label="Official brand icon URL (optional)">
                     <select id="skillCategory" aria-label="Skill category" required>
-                        <option value="">Choose a skill category</option>
-                        <option value="Programming">Programming</option>
-                        <option value="AI & Machine Learning">AI &amp; Machine Learning</option>
-                        <option value="Databases & Cloud">Databases &amp; Cloud</option>
+                        <option value="">Choose a skill type</option>
                     </select>
+                    <input type="text" id="skillBrandColor" maxlength="7" placeholder="Brand color (optional, #RRGGBB)" aria-label="Brand color, optional hex value">
+                    <textarea id="skillContext" maxlength="160" placeholder="How you use this tool (optional, one line)" aria-label="How you use this tool (optional)"></textarea>
                     <button id="addSkillBtn" class="admin-btn">Add Skill</button>
                 </div>
 

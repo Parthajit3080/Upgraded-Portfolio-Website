@@ -1,5 +1,5 @@
 import { escapeHtml, safeExternalUrl, safeAssetFilename, safeDocumentId } from "./js/safe-content.js";
-import { FALLBACK_PROJECT_BY_ID } from "./js/fallback-content.js";
+import { FALLBACK_PROJECT_BY_ID, withProjectPresentation } from "./js/fallback-content.js";
 import { setupThemeToggle } from "./js/theme.js";
 import { setupReveal } from "./js/reveal.js";
 
@@ -162,7 +162,7 @@ async function loadProject() {
     }
 
     let data = FALLBACK_PROJECT_BY_ID[id] || null;
-    if (data) renderProjectDetails(data);
+    if (data) renderProjectDetails(withProjectPresentation(data, id));
     try {
         const [{ doc, getDoc }, { db }] = await Promise.all([
             import("https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js"),
@@ -170,7 +170,7 @@ async function loadProject() {
         ]);
         const snapshot = await getDoc(doc(db, "projects", id));
         if (snapshot.exists()) {
-            data = snapshot.data();
+            data = withProjectPresentation(snapshot.data(), id);
             renderProjectDetails(data);
         } else if (!data) {
             container.innerHTML = '<section class="project-section"><h2>Project not found</h2><p>This project may have moved or been removed.</p></section>';

@@ -18,6 +18,7 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 import { auth, db } from "./js/firebase.js";
 import { escapeHtml, safeExternalUrl, safeAssetFilename, safeGalleryPath, safeDocumentId } from "./js/safe-content.js";
+import { withProjectPresentation } from "./js/fallback-content.js";
 
 const projectPreviewExtensions = new Set(["jpg", "jpeg", "png", "webp", "gif", "mp4", "webm", "ogg", "ogv", "pdf"]);
 const projectResultExtensions = new Set(["jpg", "jpeg", "png", "webp", "gif", "mp4", "webm", "ogg", "ogv"]);
@@ -30,6 +31,36 @@ let editingSkillId = null;
 let editingCertificateId = null;
 let editingAchievementId = null;
 let editingResearchId = null;
+let skillCategories = [];
+
+const defaultSkillCategories = [
+    "Programming",
+    "AI & Machine Learning",
+    "Databases & Cloud"
+];
+
+function normalizeSkillCategoryName(value) {
+    const name = String(value ?? "").trim();
+    return name === "Computer Science Foundations" ? "Databases & Cloud" : name;
+}
+
+function skillCategoryIdForName(name, existingIds = new Set()) {
+    const base = String(name ?? "")
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/^-|-$/g, "") || "skill-type";
+    let id = base;
+    let suffix = 2;
+    while (existingIds.has(id)) id = `${base}-${suffix++}`;
+    return id;
+}
+
+function sortSkillCategories(categories) {
+    return [...categories].sort((left, right) =>
+        (left.order ?? Number.MAX_SAFE_INTEGER) - (right.order ?? Number.MAX_SAFE_INTEGER) ||
+        left.name.localeCompare(right.name)
+    );
+}
 
 function sortByDisplayOrder(documents) {
     return [...documents].filter(item => safeDocumentId(item.id)).sort((a, b) => {
@@ -183,6 +214,7 @@ document.addEventListener("DOMContentLoaded", () => {
 document.getElementById("addProjectBtn").addEventListener("click", async () => {
 
     const title = document.getElementById("projectTitle").value.trim();
+    const year = document.getElementById("projectYear").value.trim();
     const shortDesc = document.getElementById("shortDesc").value.trim();
     const category = document.getElementById("projectCategory").value;
     const description = document.getElementById("projectFullDesc").value.trim();
@@ -204,6 +236,10 @@ document.getElementById("addProjectBtn").addEventListener("click", async () => {
 
     if (!title || !description || !category) {
         alert("Title, description, and a project category are required.");
+        return;
+    }
+    if (year && !/^(19|20)\d{2}$/.test(year)) {
+        alert("Enter a four-digit project year.");
         return;
     }
     if ((githubInput && !github) || (liveWebsiteInput && !liveWebsite) || (paperInput && !paper)) {
@@ -232,6 +268,7 @@ document.getElementById("addProjectBtn").addEventListener("click", async () => {
 
             await updateDoc(doc(db, "projects", editingProjectId), {
                 title,
+                year: year || null,
                 shortDesc,
                 category: category || null,
                 description,
@@ -255,6 +292,7 @@ document.getElementById("addProjectBtn").addEventListener("click", async () => {
         // ➕ ADD MODE (THIS WAS MISSING)
         await addDoc(collection(db, "projects"), {
             title,
+            year: year || null,
             shortDesc,
             category: category || null,
             description,
@@ -273,6 +311,7 @@ document.getElementById("addProjectBtn").addEventListener("click", async () => {
 
         // Clear form
         document.getElementById("projectTitle").value = "";
+        document.getElementById("projectYear").value = "";
         document.getElementById("shortDesc").value = "";
         document.getElementById("projectCategory").value = "";
         document.getElementById("projectFullDesc").value = "";
@@ -345,29 +384,45 @@ document.getElementById("addCertBtn").addEventListener("click", async () => {
     // ➕ ADD SKILL (NEW STRUCTURE)
     document.getElementById("addSkillBtn").addEventListener("click", async () => {
         const name = document.getElementById("skillName").value.trim();
-        const icon = document.getElementById("skillIcon").value.trim();
-        const category = document.getElementById("skillCategory").value;
+        const iconUrlValue = document.getElementById("skillIconUrl").value.trim();
+        const iconUrl = safeExternalUrl(iconUrlValue);
+        const brandColorValue = document.getElementById("skillBrandColor").value.trim();
+        const context = document.getElementById("skillContext").value.trim();
+        const brandColor = /^#[\da-f]{6}$/i.test(brandColorValue) ? brandColorValue : "";
+        const categoryId = document.getElementById("skillCategory").value;
+        const category = skillCategories.find(item => item.id === categoryId);
 
         if (!name || !category) {
-            alert("Enter a skill name and choose a category.");
+            alert("Enter a skill name and choose a skill type.");
+            return;
+        }
+        if (iconUrlValue && !iconUrl.startsWith("https:")) {
+            alert("Use a secure HTTPS address for the brand icon.");
+            return;
+        }
+        if (brandColorValue && !brandColor) {
+            alert("Enter a valid six-digit hex color, such as #3776AB.");
             return;
         }
 
+        const skillFields = {
+            name,
+            iconUrl: iconUrl || null,
+            brandColor: brandColor || null,
+            context: context || null,
+            category: category.name,
+            categoryId: category.id,
+            updatedAt: new Date()
+        };
+
         const wasEditing = Boolean(editingSkillId);
         if (wasEditing) {
-            await updateDoc(doc(db, "skills", editingSkillId), {
-                name,
-                icon: icon || null,
-                category,
-                updatedAt: new Date()
-            });
+            await updateDoc(doc(db, "skills", editingSkillId), skillFields);
             editingSkillId = null;
             document.getElementById("addSkillBtn").textContent = "Add Skill";
         } else {
             await addDoc(collection(db, "skills"), {
-                name,
-                icon: icon || null,
-                category,
+                ...skillFields,
                 order: await nextDisplayOrder("skills"),
                 createdAt: new Date()
             });
@@ -375,9 +430,41 @@ document.getElementById("addCertBtn").addEventListener("click", async () => {
 
         alert(wasEditing ? "Skill Updated" : "Skill Saved");
         document.getElementById("skillName").value = "";
-        document.getElementById("skillIcon").value = "";
+        document.getElementById("skillIconUrl").value = "";
+        document.getElementById("skillBrandColor").value = "";
+        document.getElementById("skillContext").value = "";
         document.getElementById("skillCategory").value = "";
         loadSkills();
+    });
+
+    document.getElementById("addSkillCategoryBtn").addEventListener("click", async () => {
+        const input = document.getElementById("newSkillCategoryName");
+        const status = document.getElementById("skillCategoryStatus");
+        const name = normalizeSkillCategoryName(input.value);
+        if (!name) {
+            status.textContent = "Enter a name for the new skill type.";
+            input.focus();
+            return;
+        }
+        if (skillCategories.some(category => category.name.toLocaleLowerCase() === name.toLocaleLowerCase())) {
+            status.textContent = "That skill type already exists.";
+            return;
+        }
+
+        try {
+            const order = Math.max(-1, ...skillCategories.map(category => Number(category.order)).filter(Number.isFinite)) + 1;
+            await addDoc(collection(db, "skillCategories"), {
+                name,
+                order,
+                createdAt: new Date()
+            });
+            input.value = "";
+            status.textContent = `“${name}” is now available for skills and will appear in the public toolkit.`;
+            await loadSkills();
+        } catch (error) {
+            console.error("Could not add skill type.", error);
+            status.textContent = "Could not save this skill type. Check your Firebase access and try again.";
+        }
     });
 
 
@@ -584,6 +671,7 @@ async function loadProjects() {
     sortByDisplayOrder(querySnapshot.docs).forEach((docSnap) => {
         const data = docSnap.data();
         const id = docSnap.id;
+        const project = withProjectPresentation(data, id);
 
         container.innerHTML += `
             <div class="project-admin-card">
@@ -597,6 +685,7 @@ async function loadProjects() {
                     <div class="project-admin-file">
                         Category: ${escapeHtml(data.category || "Category not set")}
                     </div>
+                    ${project.year ? `<div class="project-admin-file">Year: ${escapeHtml(project.year)}</div>` : ""}
                     ${safeExternalUrl(data.liveWebsite || data.website)
                         ? `<a class="project-admin-website" href="${escapeHtml(safeExternalUrl(data.liveWebsite || data.website))}" target="_blank" rel="noopener noreferrer">View live site ↗</a>`
                         : `<div class="project-admin-file">No live website set</div>`}
@@ -647,31 +736,146 @@ async function loadCertificates() {
 }
 
 
-// 📚 LOAD SKILLS (NEW STRUCTURE)
+async function loadSkillCategories() {
+    const categorySnapshot = await getDocs(collection(db, "skillCategories"));
+    let categories = categorySnapshot.docs.map(item => ({ id: item.id, ...item.data() }))
+        .filter(item => safeDocumentId(item.id) && String(item.name || "").trim());
+    const skillSnapshot = await getDocs(collection(db, "skills"));
+
+    const knownNames = new Set(categories.map(item => normalizeSkillCategoryName(item.name).toLocaleLowerCase()));
+    const discoveredNames = categories.length ? [] : [...defaultSkillCategories];
+    skillSnapshot.docs.forEach(item => {
+        const name = normalizeSkillCategoryName(item.data().category || "Uncategorized");
+        if (name && !knownNames.has(name.toLocaleLowerCase()) && !discoveredNames.some(value => value.toLocaleLowerCase() === name.toLocaleLowerCase())) {
+            discoveredNames.push(name);
+        }
+    });
+
+    if (discoveredNames.length) {
+        const existingIds = new Set(categories.map(item => item.id));
+        const nextOrder = Math.max(-1, ...categories.map(item => Number(item.order)).filter(Number.isFinite)) + 1;
+        const batch = writeBatch(db);
+        discoveredNames.forEach((name, index) => {
+            const id = skillCategoryIdForName(name, existingIds);
+            existingIds.add(id);
+            batch.set(doc(collection(db, "skillCategories"), id), {
+                name,
+                order: nextOrder + index,
+                createdAt: new Date()
+            });
+        });
+        await batch.commit();
+        const refreshed = await getDocs(collection(db, "skillCategories"));
+        categories = refreshed.docs.map(item => ({ id: item.id, ...item.data() }))
+            .filter(item => safeDocumentId(item.id) && String(item.name || "").trim());
+    }
+
+    skillCategories = sortSkillCategories(categories);
+
+    const select = document.getElementById("skillCategory");
+    if (select) {
+        const selectedId = select.value;
+        select.innerHTML = `<option value="">Choose a skill type</option>${skillCategories.map(category => `
+            <option value="${escapeHtml(category.id)}">${escapeHtml(category.name)}</option>
+        `).join("")}`;
+        if (skillCategories.some(category => category.id === selectedId)) select.value = selectedId;
+    }
+
+    const manager = document.getElementById("adminSkillCategoriesContainer");
+    if (manager) {
+        manager.innerHTML = skillCategories.map(category => `
+            <div class="skill-category-row">
+                <label for="skill-category-name-${escapeHtml(category.id)}">Skill type</label>
+                <input id="skill-category-name-${escapeHtml(category.id)}" type="text" maxlength="60" value="${escapeHtml(category.name)}" aria-label="Skill type name">
+                <button class="edit-btn" type="button" onclick="saveSkillCategory('${escapeHtml(category.id)}')">Save name</button>
+            </div>
+        `).join("");
+    }
+    return skillCategories;
+}
+
+window.saveSkillCategory = async function(id) {
+    id = safeDocumentId(id);
+    const current = skillCategories.find(category => category.id === id);
+    const input = document.getElementById(`skill-category-name-${id}`);
+    const status = document.getElementById("skillCategoryStatus");
+    if (!current || !input || !status) return;
+
+    const name = normalizeSkillCategoryName(input.value);
+    if (!name) {
+        status.textContent = "A skill type name cannot be empty.";
+        input.focus();
+        return;
+    }
+    if (skillCategories.some(category => category.id !== id && category.name.toLocaleLowerCase() === name.toLocaleLowerCase())) {
+        status.textContent = "That skill type name is already in use.";
+        input.focus();
+        return;
+    }
+    if (name === current.name) {
+        status.textContent = "This skill type name is already up to date.";
+        return;
+    }
+
+    try {
+        const skills = await getDocs(collection(db, "skills"));
+        const oldName = normalizeSkillCategoryName(current.name).toLocaleLowerCase();
+        const assignedSkills = skills.docs.filter(item => {
+            const data = item.data();
+            return data.categoryId === id || normalizeSkillCategoryName(data.category || "").toLocaleLowerCase() === oldName;
+        });
+
+        for (let start = 0; start < assignedSkills.length; start += 450) {
+            const batch = writeBatch(db);
+            assignedSkills.slice(start, start + 450).forEach(item => {
+                batch.update(item.ref, { category: name, categoryId: id, updatedAt: new Date() });
+            });
+            await batch.commit();
+        }
+        await updateDoc(doc(db, "skillCategories", id), { name, updatedAt: new Date() });
+        status.textContent = `Skill type renamed to “${name}”.`;
+        await loadSkills();
+    } catch (error) {
+        console.error("Could not rename skill type.", error);
+        status.textContent = "Could not rename this skill type. Check your Firebase access and try again.";
+    }
+};
+
+// 📚 LOAD SKILLS BY THEIR MANAGED TYPES
 async function loadSkills() {
     const container = document.getElementById("adminSkillsContainer");
     if (!container) return;
 
-    container.innerHTML = "";
+    try {
+        await loadSkillCategories();
+        const querySnapshot = await getDocs(collection(db, "skills"));
+        const records = sortByDisplayOrder(querySnapshot.docs).map(item => ({ id: item.id, data: item.data() }));
+        const categoryFor = data => {
+            const legacyName = normalizeSkillCategoryName(data.category || "Uncategorized");
+            return skillCategories.find(category => category.id === data.categoryId) ||
+                skillCategories.find(category => category.name.toLocaleLowerCase() === legacyName.toLocaleLowerCase());
+        };
 
-    const querySnapshot = await getDocs(collection(db, "skills"));
-
-    sortByDisplayOrder(querySnapshot.docs).forEach((docSnap) => {
-        const data = docSnap.data();
-        const id = docSnap.id;
-        const skillCategory = data.category === "Computer Science Foundations"
-            ? "Databases & Cloud"
-            : data.category || "Uncategorized";
-
-        container.innerHTML += `
-            <div class="skill-admin-card">
-                <span>${escapeHtml(data.icon || "⚡")}</span>
-                <span class="skill-admin-details"><strong>${escapeHtml(data.name)}</strong><small>${escapeHtml(skillCategory)}</small></span>
-                <button class="edit-btn" type="button" onclick="editSkill('${id}')">Edit</button>
-                <button class="delete-btn" type="button" aria-label="Delete ${escapeHtml(data.name || "skill")}" onclick="deleteSkill('${id}')">×</button>
-            </div>
-        `;
-    });
+        container.innerHTML = skillCategories.map(category => {
+            const items = records.filter(record => categoryFor(record.data)?.id === category.id);
+            return `
+                <section class="skill-admin-group">
+                    <h4>${escapeHtml(category.name)} <small>${items.length} ${items.length === 1 ? "skill" : "skills"}</small></h4>
+                    <div class="skill-admin-group-items">${items.length ? items.map(({ id, data }) => `
+                        <div class="skill-admin-card">
+                            <span class="skill-admin-mark" aria-hidden="true" style="--skill-admin-color:${/^#[\da-f]{6}$/i.test(String(data.brandColor || "")) ? data.brandColor : "#B4432A"}">${escapeHtml(String(data.name || "Tool").trim().slice(0, 2).toUpperCase())}</span>
+                            <span class="skill-admin-details"><strong>${escapeHtml(data.name || "Unnamed skill")}</strong><small>${escapeHtml(data.context || category.name)}</small></span>
+                            <button class="edit-btn" type="button" onclick="editSkill('${id}')">Edit</button>
+                            <button class="delete-btn" type="button" aria-label="Delete ${escapeHtml(data.name || "skill")}" onclick="deleteSkill('${id}')">×</button>
+                        </div>
+                    `).join("") : `<p class="skill-admin-empty">No skills assigned to this type yet.</p>`}</div>
+                </section>
+            `;
+        }).join("");
+    } catch (error) {
+        console.error("Could not load skills and skill types.", error);
+        container.innerHTML = `<p class="skill-admin-empty">Could not load skill types. Check your Firebase access and reload this page.</p>`;
+    }
 }
 
 // 🏆 LOAD ACHIEVEMENTS
@@ -791,7 +995,9 @@ window.deleteSkill = async function(id) {
     if (editingSkillId === id) {
         editingSkillId = null;
         document.getElementById("skillName").value = "";
-        document.getElementById("skillIcon").value = "";
+        document.getElementById("skillIconUrl").value = "";
+        document.getElementById("skillBrandColor").value = "";
+        document.getElementById("skillContext").value = "";
         document.getElementById("skillCategory").value = "";
         document.getElementById("addSkillBtn").textContent = "Add Skill";
     }
@@ -824,10 +1030,14 @@ window.editSkill = async function(id) {
     if (!docSnap.exists()) return;
     const data = docSnap.data();
     document.getElementById("skillName").value = data.name || "";
-    document.getElementById("skillIcon").value = data.icon || "";
-    document.getElementById("skillCategory").value = data.category === "Computer Science Foundations"
-        ? "Databases & Cloud"
-        : data.category || "";
+    const iconUrl = safeExternalUrl(data.iconUrl || data.icon || "");
+    document.getElementById("skillIconUrl").value = iconUrl.startsWith("https:") ? iconUrl : "";
+    document.getElementById("skillBrandColor").value = /^#[\da-f]{6}$/i.test(String(data.brandColor || "")) ? data.brandColor : "";
+    document.getElementById("skillContext").value = data.context || "";
+    const categoryName = normalizeSkillCategoryName(data.category || "");
+    const category = skillCategories.find(item => item.id === data.categoryId) ||
+        skillCategories.find(item => item.name.toLocaleLowerCase() === categoryName.toLocaleLowerCase());
+    document.getElementById("skillCategory").value = category?.id || "";
     editingSkillId = id;
     document.getElementById("addSkillBtn").textContent = "Update Skill";
     document.getElementById("skillName").focus();
@@ -841,16 +1051,18 @@ window.editProject = async function(id) {
     if (!docSnap.exists()) return;
 
     const data = docSnap.data();
+    const project = withProjectPresentation(data, id);
 
-    document.getElementById("projectTitle").value = data.title || "";
-    document.getElementById("shortDesc").value = data.shortDesc || "";
-    document.getElementById("projectCategory").value = data.category || "";
-    document.getElementById("projectFullDesc").value = data.description || "";
-    document.getElementById("projectTechStack").value = data.techStack || "";
-    document.getElementById("projectDataset").value = data.dataset || "";
-    document.getElementById("projectGithub").value = data.github || "";
-    document.getElementById("projectLiveWebsite").value = data.liveWebsite || data.website || "";
-    document.getElementById("projectPaper").value = data.paper || "";
+    document.getElementById("projectTitle").value = project.title || "";
+    document.getElementById("projectYear").value = project.year || "";
+    document.getElementById("shortDesc").value = project.shortDesc || "";
+    document.getElementById("projectCategory").value = project.category || "";
+    document.getElementById("projectFullDesc").value = project.description || "";
+    document.getElementById("projectTechStack").value = project.techStack || "";
+    document.getElementById("projectDataset").value = project.dataset || "";
+    document.getElementById("projectGithub").value = project.github || "";
+    document.getElementById("projectLiveWebsite").value = project.liveWebsite || project.website || "";
+    document.getElementById("projectPaper").value = project.paper || "";
     const existingResults = Array.isArray(data.screenshots)
         ? data.screenshots
         : typeof data.screenshots === "string" ? data.screenshots.split(",") : [];

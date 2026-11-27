@@ -68,7 +68,46 @@
     <div class="container">
         
         <div class="profile-node">
-            <img src="img2.jpeg" alt="Parthajit Das by the sea at sunset" class="profile-pic" fetchpriority="high">
+            <img src="img.jpg" alt="Parthajit Das by the sea at sunset" class="profile-pic" fetchpriority="high">
+            <div class="hero-laptop-shadow" id="heroLaptopShadow" aria-hidden="true"></div>
+            <div class="hero-laptop" id="heroLaptop" aria-hidden="true">
+                <div class="laptop-model" id="laptopModel">
+                    <div class="laptop-base">
+                        <div class="laptop-keyboard" id="laptopKeyboard"></div>
+                        <div class="laptop-trackpad"></div>
+                        <div class="laptop-front-lip"></div>
+                        <div class="laptop-hinge"></div>
+                        <div class="laptop-display" id="laptopDisplay">
+                            <div class="laptop-display-frame">
+                                <div class="laptop-camera"></div>
+                                <div class="laptop-screen">
+                                    <div class="laptop-editor-bar">
+                                        <span class="editor-lights"><i></i><i></i><i></i></span>
+                                        <span>research.py</span>
+                                        <span class="editor-mode">PYTHON</span>
+                                    </div>
+                                    <div class="laptop-screen-body">
+                                        <pre class="laptop-code"><code>
+<span class="laptop-code-line" style="--line-chars:24; --line-width:24ch; --line-delay:2.67s"><span class="code-keyword">def</span> <span class="code-function">explore_ideas</span>(data):</span>
+<span class="laptop-code-line" style="--line-chars:27; --line-width:27ch; --line-delay:2.79s">    model = <span class="code-type">ResearchModel</span>()</span>
+<span class="laptop-code-line" style="--line-chars:21; --line-width:21ch; --line-delay:2.91s">    model.<span class="code-function">learn</span>(data)</span>
+<span class="laptop-code-line" style="--line-chars:33; --line-width:33ch; --line-delay:3.03s">    predictions = model.<span class="code-function">predict</span>()</span>
+<span class="laptop-code-line" style="--line-chars:23; --line-width:23ch; --line-delay:3.15s">    <span class="code-keyword">return</span> predictions</span>
+                                        </code></pre>
+                                        <div class="laptop-compute">
+                                            <svg class="laptop-network" viewBox="0 0 68 52" focusable="false">
+                                                <path d="M8 10 29 25 58 9 M8 10 14 42 29 25 53 42 58 9 M14 42 58 9"></path>
+                                                <circle cx="8" cy="10" r="2.2"></circle><circle cx="29" cy="25" r="2.6"></circle><circle cx="58" cy="9" r="2.2"></circle><circle cx="14" cy="42" r="2.2"></circle><circle cx="53" cy="42" r="2.2"></circle>
+                                            </svg>
+                                            <span class="laptop-equation">ŷ = f<sub>θ</sub>(x)</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
         
         <div class="hero-text">
@@ -110,7 +149,39 @@
             <h2>A Path of Progress<span class="highlight">.</span></h2>
         </div>
         <div class="milestone-list" id="milestonesContainer" aria-label="Academic and professional timeline">
-            <svg class="milestone-path" aria-hidden="true" focusable="false" preserveAspectRatio="none"><path class="milestone-path-base"></path><path class="milestone-path-progress"></path></svg>
+            <svg class="milestone-path" aria-hidden="true" focusable="false" preserveAspectRatio="none">
+                <defs>
+                    <linearGradient id="milestonePlaneSilk" x1="0" y1="0" x2="1" y2="1">
+                        <stop offset="0" stop-color="#fffaf0"></stop>
+                        <stop offset=".55" stop-color="#d6dad4"></stop>
+                        <stop offset="1" stop-color="#aeb8b2"></stop>
+                    </linearGradient>
+                    <linearGradient id="milestonePlaneNearWing" x1=".1" y1="0" x2=".95" y2="1">
+                        <stop offset="0" stop-color="#f0eee5"></stop>
+                        <stop offset=".62" stop-color="#c1c9c3"></stop>
+                        <stop offset="1" stop-color="#8d9a94"></stop>
+                    </linearGradient>
+                    <linearGradient id="milestonePlaneFold" x1="0" y1="0" x2="1" y2="1">
+                        <stop offset="0" stop-color="#fffaf1"></stop>
+                        <stop offset=".7" stop-color="#c8d0ca"></stop>
+                        <stop offset="1" stop-color="#b45a43"></stop>
+                    </linearGradient>
+                </defs>
+                <path class="milestone-path-base"></path>
+                <path class="milestone-path-progress"></path>
+                <g class="milestone-paper-plane" visibility="hidden">
+                    <ellipse class="milestone-plane-shadow" cx="0" cy="9" rx="11" ry="2.1"></ellipse>
+                    <path class="milestone-plane-silhouette" d="M15 0 -12 -10 -5 -1 -13 4 -14 8Z"></path>
+                    <path class="milestone-plane-far-wing" d="M15 0 -12 -10 -5 -1 4 -.45Z"></path>
+                    <path class="milestone-plane-near-wing" d="M15 0 -14 8 -5 1.2 4 .55Z"></path>
+                    <path class="milestone-plane-fuselage" d="M15 0 -7 -.7 -13 4 -5 1Z"></path>
+                    <path class="milestone-plane-fold milestone-plane-fold-far" d="M15 0 -12 -10 -5 -1"></path>
+                    <path class="milestone-plane-fold milestone-plane-fold-near" d="M15 0 -14 8 -5 1.2"></path>
+                    <path class="milestone-plane-ridge" d="M15 0 -11 2.8"></path>
+                    <path class="milestone-plane-highlight" d="M11 -.45 -7 -7"></path>
+                    <path class="milestone-plane-terracotta" d="M-13 4 -8 1.25 -5 1Z"></path>
+                </g>
+            </svg>
             <div class="timeline-lane timeline-lane-two" role="group" aria-label="2024, Data Science Internship, 2025, then GATE; left to right">
             <span class="timeline-year-node" style="--marker-drop:0px" aria-label="2024">2024</span>
             <article class="milestone" data-milestone="internship-2024" style="--milestone-order:0; --marker-drop:8px">
@@ -281,15 +352,34 @@
 <!-- EDUCATION -->
 <section id="education" class="education-section">
     <div class="container">
-        <div class="section-heading"><p class="section-kicker">02 / Background</p><h2>Where I’ve <span class="highlight">learned.</span></h2></div>
+        <div class="section-heading education-heading">
+            <p class="section-kicker">02 / Background</p>
+            <h2>Where I’ve <span class="highlight">learned.</span></h2>
+        </div>
+
+        <div class="education-path" id="educationPath">
+        <span class="edu-connector" aria-hidden="true"></span>
+        <span class="edu-compass" aria-hidden="true">
+            <svg viewBox="0 0 32 32" focusable="false">
+                <circle class="edu-compass-face" cx="16" cy="16" r="14.3"></circle>
+                <circle class="edu-compass-ring" cx="16" cy="16" r="11.7"></circle>
+                <path class="edu-compass-ticks" d="M16 3.8v3.8 M16 24.4v3.8 M3.8 16h3.8 M24.4 16h3.8 M7.3 7.3l2.7 2.7 M22 22l2.7 2.7 M24.7 7.3 22 10 M10 22l-2.7 2.7"></path>
+                <g class="edu-compass-needle">
+                    <path class="edu-compass-north" d="M16 7.2 19.3 16 16 14.3 12.7 16Z"></path>
+                    <path class="edu-compass-south" d="M16 24.8 12.7 16 16 17.7 19.3 16Z"></path>
+                </g>
+                <circle class="edu-compass-pivot" cx="16" cy="16" r="1.8"></circle>
+            </svg>
+        </span>
 
         <!-- MTECH -->
-     <div class="edu-row">
+<div class="edu-row edu-row-from-left">
+    <button class="edu-node" type="button" aria-label="Scroll to the IIT Kharagpur education card" aria-current="step"></button>
     <div class="edu-img">
         <img src="assets/edu/IITKGP.jpeg" alt="IIT Kharagpur">
     </div>
     <div class="edu-content">
-        <p class="edu-date">2026 — Present</p>
+        <p class="edu-date"><span>2026 — Present</span><span class="edu-status">CURRENTLY PURSUING</span></p>
         <div class="edu-college">Indian Institute of Technology, Kharagpur</div>
     <div class="edu-degree">M.Tech in CSE</div>
         <div class="edu-desc">
@@ -300,12 +390,13 @@
 </div>
 
 
-<div class="edu-row reverse">
+<div class="edu-row reverse edu-row-from-right">
+    <button class="edu-node" type="button" aria-label="Scroll to the Techno Main Salt Lake education card"></button>
     <div class="edu-img">
         <img src="assets/edu/TMSL.jpg" alt="Techno Main Salt Lake">
     </div>
     <div class="edu-content">
-        <p class="edu-date">2022 — 2026</p>
+        <p class="edu-date"><span>2022 — 2026</span><span class="edu-status">UNDERGRADUATE</span></p>
         <div class="edu-college">Techno Main Salt Lake, West Bengal</div>
     <div class="edu-degree">B.Tech in Computer Science & Engineering</div>
         <div class="edu-desc">
@@ -317,12 +408,13 @@
 </div>
 
 
-<div class="edu-row">
+<div class="edu-row edu-row-from-left">
+    <button class="edu-node" type="button" aria-label="Scroll to the Central Modern School education card"></button>
     <div class="edu-img">
         <img src="assets/edu/CMS.jpg" alt="Central Modern School">
     </div>
     <div class="edu-content">
-        <p class="edu-date">2008 — 2026</p>
+        <p class="edu-date"><span>2008 — 2026</span><span class="edu-status">FOUNDATION</span></p>
         <div class="edu-college">Central Modern School</div>
     <div class="edu-degree">Higher Secondary & Secondary Education</div>
         <div class="edu-desc">
@@ -332,6 +424,7 @@
         </div>
     </div>
 </div>
+        </div>
 </div>
 </section>
 
@@ -352,36 +445,56 @@
             <button type="button" data-filter="Systems" aria-pressed="false">Systems</button>
         </div>
 
+        <div class="project-gallery-caption" id="projectGalleryCaption" aria-live="polite" aria-atomic="true">
+            <div class="project-gallery-copy">
+                <p class="project-gallery-category" id="projectGalleryCategory">Selected work</p>
+                <h3 id="projectGalleryTitle">Project</h3>
+            </div>
+            <p class="project-gallery-year"><span>YEAR</span><strong id="projectGalleryYear">—</strong></p>
+            <p class="project-gallery-position" id="projectGalleryPosition">01 / 01</p>
+        </div>
+
         <div class="projects-carousel-wrapper" id="projectsCarousel">
-            <button class="arrow project-arrow" id="projectPrev" type="button" aria-label="Scroll projects left">&#8592;</button>
-            <div class="project-grid" id="projectsContainer">
-                <article class="project-item" data-category="Computer Vision">
+            <button class="arrow project-arrow" id="projectPrev" type="button" aria-label="Previous project">&#8592;</button>
+            <div class="project-grid" id="projectsContainer" role="group" aria-label="Selected work project carousel" aria-roledescription="carousel" tabindex="0">
+                <article class="project-item" data-category="Computer Vision" data-year="2026">
                     <div class="project-preview project-preview-video"><video class="project-preview-media project-video" muted loop playsinline preload="none" poster="assets/projects/AgrIVision Preview.jpg" data-fallback-src="assets/projects/AgrIVision Preview.jpg" data-preview-title="AgrIVision" aria-label="Video preview of AgrIVision"><source src="assets/projects/AgriVision.mp4" type="video/mp4"></video><span class="preview-video-badge" aria-hidden="true">VIDEO</span></div>
-                    <p class="section-kicker">Computer Vision</p><h3>AgrIVision</h3><p>A computer vision project exploring visual analysis for agriculture.</p>
-                    <a class="details-btn" href="project.html?id=agrivision">Read project notes <span aria-hidden="true">↗</span></a>
+                    <div class="project-card-meta"><p class="section-kicker">Computer Vision</p><span class="project-year-tag">2026</span></div><h3>AgrIVision</h3><p>A computer vision project exploring visual analysis for agriculture.</p>
+                    <ul class="project-tech-tags" aria-label="Technologies used"><li>Next.js</li><li>React</li><li>TypeScript</li><li>Python</li><li>FastAPI</li><li>ONNX Runtime</li><li>PostgreSQL</li><li>SQLite</li><li>Monte Carlo</li><li>ARIMA</li></ul>
+                    <a class="details-btn" href="project.html?id=agrivision">Explore project <span aria-hidden="true">↗</span></a>
                 </article>
-                <article class="project-item" data-category="Applied AI">
+                <article class="project-item" data-category="Applied AI" data-year="2024">
                     <div class="project-preview"><img src="assets/projects/GAN preview.png" alt="Generated image preview for a GAN project" loading="lazy"></div>
-                    <p class="section-kicker">Applied AI</p><h3>GAN Architecture Comparison</h3><p>A comparative analysis of GAN architectures for image synthesis.</p>
-                    <a class="details-btn" href="project.html?id=gan">Read project notes <span aria-hidden="true">↗</span></a>
+                    <div class="project-card-meta"><p class="section-kicker">Applied AI</p><span class="project-year-tag">2024</span></div><h3>GAN Architecture Comparison</h3><p>A comparative analysis of GAN architectures for image synthesis.</p>
+                    <ul class="project-tech-tags" aria-label="Technologies used"><li>PyTorch</li><li>NumPy</li><li>Matplotlib</li><li>TorchMetrics</li><li>GANs</li><li>WGAN</li></ul>
+                    <a class="details-btn" href="project.html?id=gan">Explore project <span aria-hidden="true">↗</span></a>
                 </article>
-                <article class="project-item" data-category="Applied AI">
+                <article class="project-item" data-category="Applied AI" data-year="2026">
                     <div class="project-preview"><img src="assets/projects/movie preview.png" alt="Movie recommendation project preview" loading="lazy"></div>
-                    <p class="section-kicker">Applied AI</p><h3>Movie Recommendation System</h3><p>A recommendation systems project focused on movie discovery.</p>
-                    <a class="details-btn" href="project.html?id=movie-recommendation">Read project notes <span aria-hidden="true">↗</span></a>
+                    <div class="project-card-meta"><p class="section-kicker">Applied AI</p><span class="project-year-tag">2026</span></div><h3>Movie Recommendation System</h3><p>A recommendation systems project focused on movie discovery.</p>
+                    <ul class="project-tech-tags" aria-label="Technologies used"><li>PyTorch</li><li>DistilBERT</li><li>SVD</li><li>LightGBM</li></ul>
+                    <a class="details-btn" href="project.html?id=movie-recommendation">Explore project <span aria-hidden="true">↗</span></a>
                 </article>
-                <article class="project-item" data-category="Systems">
-                    <div class="project-preview project-preview-video"><video class="project-preview-media project-video" muted loop playsinline preload="none" poster="assets/projects/Terminal.jpg" data-fallback-src="assets/projects/Terminal.jpg" data-preview-title="Terminal" aria-label="Video preview of Terminal"><source src="assets/projects/Terminal.mp4" type="video/mp4"></video><span class="preview-video-badge" aria-hidden="true">VIDEO</span></div>
-                    <p class="section-kicker">Systems</p><h3>Terminal</h3><p>A command-line project exploring core systems concepts.</p>
-                    <a class="details-btn" href="project.html?id=terminal">Read project notes <span aria-hidden="true">↗</span></a>
+                <article class="project-item" data-category="Systems" data-year="2026">
+                    <div class="project-preview project-preview-video"><video class="project-preview-media project-video" muted loop playsinline preload="none" poster="assets/projects/Terminal.jpg" data-fallback-src="assets/projects/Terminal.jpg" data-preview-title="Terminator" aria-label="Video preview of Terminator"><source src="assets/projects/Terminal.mp4" type="video/mp4"></video><span class="preview-video-badge" aria-hidden="true">VIDEO</span></div>
+                    <div class="project-card-meta"><p class="section-kicker">Systems</p><span class="project-year-tag">2026</span></div><h3>Terminator</h3><p>A command-line project exploring core systems concepts.</p>
+                    <ul class="project-tech-tags" aria-label="Technologies used"><li>C</li><li>Xlib (X11)</li><li>POSIX API</li><li>Pthreads</li><li>Linux</li><li>GCC</li></ul>
+                    <a class="details-btn" href="project.html?id=terminal">Explore project <span aria-hidden="true">↗</span></a>
                 </article>
-                <article class="project-item" data-category="Systems">
+                <article class="project-item" data-category="Systems" data-year="2025">
                     <div class="project-preview project-preview-video"><video class="project-preview-media project-video" muted loop playsinline preload="none" poster="assets/projects/Weather Orion preview.png" data-fallback-src="assets/projects/Weather Orion preview.png" data-preview-title="Weather Orion" aria-label="Video preview of Weather Orion"><source src="assets/projects/Weather Orion.mp4" type="video/mp4"></video><span class="preview-video-badge" aria-hidden="true">VIDEO</span></div>
-                    <p class="section-kicker">Systems</p><h3>Weather Orion</h3><p>A weather-focused application with a data-driven interface.</p>
-                    <a class="details-btn" href="project.html?id=weather-orion">Read project notes <span aria-hidden="true">↗</span></a>
+                    <div class="project-card-meta"><p class="section-kicker">Systems</p><span class="project-year-tag">2025</span></div><h3>Weather Orion</h3><p>A weather-focused application with a data-driven interface.</p>
+                    <ul class="project-tech-tags" aria-label="Technologies used"><li>HTML</li><li>CSS</li><li>JavaScript</li><li>REST APIs</li><li>WeatherAPI</li></ul>
+                    <a class="details-btn" href="project.html?id=weather-orion">Explore project <span aria-hidden="true">↗</span></a>
+                </article>
+                <article class="project-item" data-category="Systems" data-year="2025">
+                    <div class="project-preview"><img src="assets/projects/myportfolio.png" alt="Preview of the portfolio website" loading="lazy"></div>
+                    <div class="project-card-meta"><p class="section-kicker">Systems</p><span class="project-year-tag">2025</span></div><h3>Upgraded Portfolio Website</h3><p>A responsive portfolio presenting research, projects, milestones, and skills.</p>
+                    <ul class="project-tech-tags" aria-label="Technologies used"><li>HTML</li><li>CSS</li><li>JavaScript</li><li>Firebase</li></ul>
+                    <a class="details-btn" href="project.html?id=personal-portfolio">Explore project <span aria-hidden="true">↗</span></a>
                 </article>
             </div>
-            <button class="arrow project-arrow" id="projectNext" type="button" aria-label="Scroll projects right">&#8594;</button>
+            <button class="arrow project-arrow" id="projectNext" type="button" aria-label="Next project">&#8594;</button>
         </div>
     </div>
 </section>
@@ -395,20 +508,27 @@
     <div class="container">
 
         <div class="cert-header">
-            <div class="section-heading"><p class="section-kicker">03 / Learning</p><h2>Certificates &amp; Achievements <span aria-hidden="true">🏆</span></h2></div>
-            <button id="certToggleBtn" class="see-all-btn">See All</button>
+            <div class="section-heading"><p class="section-kicker">03 / Learning</p><h2>Certificates &amp; Achievements <svg class="certificate-trophy" viewBox="0 0 48 48" aria-hidden="true" focusable="false"><path class="trophy-laurel" d="M8 13c-4 5-3 14 3 19m29-19c4 5 3 14-3 19M9 18l5 2m-4 5 5 1m22-8-5 2m4 5-5 1M13 14c3-3 6-4 10-4m12 4c-3-3-6-4-10-4"/><path class="trophy-cup" d="M16 9h16v9c0 6-3 10-8 11-5-1-8-5-8-11V9Zm0 4H9v4c0 5 3 8 9 8m14-12h7v4c0 5-3 8-9 8M24 29v7m-7 4h14m-12-4h10v4H19v-4Z"/><path class="trophy-shine" d="M20 13v6m-4-4c0 4 1 7 3 9"/></svg></h2></div>
+            <button id="certToggleBtn" class="see-all-btn" type="button" aria-expanded="false">See All (5)</button>
             <p class="cert-subtitle">Selected certifications and academic achievements.</p>
+            <div class="filter-tabs certificate-filters" data-filter-group="certificates" aria-label="Filter credentials">
+                <button type="button" data-filter="all" aria-pressed="true">All</button>
+                <button type="button" data-filter="award" aria-pressed="false">Awards</button>
+                <button type="button" data-filter="internship" aria-pressed="false">Internships</button>
+                <button type="button" data-filter="certification" aria-pressed="false">Certifications</button>
+                <button type="button" data-filter="competition" aria-pressed="false">Competitions</button>
+            </div>
         </div>
 
         <div class="cert-carousel-wrapper" id="certCarousel">
             <button class="arrow left" id="certPrev" type="button" aria-label="Scroll certificates left">&#8592;</button>
 
             <div class="cert-carousel-track" id="certificatesContainer">
-                <article class="certificate-item"><div class="certificate-art"><iframe class="certificate-document" src="assets/certificates/ECSU Participation.pdf#toolbar=0&amp;navpanes=0&amp;scrollbar=0&amp;view=FitH" title="Tenth Summer School on Computer Vision certificate" loading="lazy" tabindex="-1" aria-hidden="true"></iframe><button class="certificate-open" type="button" data-preview-path="assets/certificates/ECSU Participation.pdf" aria-label="Preview Tenth Summer School on Computer Vision certificate"><span>Preview certificate ↗</span></button></div><h3>Tenth Summer School on Computer Vision</h3><p>Indian Statistical Institute, Kolkata · 2025</p></article>
-                <article class="certificate-item"><div class="certificate-art"><iframe class="certificate-document" src="assets/certificates/ECSU Special Mention.pdf#toolbar=0&amp;navpanes=0&amp;scrollbar=0&amp;view=FitH" title="GAN Architecture Special Mention certificate" loading="lazy" tabindex="-1" aria-hidden="true"></iframe><button class="certificate-open" type="button" data-preview-path="assets/certificates/ECSU Special Mention.pdf" aria-label="Preview GAN Architecture Special Mention certificate"><span>Preview certificate ↗</span></button></div><h3>GAN Architecture Special Mention</h3><p>Comparative GAN analysis · ISI Kolkata · 2025</p></article>
-                <article class="certificate-item"><div class="certificate-art"><iframe class="certificate-document" src="assets/certificates/IDEAS Internship Certificate.pdf#toolbar=0&amp;navpanes=0&amp;scrollbar=0&amp;view=FitH" title="Data Science Internship certificate" loading="lazy" tabindex="-1" aria-hidden="true"></iframe><button class="certificate-open" type="button" data-preview-path="assets/certificates/IDEAS Internship Certificate.pdf" aria-label="Preview Data Science Internship certificate"><span>Preview certificate ↗</span></button></div><h3>Data Science Internship</h3><p>IDEAS-TIH, ISI Kolkata · 3 months · ~120 hours</p></article>
-                <article class="certificate-item"><div class="certificate-art"><iframe class="certificate-document" src="assets/certificates/NPTEL.pdf#toolbar=0&amp;navpanes=0&amp;scrollbar=0&amp;view=FitH" title="Introduction to Machine Learning certificate" loading="lazy" tabindex="-1" aria-hidden="true"></iframe><button class="certificate-open" type="button" data-preview-path="assets/certificates/NPTEL.pdf" aria-label="Preview Introduction to Machine Learning certificate"><span>Preview certificate ↗</span></button></div><h3>Introduction to Machine Learning</h3><p>NPTEL Elite · Jul–Oct 2025 · 69%</p></article>
-                <article class="certificate-item"><div class="certificate-art"><iframe class="certificate-document" src="assets/certificates/Ramanujan.pdf#toolbar=0&amp;navpanes=0&amp;scrollbar=0&amp;view=FitH" title="Ramanujan Memorial Math Talent Search certificate" loading="lazy" tabindex="-1" aria-hidden="true"></iframe><button class="certificate-open" type="button" data-preview-path="assets/certificates/Ramanujan.pdf" aria-label="Preview Ramanujan Memorial Math Talent Search certificate"><span>Preview certificate ↗</span></button></div><h3>Ramanujan Memorial Math Talent Search</h3><p>Class IX · 2018 · Rank 3 · Grade A</p></article>
+                <article class="certificate-item is-featured" data-category="award" style="--certificate-accent:#1E40AF"><button class="certificate-card-trigger" type="button" data-certificate-id="isi-top3" aria-label="View Special Mention, ISI Kolkata credential"><span class="certificate-art"><img class="certificate-thumbnail" src="assets/certificates/thumbnails/isi-top3.png" alt="" loading="lazy"><span class="certificate-ribbon">Featured</span></span><span class="certificate-copy"><span class="certificate-category"><i aria-hidden="true"></i>Award</span><span class="certificate-title">Special Mention · ISI Kolkata</span><span class="certificate-meta">Tenth Summer School on Computer Vision · 2025</span><span class="certificate-skills"><span>Computer Vision</span><span>GANs</span></span></span></button></article>
+                <article class="certificate-item" data-category="internship" style="--certificate-accent:#536B58"><button class="certificate-card-trigger" type="button" data-certificate-id="isi-participation" aria-label="View Tenth Summer School on Computer Vision credential"><span class="certificate-art"><img class="certificate-thumbnail" src="assets/certificates/thumbnails/isi-participation.png" alt="" loading="lazy"></span><span class="certificate-copy"><span class="certificate-category"><i aria-hidden="true"></i>Internship</span><span class="certificate-title">Tenth Summer School on Computer Vision</span><span class="certificate-meta">Electronics and Communication Sciences Unit · ISI Kolkata · 2025</span><span class="certificate-skills"><span>Computer Vision</span><span>Deep Learning</span></span></span></button></article>
+                <article class="certificate-item" data-category="internship" style="--certificate-accent:#A6402B"><button class="certificate-card-trigger" type="button" data-certificate-id="ideas-internship" aria-label="View Data Science Internship credential"><span class="certificate-art"><img class="certificate-thumbnail" src="assets/certificates/thumbnails/ideas-internship.png" alt="" loading="lazy"></span><span class="certificate-copy"><span class="certificate-category"><i aria-hidden="true"></i>Internship</span><span class="certificate-title">Data Science Internship</span><span class="certificate-meta">IDEAS · ISI Kolkata · 2024</span><span class="certificate-skills"><span>Data Science</span><span>Python</span></span></span></button></article>
+                <article class="certificate-item" data-category="certification" style="--certificate-accent:#881337"><button class="certificate-card-trigger" type="button" data-certificate-id="nptel-ml" aria-label="View Introduction to Machine Learning credential"><span class="certificate-art"><img class="certificate-thumbnail" src="assets/certificates/thumbnails/nptel-ml.png" alt="" loading="lazy"></span><span class="certificate-copy"><span class="certificate-category"><i aria-hidden="true"></i>Certification</span><span class="certificate-title">Introduction to Machine Learning</span><span class="certificate-meta">NPTEL · Elite · 2025</span><span class="certificate-skills"><span>Machine Learning</span><span>Evaluation</span></span></span></button></article>
+                <article class="certificate-item is-featured" data-category="competition" style="--certificate-accent:#B45309"><button class="certificate-card-trigger" type="button" data-certificate-id="ramanujan-rank3" aria-label="View Ramanujan Math Talent Search, Rank 3 credential"><span class="certificate-art"><img class="certificate-thumbnail" src="assets/certificates/thumbnails/ramanujan-rank3.png" alt="" loading="lazy"><span class="certificate-ribbon">Featured</span></span><span class="certificate-copy"><span class="certificate-category"><i aria-hidden="true"></i>Competition</span><span class="certificate-title">Ramanujan Math Talent Search · Rank 3</span><span class="certificate-meta">JMMC · Ramanujan Memorial · 2018</span><span class="certificate-skills"><span>Mathematics</span><span>Problem Solving</span></span></span></button></article>
             </div>
 
             <button class="arrow right" id="certNext" type="button" aria-label="Scroll certificates right">&#8594;</button>
@@ -423,12 +543,60 @@
 <!-- SKILLS -->
 <section id="skills" class="skills-section">
     <div class="container">
-        <div class="section-heading"><p class="section-kicker">04 / Toolkit</p><h2>Tools for the <span class="highlight">work.</span></h2></div>
-        <div id="skillsContainer" class="skills-grid">
-            <section class="skill-group"><h3>Programming</h3><div class="skill-group-items"><div class="skill-pill"><span aria-hidden="true">⌘</span><span>Python</span></div></div></section>
-            <section class="skill-group"><h3>AI & Machine Learning</h3><div class="skill-group-items"><div class="skill-pill"><span aria-hidden="true">⌘</span><span>PyTorch</span></div><div class="skill-pill"><span aria-hidden="true">⌘</span><span>Machine Learning</span></div><div class="skill-pill"><span aria-hidden="true">⌘</span><span>Computer Vision</span></div><div class="skill-pill"><span aria-hidden="true">⌘</span><span>Generative Models</span></div></div></section>
-            <section class="skill-group"><h3>Databases &amp; Cloud</h3><div class="skill-group-items"><div class="skill-pill"><span aria-hidden="true">⌘</span><span>Data Structures & Algorithms</span></div><div class="skill-pill"><span aria-hidden="true">⌘</span><span>Operating Systems</span></div><div class="skill-pill"><span aria-hidden="true">⌘</span><span>Computer Networks</span></div><div class="skill-pill"><span aria-hidden="true">⌘</span><span>DBMS</span></div></div></section>
+        <div class="section-heading skills-section-heading"><p class="section-kicker">04 / Toolkit</p><h2>Tools for the <span class="highlight">work.</span></h2></div>
+        <div class="skill-filter-row">
+            <div id="skillFilters" class="skill-filters" role="group" aria-label="Filter tools">
+                <button class="skill-filter is-active" type="button" data-skill-filter="all" aria-pressed="true">All <span>(23)</span></button>
+                <button class="skill-filter" type="button" data-skill-filter="programming" aria-pressed="false">Programming</button>
+                <button class="skill-filter" type="button" data-skill-filter="ai-machine-learning" aria-pressed="false">AI &amp; Machine Learning</button>
+                <button class="skill-filter" type="button" data-skill-filter="databases-cloud" aria-pressed="false">Databases &amp; Cloud</button>
+            </div>
+            <span class="skill-filter-hint">Select a tool to pin its use</span>
         </div>
+        <div id="skillsContainer" class="skills-grid">
+            <section class="skill-group" data-skill-group="programming" data-skill-category="Programming" style="--group-order:0">
+                <header class="skill-group-header"><span class="skill-group-index">01</span><h3>Programming</h3><span class="skill-group-count">8 tools</span></header>
+                <div class="skill-group-items">
+                    <button class="skill-pill" type="button" data-skill-id="cpp" data-skill-name="C++" data-skill-context="Builds efficient systems, algorithms, and performance-focused code." style="--brand-color:#00599C;--pill-order:0" aria-pressed="false" aria-label="C++. Builds efficient systems, algorithms, and performance-focused code."><span class="skill-icon-wrap"><img class="skill-brand-icon" src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/cplusplus/cplusplus-original.svg" alt="" loading="lazy" decoding="async" data-skill-icon></span><span class="skill-pill-name">C++</span></button>
+                    <button class="skill-pill" type="button" data-skill-id="python" data-skill-name="Python" data-skill-context="Used for data analysis, machine learning, and rapid prototyping." style="--brand-color:#3776AB;--pill-order:1" aria-pressed="false" aria-label="Python. Used for data analysis, machine learning, and rapid prototyping."><span class="skill-icon-wrap"><img class="skill-brand-icon" src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/python/python-original.svg" alt="" loading="lazy" decoding="async" data-skill-icon></span><span class="skill-pill-name">Python</span></button>
+                    <button class="skill-pill" type="button" data-skill-id="vs-code" data-skill-name="VS Code" data-skill-context="Primary editor for application, research, and systems development." style="--brand-color:#007ACC;--pill-order:2" aria-pressed="false" aria-label="VS Code. Primary editor for application, research, and systems development."><span class="skill-icon-wrap"><img class="skill-brand-icon" src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/vscode/vscode-original.svg" alt="" loading="lazy" decoding="async" data-skill-icon></span><span class="skill-pill-name">VS Code</span></button>
+                    <button class="skill-pill" type="button" data-skill-id="google-colab" data-skill-name="Google Colab" data-skill-context="Runs notebook experiments and GPU-assisted model training." style="--brand-color:#F9AB00;--pill-order:3" aria-pressed="false" aria-label="Google Colab. Runs notebook experiments and GPU-assisted model training."><span class="skill-icon-wrap"><img class="skill-brand-icon" src="https://cdn.simpleicons.org/googlecolab/F9AB00" alt="" loading="lazy" decoding="async" data-skill-icon></span><span class="skill-pill-name">Google Colab</span></button>
+                    <button class="skill-pill" type="button" data-skill-id="c-language" data-skill-name="C" data-skill-context="Used to study low-level programming and operating-system concepts." style="--brand-color:#A8B9CC;--pill-order:4" aria-pressed="false" aria-label="C. Used to study low-level programming and operating-system concepts."><span class="skill-icon-wrap"><img class="skill-brand-icon" src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/c/c-original.svg" alt="" loading="lazy" decoding="async" data-skill-icon></span><span class="skill-pill-name">C</span></button>
+                    <button class="skill-pill" type="button" data-skill-id="windows" data-skill-name="Windows" data-skill-context="Main desktop environment for development and research workflows." style="--brand-color:#0078D4;--pill-order:5" aria-pressed="false" aria-label="Windows. Main desktop environment for development and research workflows."><span class="skill-icon-wrap"><img class="skill-brand-icon" src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/windows11/windows11-original.svg" alt="" loading="lazy" decoding="async" data-skill-icon></span><span class="skill-pill-name">Windows</span></button>
+                    <button class="skill-pill" type="button" data-skill-id="java" data-skill-name="Java" data-skill-context="Supports object-oriented programming and application development." style="--brand-color:#E76F00;--pill-order:6" aria-pressed="false" aria-label="Java. Supports object-oriented programming and application development."><span class="skill-icon-wrap"><img class="skill-brand-icon" src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/java/java-original.svg" alt="" loading="lazy" decoding="async" data-skill-icon></span><span class="skill-pill-name">Java</span></button>
+                    <button class="skill-pill" type="button" data-skill-id="linux" data-skill-name="Linux" data-skill-context="Used for shell workflows, systems work, and software development." style="--brand-color:#FCC624;--pill-order:7" aria-pressed="false" aria-label="Linux. Used for shell workflows, systems work, and software development."><span class="skill-icon-wrap"><img class="skill-brand-icon" src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/linux/linux-original.svg" alt="" loading="lazy" decoding="async" data-skill-icon></span><span class="skill-pill-name">Linux</span></button>
+                </div>
+            </section>
+            <section class="skill-group" data-skill-group="ai-machine-learning" data-skill-category="AI &amp; Machine Learning" style="--group-order:1">
+                <header class="skill-group-header"><span class="skill-group-index">02</span><h3>AI &amp; Machine Learning</h3><span class="skill-group-count">7 tools</span></header>
+                <div class="skill-group-items">
+                    <button class="skill-pill" type="button" data-skill-id="opencv" data-skill-name="OpenCV" data-skill-context="Computer-vision pipelines and image-processing experiments." style="--brand-color:#5C3EE8;--pill-order:0" aria-pressed="false" aria-label="OpenCV. Computer-vision pipelines and image-processing experiments."><span class="skill-icon-wrap"><img class="skill-brand-icon" src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/opencv/opencv-original.svg" alt="" loading="lazy" decoding="async" data-skill-icon></span><span class="skill-pill-name">OpenCV</span></button>
+                    <button class="skill-pill" type="button" data-skill-id="numpy" data-skill-name="NumPy" data-skill-context="Numerical computing and array operations for ML experiments." style="--brand-color:#4D77CF;--pill-order:1" aria-pressed="false" aria-label="NumPy. Numerical computing and array operations for ML experiments."><span class="skill-icon-wrap"><img class="skill-brand-icon" src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/numpy/numpy-original.svg" alt="" loading="lazy" decoding="async" data-skill-icon></span><span class="skill-pill-name">NumPy</span></button>
+                    <button class="skill-pill" type="button" data-skill-id="pandas" data-skill-name="Pandas" data-skill-context="Data cleaning, exploration, and feature preparation." style="--brand-color:#150458;--pill-order:2" aria-pressed="false" aria-label="Pandas. Data cleaning, exploration, and feature preparation."><span class="skill-icon-wrap"><img class="skill-brand-icon" src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/pandas/pandas-original.svg" alt="" loading="lazy" decoding="async" data-skill-icon></span><span class="skill-pill-name">Pandas</span></button>
+                    <button class="skill-pill" type="button" data-skill-id="transformers" data-skill-name="Transformers" data-skill-context="Transformer models for language and recommendation-system research." style="--brand-color:#D5A800;--pill-order:3" aria-pressed="false" aria-label="Transformers. Transformer models for language and recommendation-system research."><span class="skill-icon-wrap"><img class="skill-brand-icon" src="https://cdn.simpleicons.org/huggingface/FFD21E" alt="" loading="lazy" decoding="async" data-skill-icon></span><span class="skill-pill-name">Transformers</span></button>
+                    <button class="skill-pill" type="button" data-skill-id="pytorch" data-skill-name="PyTorch" data-skill-context="Builds and trains deep-learning and computer-vision models." style="--brand-color:#EE4C2C;--pill-order:4" aria-pressed="false" aria-label="PyTorch. Builds and trains deep-learning and computer-vision models."><span class="skill-icon-wrap"><img class="skill-brand-icon" src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/pytorch/pytorch-original.svg" alt="" loading="lazy" decoding="async" data-skill-icon></span><span class="skill-pill-name">PyTorch</span></button>
+                    <button class="skill-pill" type="button" data-skill-id="kaggle" data-skill-name="Kaggle" data-skill-context="Explores datasets, notebooks, and machine-learning benchmarks." style="--brand-color:#20BEFF;--pill-order:5" aria-pressed="false" aria-label="Kaggle. Explores datasets, notebooks, and machine-learning benchmarks."><span class="skill-icon-wrap"><img class="skill-brand-icon" src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/kaggle/kaggle-original.svg" alt="" loading="lazy" decoding="async" data-skill-icon></span><span class="skill-pill-name">Kaggle</span></button>
+                    <button class="skill-pill" type="button" data-skill-id="matplotlib" data-skill-name="Matplotlib" data-skill-context="Visualizes experiments, model behavior, and data distributions." style="--brand-color:#11557C;--pill-order:6" aria-pressed="false" aria-label="Matplotlib. Visualizes experiments, model behavior, and data distributions."><span class="skill-icon-wrap"><img class="skill-brand-icon" src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/matplotlib/matplotlib-original.svg" alt="" loading="lazy" decoding="async" data-skill-icon></span><span class="skill-pill-name">Matplotlib</span></button>
+                </div>
+            </section>
+            <section class="skill-group" data-skill-group="databases-cloud" data-skill-category="Databases &amp; Cloud" style="--group-order:2">
+                <header class="skill-group-header"><span class="skill-group-index">03</span><h3>Databases &amp; Cloud</h3><span class="skill-group-count">8 tools</span></header>
+                <div class="skill-group-items">
+                    <button class="skill-pill" type="button" data-skill-id="github" data-skill-name="GitHub" data-skill-context="Version control, collaboration, and publishing project code." style="--brand-color:#171515;--pill-order:0" aria-pressed="false" aria-label="GitHub. Version control, collaboration, and publishing project code."><span class="skill-icon-wrap"><img class="skill-brand-icon" src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/github/github-original.svg" alt="" loading="lazy" decoding="async" data-skill-icon></span><span class="skill-pill-name">GitHub</span></button>
+                    <button class="skill-pill" type="button" data-skill-id="html" data-skill-name="HTML" data-skill-context="Structures accessible pages and interfaces for web projects." style="--brand-color:#E34F26;--pill-order:1" aria-pressed="false" aria-label="HTML. Structures accessible pages and interfaces for web projects."><span class="skill-icon-wrap"><img class="skill-brand-icon" src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/html5/html5-original.svg" alt="" loading="lazy" decoding="async" data-skill-icon></span><span class="skill-pill-name">HTML</span></button>
+                    <button class="skill-pill" type="button" data-skill-id="vercel" data-skill-name="Vercel" data-skill-context="Deploys portfolio and web-app projects to the public web." style="--brand-color:#242424;--pill-order:2" aria-pressed="false" aria-label="Vercel. Deploys portfolio and web-app projects to the public web."><span class="skill-icon-wrap"><img class="skill-brand-icon" src="https://cdn.simpleicons.org/vercel/000000" alt="" loading="lazy" decoding="async" data-skill-icon></span><span class="skill-pill-name">Vercel</span></button>
+                    <button class="skill-pill" type="button" data-skill-id="css" data-skill-name="CSS" data-skill-context="Styles responsive interfaces and interaction details." style="--brand-color:#1572B6;--pill-order:3" aria-pressed="false" aria-label="CSS. Styles responsive interfaces and interaction details."><span class="skill-icon-wrap"><img class="skill-brand-icon" src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/css3/css3-original.svg" alt="" loading="lazy" decoding="async" data-skill-icon></span><span class="skill-pill-name">CSS</span></button>
+                    <button class="skill-pill" type="button" data-skill-id="mysql" data-skill-name="MySQL" data-skill-context="Stores and queries structured data for application projects." style="--brand-color:#4479A1;--pill-order:4" aria-pressed="false" aria-label="MySQL. Stores and queries structured data for application projects."><span class="skill-icon-wrap"><img class="skill-brand-icon" src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/mysql/mysql-original.svg" alt="" loading="lazy" decoding="async" data-skill-icon></span><span class="skill-pill-name">MySQL</span></button>
+                    <button class="skill-pill" type="button" data-skill-id="sql" data-skill-name="SQL" data-skill-context="Queries and manages relational data across project workflows." style="--brand-color:#0078D4;--pill-order:5" aria-pressed="false" aria-label="SQL. Queries and manages relational data across project workflows."><span class="skill-icon-wrap"><img class="skill-brand-icon" src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/azuresqldatabase/azuresqldatabase-original.svg" alt="" loading="lazy" decoding="async" data-skill-icon></span><span class="skill-pill-name">SQL</span></button>
+                    <button class="skill-pill" type="button" data-skill-id="full-stack-development" data-skill-name="Full-Stack Development" data-skill-context="Connects polished front ends, application logic, and data services." style="--brand-color:#B4432A;--pill-order:6" aria-pressed="false" aria-label="Full-Stack Development. Connects polished front ends, application logic, and data services."><span class="skill-icon-wrap skill-icon-custom"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="m8.6 7.2-4.1 4.8 4.1 4.8M15.4 7.2l4.1 4.8-4.1 4.8M13.5 4.8l-3 14.4M3 3.8h18v16.4H3z"/></svg></span><span class="skill-pill-name">Full-Stack Development</span></button>
+                    <button class="skill-pill" type="button" data-skill-id="firebase" data-skill-name="Firebase" data-skill-context="Provides authentication, hosting, and Firestore data for web apps." style="--brand-color:#FFCA28;--pill-order:7" aria-pressed="false" aria-label="Firebase. Provides authentication, hosting, and Firestore data for web apps."><span class="skill-icon-wrap"><img class="skill-brand-icon" src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/firebase/firebase-original.svg" alt="" loading="lazy" decoding="async" data-skill-icon></span><span class="skill-pill-name">Firebase</span></button>
+                </div>
+            </section>
+        </div>
+        <aside id="skillInspector" class="skill-inspector" aria-live="polite" aria-atomic="true">
+            <span class="skill-inspector-dot" aria-hidden="true"></span><span class="skill-inspector-copy"><span data-tool-kicker>Toolkit note</span><strong data-tool-name>Explore the toolkit</strong><span data-tool-context>Focus a tool to see where it fits; select one to keep its note here.</span></span>
+            <span class="skill-inspector-mark" aria-hidden="true">04</span>
+        </aside>
     </div>
 </section>
 
@@ -558,6 +726,27 @@ I’m glad to hear from researchers, engineers, students, and curious minds. Sen
     <div class="file-modal-content">
         <button id="closeModal" type="button" aria-label="Close preview">&times;</button>
         <div id="modalBody"></div>
+    </div>
+</div>
+<div id="certificateModal" class="certificate-modal" role="dialog" aria-modal="true" aria-labelledby="certificateModalTitle" aria-hidden="true">
+    <div class="certificate-modal-dialog">
+        <button class="certificate-modal-close" type="button" data-certificate-close aria-label="Close credential details">&times;</button>
+        <div class="certificate-modal-grid">
+            <div class="certificate-modal-visual">
+                <div class="certificate-modal-toolbar" aria-label="Scan zoom controls">
+                    <button type="button" data-certificate-zoom-out aria-label="Zoom out">−</button><span data-certificate-zoom-label>100%</span><button type="button" data-certificate-zoom-in aria-label="Zoom in">+</button><button type="button" data-certificate-zoom-reset>Reset</button>
+                </div>
+                <div class="certificate-modal-stage" id="certificateModalDocument"></div>
+            </div>
+            <div class="certificate-modal-details">
+                <span class="certificate-modal-category" id="certificateModalCategory"></span>
+                <h2 id="certificateModalTitle"></h2>
+                <p class="certificate-modal-meta" id="certificateModalMeta"></p>
+                <p class="certificate-modal-summary" id="certificateModalSummary"></p>
+                <div class="certificate-modal-skills" id="certificateModalSkills" aria-label="Related skills"></div>
+                <a class="certificate-verify-link" id="certificateVerifyLink" target="_blank" rel="noopener noreferrer" hidden>Verify credential <span aria-hidden="true">↗</span></a>
+            </div>
+        </div>
     </div>
 </div>
 <footer>

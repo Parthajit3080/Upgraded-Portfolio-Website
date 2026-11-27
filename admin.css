@@ -40,12 +40,31 @@
 .edit-btn, .gallery-edit-btn { color: var(--muted); }
 .delete-btn, .message-delete, .gallery-delete-btn { color: var(--accent); }
 .skill-admin-card { display: inline-flex; align-items: center; gap: 9px; margin: 5px; padding: 8px 10px; border: 1px solid var(--line); }
-.skill-admin-details { display: grid; gap: 2px; }
-.skill-admin-details small { color: var(--muted); font-size: .67rem; }
+.skill-admin-details { display: grid; min-width: 0; gap: 2px; }
+.skill-admin-details small { max-width: 245px; overflow: hidden; color: var(--muted); font-size: .67rem; text-overflow: ellipsis; }
 .skill-admin-card .edit-btn, .skill-admin-card .delete-btn { min-height: 30px; padding: 4px 7px; border: 1px solid var(--line); background: transparent; cursor: pointer; }
 .skill-admin-card .edit-btn { color: var(--muted); }
 .skill-admin-card .delete-btn { color: var(--accent); }
 .skill-admin-card button { border: 0; background: transparent; color: var(--accent); cursor: pointer; }
+.skill-admin-mark { display: grid; width: 31px; height: 31px; flex: 0 0 31px; place-items: center; border: 1px solid color-mix(in srgb, var(--skill-admin-color, var(--accent)) 35%, var(--line)); border-radius: 9px; background: color-mix(in srgb, var(--skill-admin-color, var(--accent)) 8%, var(--surface)); color: var(--skill-admin-color, var(--accent)); font-size: .62rem; font-weight: 800; }
+.skill-form #skillContext { grid-column: 1 / -1; min-height: 76px; }
+.skill-form #skillBrandColor { text-transform: uppercase; }
+.skill-form input, .skill-form textarea { width: 100%; min-height: 44px; padding: 10px 12px; border: 1px solid var(--line); border-radius: 2px; background: var(--surface); color: var(--ink); }
+.skill-form textarea { min-height: 76px; resize: vertical; }
+.skill-category-list { display: grid; gap: 8px; }
+.skill-category-row { display: grid; grid-template-columns: minmax(120px, .55fr) minmax(180px, 1fr) auto; align-items: center; gap: 10px; padding: 9px 10px; border: 1px solid var(--line); background: var(--paper); }
+.skill-category-row label { color: var(--muted); font-size: .78rem; font-weight: 700; }
+.skill-category-row input, .skill-category-add-form input { width: 100%; min-height: 40px; padding: 9px 11px; border: 1px solid var(--line); border-radius: 2px; background: var(--surface); color: var(--ink); }
+.skill-category-row .edit-btn { min-height: 36px; padding: 6px 10px; border: 1px solid var(--line); background: var(--surface); cursor: pointer; }
+.skill-category-add-form { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 9px; margin-top: 10px; }
+.skill-category-status { min-height: 1.4em; margin: 8px 0 0; color: var(--muted); font-size: .76rem; }
+#adminSkillsContainer { display: grid; gap: 18px; }
+.skill-admin-group { padding-top: 14px; border-top: 1px solid var(--line); }
+.skill-admin-group h4 { display: flex; align-items: baseline; gap: 9px; margin: 0 0 8px; font-family: var(--sans); font-size: .88rem; }
+.skill-admin-group h4 small { color: var(--muted); font-size: .68rem; font-weight: 500; }
+.skill-admin-group-items { display: flex; flex-wrap: wrap; gap: 4px; }
+.skill-admin-group .skill-admin-card { margin: 0; background: var(--paper); }
+.skill-admin-empty { margin: 5px 0; color: var(--muted); font-size: .8rem; }
 .emoji-picker { display: flex; flex-wrap: wrap; grid-column: 1 / -1; gap: 5px; }
 .emoji-picker span { display: grid; width: 36px; height: 36px; place-items: center; border: 1px solid var(--line); cursor: pointer; }
 .emoji-picker span.active { border-color: var(--accent); background: var(--surface-strong); }
@@ -85,6 +104,8 @@
 }
 @media (max-width: 520px) {
     .project-form, .cert-form, .skill-form, .admin-grid, .gallery-form { grid-template-columns: 1fr; }
+    .skill-category-row { grid-template-columns: 1fr; gap: 6px; }
+    .skill-category-add-form { grid-template-columns: 1fr; }
     .project-form textarea, .admin-grid textarea, .gallery-form textarea, .emoji-picker { grid-column: auto; }
     .project-admin-card, .certificate-admin-card { align-items: flex-start; flex-direction: column; }
     #adminAchievementsContainer { grid-template-columns: 1fr; }

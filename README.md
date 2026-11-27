@@ -20,6 +20,8 @@ The public pages load Firebase's browser SDK from `gstatic.com` only for the opt
 
 The admin page's sign-in state only controls its interface. Firestore Security Rules must independently restrict writes and message access to the intended administrator UID. Public users need read access to published portfolio collections and narrowly validated message creation. Enable Firebase App Check and configure abuse controls for public contact submissions. Set the production hostname in Firebase Authentication's authorized domains and use HTTPS.
 
+Skill groups are stored in the `skillCategories` collection (`name` and `order` fields). The admin needs permission to create and update these documents; public visitors need read access so new or renamed groups appear in the toolkit. Skills keep both a category name and category document ID so older records continue to render while names are edited.
+
 Before deployment, review the rules in the Firebase console or repository hosting configuration. They are external to this source archive and cannot be verified here. In particular, an `allow write: if request.auth != null` rule is not sufficient: it would grant write access to every signed-in user.
 
 No `.env` file is used in this browser-only setup. If the Firebase project changes, update the shared configuration in `js/firebase.js`.
